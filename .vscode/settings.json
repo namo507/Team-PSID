@@ -1,0 +1,8 @@
+{
+    "python.defaultInterpreterPath": "/Users/namomac/Team-PSID/.venv/bin/python",
+    "python.analysis.extraPaths": [
+        "/Users/namomac/Team-PSID/.venv/lib/python3.9/site-packages",
+        "/Users/namomac/Team-PSID"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

@@ -1,645 +1,489 @@
-# PSID Generic Crisis Module: NLP Optimization with Hurricane Katrina Integration
-# Jupyter Notebook Structure (Conceptual Reference)
-# Date: March 8, 2026
+"""Utility helpers for the PSID crisis-module notebook.
 
-"""
-This notebook implements the complete NLP-driven optimization pipeline for the 
-PSID Generic Crisis Module, now enhanced with Hurricane Katrina 2007 supplement integration.
-
-INPUTS:
-- Shutdown_Income_Questions.csv (57 questions)
-- Shutdown_Crisis_Questions.csv (19 questions)
-- COVID19_Questions.csv (20 questions)
-- Understanding_Society_Demographics.csv (7 questions)
-- Katrina_Questions.csv (37 questions from 2007 supplement) ← NEW
-
-OUTPUTS:
-- PSID_Ranked_Questions_Katrina_Integrated.csv (complete ranked export)
-- Five publication-quality visualizations
-- Toggle-classified module assembly
-
-METHODOLOGY:
-Ri = Ui / Bi
-where Ui = Σ wk (information utility from matched keywords)
-      Bi = α·Ni + β·Ci (respondent burden from length + complexity)
+This module exposes reusable keyword extraction, tagging, scoring, and
+classification helpers for the Katrina-integrated ranked-question dataset.
+It is designed to be safe to import from a notebook without triggering any
+file I/O or long-running pipeline execution at import time.
 """
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 1: Environment Setup
-# ═══════════════════════════════════════════════════════════════════════════════
+from __future__ import annotations
 
-# Standard libraries
-import pandas as pd
-import numpy as np
+import ast
 import re
-from collections import Counter
+from functools import lru_cache
+from typing import Any
 
-# NLP libraries
-import spacy
-from rake_nltk import Rake
+import pandas as pd
 
-# Visualization
-import matplotlib.pyplot as plt
-import seaborn as sns
+try:
+    import nltk
+except ModuleNotFoundError:  # pragma: no cover - handled at runtime
+    nltk = None
 
-# Load spaCy model for entity recognition and noun phrase extraction
-nlp = spacy.load("en_core_web_sm")
+try:
+    import spacy
+except ModuleNotFoundError:  # pragma: no cover - handled at runtime
+    spacy = None
 
-# Initialize RAKE for keyword extraction
-rake = Rake(
-    min_length=1,
-    max_length=4,
-    stopwords=None  # Will use RAKE's default stopwords
-)
-
-print("✓ Environment initialized")
-print(f"✓ spaCy version: {spacy.__version__}")
-print("✓ RAKE initialized")
+try:
+    from rake_nltk import Rake
+except ModuleNotFoundError:  # pragma: no cover - handled at runtime
+    Rake = None
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 2: Data Ingestion (ENHANCED with Katrina integration)
-# ═══════════════════════════════════════════════════════════════════════════════
+ALPHA = 0.10
+BETA = 0.20
+SECS_PER_WORD = 7
+MAX_SECONDS = 30 * 60
+IDEAL_SECONDS = 15 * 60
 
-def load_question_data():
-    """
-    Load all question sources including Hurricane Katrina 2007 supplement.
-    """
-    
-    # Load existing sources
-    shutdown_income = pd.read_csv('Shutdown_Income_Questions.csv')
-    shutdown_crisis = pd.read_csv('Shutdown_Crisis_Questions.csv')
-    covid19 = pd.read_csv('COVID19_Questions.csv')
-    demographics = pd.read_csv('Understanding_Society_Demographics.csv')
-    
-    # NEW: Load Hurricane Katrina supplement
-    katrina = pd.read_csv('Katrina_Questions.csv')
-    
-    # Standardize column names
-    for df in [shutdown_income, shutdown_crisis, covid19, demographics, katrina]:
-        df.columns = ['questiontext', 'source', 'moduletype']
-    
-    # Add source labels
-    shutdown_income['source'] = 'Govt Shutdown Income'
-    shutdown_crisis['source'] = 'Govt Shutdown Crisis'
-    covid19['source'] = 'COVID-19'
-    demographics['source'] = 'Understanding Society'
-    katrina['source'] = 'Hurricane Katrina 2007'
-    
-    # Combine all sources
-    all_questions = pd.concat([
-        shutdown_income, 
-        shutdown_crisis, 
-        covid19, 
-        demographics, 
-        katrina  # NEW
-    ], ignore_index=True)
-    
-    print(f"✓ Loaded {len(shutdown_income)} Shutdown Income questions")
-    print(f"✓ Loaded {len(shutdown_crisis)} Shutdown Crisis questions")
-    print(f"✓ Loaded {len(covid19)} COVID-19 questions")
-    print(f"✓ Loaded {len(demographics)} demographic questions")
-    print(f"✓ Loaded {len(katrina)} Hurricane Katrina questions")
-    print(f"✓ Total corpus: {len(all_questions)} questions")
-    
-    return all_questions
+CSV_PATH = "/Users/namomac/Team-PSID/PSID_Ranked_Questions_Katrina_Integrated.csv"
 
-# Load data
-questions_df = load_question_data()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 3: NLP Pipeline - Dual Keyword Extraction
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def extract_keywords(text):
-    """
-    Extract keywords using dual-engine approach:
-    1. RAKE for statistical keyphrases
-    2. spaCy for noun phrases and disaster-specific entities
-    
-    Returns: List of unique keywords (deduplicated union)
-    """
-    
-    # Method 1: RAKE extraction
-    rake.extract_keywords_from_text(text)
-    rake_keywords = rake.get_ranked_phrases()
-    
-    # Method 2: spaCy noun phrase chunking
-    doc = nlp(text.lower())
-    spacy_keywords = [chunk.text for chunk in doc.noun_chunks]
-    
-    # Union (deduplicated)
-    all_keywords = list(set(rake_keywords + spacy_keywords))
-    
-    # Filter out very short keywords (< 3 chars) unless they're critical terms
-    critical_short = {'job', 'age', 'sex', 'rent', 'fee', 'pay', 'aid'}
-    filtered_keywords = [
-        kw for kw in all_keywords 
-        if len(kw) >= 3 or kw in critical_short
-    ]
-    
-    return filtered_keywords
-
-# Apply keyword extraction to all questions
-questions_df['keywords'] = questions_df['questiontext'].apply(extract_keywords)
-questions_df['nkeywords'] = questions_df['keywords'].apply(len)
-
-print(f"✓ Extracted keywords for {len(questions_df)} questions")
-print(f"  Average keywords per question: {questions_df['nkeywords'].mean():.1f}")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 4: Expanded Semantic Taxonomy (DISASTER-ENHANCED)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Seven-construct taxonomy with expert-assigned impact weights
-# UPDATED with maximum weights for disaster-specific keywords
-
-TAXONOMY = {
-    'Economic/Income': {
-        'keywords': [
-            'income', 'earnings', 'wages', 'salary', 'profit', 'revenue', 
-            'receipts', 'net income', 'gross income', 'operating expenses',
-            'business income', 'self-employment', 'rental income'
-        ],
-        'weight': 0.80
-    },
-    
-    'Employment': {
-        'keywords': [
-            'job', 'work', 'working', 'employed', 'employment', 'unemployed',
-            'furloughed', 'laid off', 'hours worked', 'essential work',
-            'remote work', 'work from home', 'job loss', 'stopped working'
-        ],
-        'weight': 0.75
-    },
-    
-    'Financial Coping': {
-        'keywords': [
-            'savings', 'borrow', 'credit card', 'loan', 'debt', 'retirement',
-            'financial difficulties', 'food bank', 'assistance', 'help',
-            'cut back', 'expenses', 'budget', 'afford', 'pay bills',
-            'late payment', 'put off paying'
-        ],
-        'weight': 0.85
-    },
-    
-    'Housing/Shelter': {
-        'keywords': [
-            'rent', 'mortgage', 'housing', 'home', 'apartment', 'residence',
-            'eviction', 'foreclosure', 'utility bills', 'landlord',
-            # NEW: Disaster-specific keywords (maximum weight)
-            'displaced', 'evacuation', 'evacuate', 'structural damage',
-            'home destroyed', 'home damaged', 'property damage', 'flooding',
-            'hurricane damage', 'temporary housing', 'shelter', 'homeless'
-        ],
-        'weight_base': 0.85,
-        'weight_disaster': 0.95  # Maximum weight for displacement/destruction
-    },
-    
-    'Government Aid': {
-        'keywords': [
-            'stimulus', 'unemployment insurance', 'government assistance',
-            'social security', 'SNAP', 'food stamps', 'welfare', 'benefits',
-            'Paycheck Protection Program', 'PPP', 'EIDL', 'relief payment',
-            # NEW: Disaster-specific government aid
-            'FEMA', 'Federal Emergency Management', 'emergency assistance',
-            'disaster relief', 'government disaster aid'
-        ],
-        'weight': 0.70
-    },
-    
-    'Trauma/Health': {
-        'keywords': [
-            'pandemic', 'COVID', 'coronavirus', 'illness', 'sick', 'health',
-            'medical', 'hospital', 'mental health', 'stress', 'anxiety',
-            # NEW: Disaster-specific trauma keywords (maximum weight)
-            'physically injured', 'injured', 'killed', 'death', 'mortality',
-            'died', 'fatality', 'casualty',
-            # PTSD symptoms
-            'disturbing memories', 'nightmares', 'disturbing dreams', 'flashbacks',
-            'emotionally distant', 'cut off', 'numb', 'detached',
-            'heart pounding', 'sweating', 'trembling', 'hypervigilance',
-            'easily startled', 'difficulty concentrating', 'irritable',
-            # Depression symptoms
-            'depressed', 'hopeless', 'little interest', 'pleasure',
-            'feeling down', 'tired', 'little energy', 'poor appetite',
-            'overeating', 'trouble sleeping', 'sleeping too much',
-            'feeling bad about yourself', 'trouble concentrating',
-            'moving slowly', 'restless',
-            # Anxiety symptoms
-            'nervous', 'anxious', 'on edge', 'worrying', 'unable to stop',
-            'trouble relaxing', 'being restless', 'afraid'
-        ],
-        'weight_base': 0.85,
-        'weight_disaster': 0.95  # Maximum weight for physical injury/mortality
-    },
-    
-    'Demographics': {
-        'keywords': [
-            'age', 'sex', 'gender', 'date of birth', 'resident', 'address',
-            'marital status', 'household size', 'education', 'race', 'ethnicity'
-        ],
-        'weight': 0.50
-    }
+COLUMN_RENAME_MAP = {
+    "questiontext": "question_text",
+    "moduletype": "module_type",
+    "togglecategory": "toggle_category",
+    "nkeywords": "n_keywords",
+    "ntagged": "n_tagged",
+    "wordcount": "word_count",
+    "selectedformodule": "selected_for_module",
 }
 
-def get_keyword_weight(keyword):
-    """
-    Map keyword to construct and return impact weight.
-    Disaster-specific keywords receive maximum weights.
-    """
-    
-    keyword_lower = keyword.lower()
-    
-    # Check each construct
-    for construct, params in TAXONOMY.items():
-        construct_keywords = [kw.lower() for kw in params['keywords']]
-        
-        if keyword_lower in construct_keywords:
-            # Check if disaster-enhanced construct
-            if 'weight_disaster' in params:
-                # Disaster keywords get maximum weight
-                disaster_keywords = [
-                    'displaced', 'evacuation', 'evacuate', 'structural damage',
-                    'destroyed', 'damaged', 'flooding', 'physically injured',
-                    'injured', 'killed', 'death', 'mortality', 'disturbing memories',
-                    'nightmares', 'PTSD', 'depressed', 'hopeless'
-                ]
-                if any(dk in keyword_lower for dk in disaster_keywords):
-                    return construct, params['weight_disaster']
-                else:
-                    return construct, params['weight_base']
-            else:
-                return construct, params['weight']
-    
-    return None, 0.0
+SOURCE_TO_CRISIS_ORIGIN = {
+    "Govt Shutdown Income": "Shutdown 2019",
+    "Govt Shutdown Crisis": "Shutdown 2019",
+    "Govt Shutdown (Income)": "Shutdown 2019",
+    "Govt Shutdown (Crisis)": "Shutdown 2019",
+    "COVID-19": "COVID-19 2021",
+    "Understanding Society": "Understanding Society",
+    "Hurricane Katrina 2007": "Hurricane Katrina 2005",
+}
 
-print("✓ Semantic taxonomy loaded with 7 constructs")
-print("✓ Disaster-enhanced weights: Housing/Shelter (0.95), Trauma/Health (0.95)")
+TOGGLE_LABEL_MAP = {
+    "Toggle Financial Crisis": "Toggle: Financial Crisis",
+    "Toggle Pandemic Disaster": "Toggle: Pandemic / Disaster",
+}
+
+TAXONOMY: dict[str, tuple[str, float]] = {
+    "income": ("Economic / Income", 0.80),
+    "net income": ("Economic / Income", 0.80),
+    "earnings": ("Economic / Income", 0.80),
+    "wages": ("Economic / Income", 0.80),
+    "salary": ("Economic / Income", 0.80),
+    "salaries": ("Economic / Income", 0.80),
+    "receipts": ("Economic / Income", 0.80),
+    "operating expenses": ("Economic / Income", 0.80),
+    "bonuses": ("Economic / Income", 0.80),
+    "overtime": ("Economic / Income", 0.80),
+    "tips": ("Economic / Income", 0.80),
+    "commissions": ("Economic / Income", 0.80),
+    "lost earnings": ("Economic / Income", 0.80),
+    "financial interest": ("Economic / Income", 0.80),
+    "business": ("Economic / Income", 0.75),
+    "furloughed": ("Employment", 0.75),
+    "laid off": ("Employment", 0.75),
+    "working": ("Employment", 0.70),
+    "work": ("Employment", 0.70),
+    "job": ("Employment", 0.70),
+    "essential work": ("Employment", 0.75),
+    "stopped working": ("Employment", 0.75),
+    "employer": ("Employment", 0.70),
+    "quit": ("Employment", 0.70),
+    "work time": ("Employment", 0.70),
+    "hours": ("Employment", 0.65),
+    "weeks": ("Employment", 0.65),
+    "savings": ("Financial Coping", 0.85),
+    "credit card": ("Financial Coping", 0.85),
+    "retirement savings": ("Financial Coping", 0.85),
+    "food bank": ("Financial Coping", 0.85),
+    "emergency support": ("Financial Coping", 0.85),
+    "cut back": ("Financial Coping", 0.85),
+    "cutting back": ("Financial Coping", 0.85),
+    "spending": ("Financial Coping", 0.80),
+    "second job": ("Financial Coping", 0.80),
+    "sell": ("Financial Coping", 0.75),
+    "belongings": ("Financial Coping", 0.75),
+    "equity": ("Financial Coping", 0.80),
+    "line of credit": ("Financial Coping", 0.80),
+    "financial help": ("Financial Coping", 0.80),
+    "financial difficulties": ("Financial Coping", 0.85),
+    "manage": ("Financial Coping", 0.70),
+    "rent": ("Housing / Shelter", 0.90),
+    "mortgage": ("Housing / Shelter", 0.90),
+    "your home": ("Housing / Shelter", 0.85),
+    "original home": ("Housing / Shelter", 0.85),
+    "foreclosure": ("Housing / Shelter", 0.95),
+    "home damage": ("Housing / Shelter", 0.95),
+    "property damage": ("Housing / Shelter", 0.95),
+    "structural damage": ("Housing / Shelter", 0.95),
+    "evacuation": ("Housing / Shelter", 0.90),
+    "evacuate": ("Housing / Shelter", 0.90),
+    "flood": ("Housing / Shelter", 0.90),
+    "flooding": ("Housing / Shelter", 0.95),
+    "displaced": ("Housing / Shelter", 0.95),
+    "displacement": ("Housing / Shelter", 0.85),
+    "temporary housing": ("Housing / Shelter", 0.90),
+    "rebuilding": ("Housing / Shelter", 0.80),
+    "levee": ("Housing / Shelter", 0.90),
+    "stimulus": ("Government Aid", 0.70),
+    "stimulus payment": ("Government Aid", 0.70),
+    "unemployment insurance": ("Government Aid", 0.75),
+    "unemployment": ("Government Aid", 0.75),
+    "paycheck protection": ("Government Aid", 0.70),
+    "loan forgiveness": ("Government Aid", 0.70),
+    "government": ("Government Aid", 0.60),
+    "federal": ("Government Aid", 0.60),
+    "shutdown": ("Government Aid", 0.65),
+    "paychecks": ("Government Aid", 0.70),
+    "fema": ("Government Aid", 0.70),
+    "emergency management": ("Government Aid", 0.70),
+    "disaster relief": ("Government Aid", 0.70),
+    "pandemic": ("Trauma / Health", 0.90),
+    "health": ("Trauma / Health", 0.85),
+    "trauma": ("Trauma / Health", 0.90),
+    "hurricane": ("Trauma / Health", 0.90),
+    "katrina": ("Trauma / Health", 0.90),
+    "rita": ("Trauma / Health", 0.90),
+    "disaster": ("Trauma / Health", 0.90),
+    "injured": ("Trauma / Health", 0.95),
+    "physically injured": ("Trauma / Health", 0.95),
+    "killed": ("Trauma / Health", 0.95),
+    "death": ("Trauma / Health", 0.95),
+    "mortality": ("Trauma / Health", 0.95),
+    "disturbing memories": ("Trauma / Health", 0.95),
+    "nightmares": ("Trauma / Health", 0.95),
+    "debris": ("Trauma / Health", 0.85),
+    "contamination": ("Trauma / Health", 0.85),
+    "age": ("Demographics", 0.50),
+    "sex": ("Demographics", 0.50),
+    "date of birth": ("Demographics", 0.50),
+    "birth": ("Demographics", 0.50),
+    "resident": ("Demographics", 0.50),
+    "address": ("Demographics", 0.45),
+    "male": ("Demographics", 0.45),
+    "female": ("Demographics", 0.45),
+    "postcode": ("Demographics", 0.40),
+}
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 5: Utility-Burden Formula Implementation
-# ═══════════════════════════════════════════════════════════════════════════════
+def _require_dependency(name: str, module: Any) -> Any:
+    if module is None:
+        raise ModuleNotFoundError(
+            f"{name} is required by PSID_NLP_Crisis_Module_Structure.py"
+        )
+    return module
 
-def calculate_utility(keywords):
-    """
-    Calculate Information Utility (Ui) as sum of impact weights.
-    Ui = Σ wk for k in keywords
-    """
-    
-    total_utility = 0.0
-    matched_constructs = []
-    
-    for keyword in keywords:
-        construct, weight = get_keyword_weight(keyword)
-        if construct:
-            total_utility += weight
-            matched_constructs.append(construct)
-    
-    return total_utility, matched_constructs
 
-def calculate_burden(text):
-    """
-    Calculate Respondent Burden (Bi) from length and complexity.
-    Bi = α·Ni + β·Ci
-    
-    where:
-        Ni = word count
-        Ci = structural complexity (entity count + clause markers)
-        α = 0.10 (word penalty)
-        β = 0.20 (complexity penalty)
-    """
-    
-    # Word count
-    word_count = len(text.split())
-    
-    # Structural complexity via spaCy
+def _download_nltk_resource(resource: str, path: str) -> None:
+    nltk_module = _require_dependency("nltk", nltk)
+    try:
+        nltk_module.data.find(path)
+    except LookupError:
+        nltk_module.download(resource, quiet=True)
+
+
+@lru_cache(maxsize=1)
+def get_rake() -> Any:
+    _require_dependency("nltk", nltk)
+    rake_cls = _require_dependency("rake_nltk", Rake)
+    _download_nltk_resource("stopwords", "corpora/stopwords")
+    _download_nltk_resource("punkt", "tokenizers/punkt")
+    try:
+        _download_nltk_resource("punkt_tab", "tokenizers/punkt_tab")
+    except Exception:
+        pass
+    return rake_cls(min_length=1, max_length=4, include_repeated_phrases=False)
+
+
+@lru_cache(maxsize=1)
+def get_nlp() -> Any:
+    spacy_module = _require_dependency("spacy", spacy)
+    return spacy_module.load("en_core_web_sm")
+
+
+def parse_keywords(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if pd.isna(value):
+        return []
+
+    text = str(value).strip()
+    if not text:
+        return []
+
+    if text.startswith("[") and text.endswith("]"):
+        parsed = ast.literal_eval(text)
+        if isinstance(parsed, list):
+            return [str(item).strip() for item in parsed if str(item).strip()]
+
+    return [item.strip() for item in text.split(",") if item.strip()]
+
+
+def normalize_ranked_questions(df: pd.DataFrame) -> pd.DataFrame:
+    normalized = df.rename(columns=COLUMN_RENAME_MAP).copy()
+    if "keywords" in normalized.columns:
+        normalized["keywords"] = normalized["keywords"].apply(parse_keywords)
+    if "crisis_origin" not in normalized.columns:
+        normalized["crisis_origin"] = normalized["source"].map(SOURCE_TO_CRISIS_ORIGIN)
+    if "toggle_category" in normalized.columns:
+        normalized["toggle_category"] = normalized["toggle_category"].replace(TOGGLE_LABEL_MAP)
+    return normalized
+
+
+def extract_keywords(text: str) -> list[str]:
+    rake = get_rake()
+    nlp = get_nlp()
+    keywords: set[str] = set()
+
+    rake.extract_keywords_from_text(text)
+    for score, phrase in rake.get_ranked_phrases_with_scores():
+        if score >= 1.0:
+            keywords.add(phrase.lower().strip())
+
     doc = nlp(text)
-    
-    # Count unique entities (proxy for information density)
-    entity_count = len(set([ent.text for ent in doc.ents]))
-    
-    # Count clause markers (and, or, if, when, because, etc.)
-    clause_markers = ['and', 'or', 'if', 'when', 'because', 'since', 'while', 'although']
-    clause_count = sum([1 for token in doc if token.text.lower() in clause_markers])
-    
-    # Complexity score
-    complexity = entity_count + clause_count
-    
-    # Burden formula
-    alpha = 0.10
-    beta = 0.20
-    burden = alpha * word_count + beta * complexity
-    
-    return burden, word_count, complexity
+    for chunk in doc.noun_chunks:
+        clean = chunk.text.lower().strip()
+        if len(clean) > 2:
+            keywords.add(clean)
 
-# Apply utility and burden calculations
-questions_df['Ui'], questions_df['constructs'] = zip(*questions_df['keywords'].apply(calculate_utility))
-questions_df[['Bi', 'wordcount', 'complexity']] = questions_df['questiontext'].apply(
-    lambda x: pd.Series(calculate_burden(x))
-)
-
-# Calculate Ranking Score
-questions_df['Ri'] = questions_df['Ui'] / questions_df['Bi'].replace(0, 0.01)  # Avoid division by zero
-
-print(f"✓ Calculated Utility, Burden, and Ranking scores for all questions")
-print(f"  Utility range: {questions_df['Ui'].min():.2f} to {questions_df['Ui'].max():.2f}")
-print(f"  Burden range: {questions_df['Bi'].min():.2f} to {questions_df['Bi'].max():.2f}")
-print(f"  Ranking score range: {questions_df['Ri'].min():.2f} to {questions_df['Ri'].max():.2f}")
+    return sorted(keywords)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 6: Matrix Bundling for Psychometric Validity
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def identify_matrix_items(questions_df):
-    """
-    Identify validated clinical matrices (PTSD, depression) from Katrina module.
-    Bundle them as cognitive units to reduce artificial burden inflation.
-    """
-    
-    # PTSD screening matrix (S13a-g from Katrina)
-    ptsd_patterns = [
-        'disturbing memories', 'disturbing dreams', 'nightmares',
-        'emotionally distant', 'cut off', 'heart pounding', 'hypervigilance'
-    ]
-    
-    # Depression screening matrix (S16a-h from Katrina)
-    depression_patterns = [
-        'little interest', 'feeling down', 'depressed', 'hopeless',
-        'trouble sleeping', 'feeling tired', 'little energy',
-        'poor appetite', 'overeating', 'feeling bad', 'trouble concentrating',
-        'moving slowly', 'restless'
-    ]
-    
-    # Identify matrix items
-    ptsd_items = []
-    depression_items = []
-    
-    for idx, row in questions_df.iterrows():
-        text_lower = row['questiontext'].lower()
-        
-        # Check for PTSD matrix membership
-        if any(pattern in text_lower for pattern in ptsd_patterns):
-            if row['source'] == 'Hurricane Katrina 2007' and 'since katrina' in text_lower:
-                ptsd_items.append(idx)
-        
-        # Check for depression matrix membership
-        if any(pattern in text_lower for pattern in depression_patterns):
-            if row['source'] == 'Hurricane Katrina 2007' and 'since katrina' in text_lower:
-                depression_items.append(idx)
-    
-    return ptsd_items, depression_items
-
-def apply_matrix_bundling(questions_df, ptsd_items, depression_items):
-    """
-    Apply reduced burden calculation to matrix items.
-    
-    Logic: First item carries full stem burden, subsequent items get 
-    marginal incremental burden only.
-    """
-    
-    # PTSD matrix bundling
-    if len(ptsd_items) > 0:
-        stem_burden = questions_df.loc[ptsd_items[0], 'Bi']  # First item's burden
-        marginal_burden = 0.4  # Incremental burden per additional item
-        
-        for i, idx in enumerate(ptsd_items):
-            if i == 0:
-                pass  # Keep original burden for first item
-            else:
-                # Reduce burden for subsequent items
-                questions_df.loc[idx, 'Bi'] = stem_burden + (i * marginal_burden)
-                questions_df.loc[idx, 'Ri'] = questions_df.loc[idx, 'Ui'] / questions_df.loc[idx, 'Bi']
-    
-    # Depression matrix bundling
-    if len(depression_items) > 0:
-        stem_burden = questions_df.loc[depression_items[0], 'Bi']
-        marginal_burden = 0.4
-        
-        for i, idx in enumerate(depression_items):
-            if i == 0:
-                pass
-            else:
-                questions_df.loc[idx, 'Bi'] = stem_burden + (i * marginal_burden)
-                questions_df.loc[idx, 'Ri'] = questions_df.loc[idx, 'Ui'] / questions_df.loc[idx, 'Bi']
-    
-    print(f"✓ Applied matrix bundling to {len(ptsd_items)} PTSD items")
-    print(f"✓ Applied matrix bundling to {len(depression_items)} depression items")
-    
-    return questions_df
-
-# Apply matrix bundling
-ptsd_items, depression_items = identify_matrix_items(questions_df)
-questions_df = apply_matrix_bundling(questions_df, ptsd_items, depression_items)
+def _phrase_in_text(phrase: str, text: str) -> bool:
+    pattern = r"\b" + re.escape(phrase) + r"\b"
+    return re.search(pattern, text) is not None
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 7: Toggle Classification Logic (DISASTER-ENHANCED)
-# ═══════════════════════════════════════════════════════════════════════════════
+def _has_any_cue(text: str, cues: set[str]) -> bool:
+    return any(cue in text for cue in cues)
 
-def classify_toggle(row):
-    """
-    Route questions to appropriate toggle based on keywords and source.
-    
-    Toggle categories:
-    1. Generic Core - universal questions applicable to any crisis
-    2. Financial Crisis - shutdown/recession-specific items
-    3. Pandemic/Natural Disaster - health emergencies and physical disasters
-    """
-    
-    keywords_lower = [kw.lower() for kw in row['keywords']]
-    source = row['source']
-    constructs = row['constructs']
-    
-    # Financial Crisis toggle triggers
-    financial_crisis_keywords = [
-        'shutdown', 'furloughed', 'government closure', 'missed paychecks',
-        'government employee', 'federal worker'
-    ]
-    
-    # Pandemic/Natural Disaster toggle triggers (EXPANDED)
-    pandemic_disaster_keywords = [
-        'pandemic', 'covid', 'coronavirus', 'stimulus', 'essential work',
-        'paycheck protection', 'remote work', 'work from home',
-        # NEW: Disaster-specific triggers
-        'hurricane', 'katrina', 'rita', 'flooding', 'displaced', 'evacuation',
-        'physically injured', 'killed', 'structural damage', 'destroyed',
-        'fema', 'emergency management', 'disaster relief',
-        'disturbing memories', 'nightmares', 'PTSD', 'trauma'
-    ]
-    
-    # Rule-based classification
-    if any(kw in ' '.join(keywords_lower) for kw in financial_crisis_keywords):
-        return 'Toggle Financial Crisis'
-    
-    elif any(kw in ' '.join(keywords_lower) for kw in pandemic_disaster_keywords):
-        return 'Toggle Pandemic Disaster'
-    
-    elif source == 'Hurricane Katrina 2007':
-        # ALL Katrina questions route to Pandemic/Disaster toggle
-        return 'Toggle Pandemic Disaster'
-    
-    elif source == 'Understanding Society':
-        # Demographics always go to Generic Core
-        return 'Generic Core'
-    
-    elif 'Economic/Income' in constructs or 'Employment' in constructs or 'Financial Coping' in constructs:
-        # Generic economic questions (no crisis-specific keywords)
-        return 'Generic Core'
-    
+
+def tag_keywords(keywords: list[str]) -> list[dict[str, Any]]:
+    matches: list[dict[str, Any]] = []
+    sorted_fragments = sorted(TAXONOMY.items(), key=lambda item: len(item[0]), reverse=True)
+    for keyword in keywords:
+        keyword_lower = keyword.lower().strip()
+        for fragment, (construct, weight) in sorted_fragments:
+            if _phrase_in_text(fragment, keyword_lower):
+                matches.append(
+                    {
+                        "keyword": keyword_lower,
+                        "construct": construct,
+                        "weight": weight,
+                    }
+                )
+                break
+    return matches
+
+
+def compute_word_count(text: str) -> int:
+    return len(str(text).split())
+
+
+def compute_complexity(text: str) -> float:
+    doc = get_nlp()(text)
+    clause_markers = text.count(",") + text.count(";") + text.count(" or ") + text.count(" and ")
+    return len(doc.ents) + 0.5 * clause_markers
+
+
+def compute_utility(tagged: list[dict[str, Any]]) -> float:
+    return sum(match["weight"] for match in tagged)
+
+
+def compute_burden(word_count: int, complexity: float) -> float:
+    return max(ALPHA * word_count + BETA * complexity, 0.1)
+
+
+def extract_constructs(tagged: list[dict[str, Any]]) -> list[str]:
+    return sorted({match["construct"] for match in tagged})
+
+
+def classify_toggle(row: Any) -> str:
+    if hasattr(row, "get"):
+        tagged = row.get("tagged", [])
+        constructs_raw = row.get("constructs")
+        source = str(row.get("source", "")).lower()
+        question_text = str(
+            row.get("question_text", row.get("questiontext", ""))
+        ).lower()
+        module_type = str(row.get("module_type", row.get("moduletype", ""))).lower()
     else:
-        # Default to Generic Core
-        return 'Generic Core'
+        tagged = []
+        constructs_raw = []
+        source = ""
+        question_text = ""
+        module_type = ""
 
-# Apply toggle classification
-questions_df['togglecategory'] = questions_df.apply(classify_toggle, axis=1)
+    if constructs_raw:
+        constructs = set(constructs_raw)
+    else:
+        constructs = {match["construct"] for match in tagged if isinstance(match, dict)}
 
-print("✓ Toggle classification complete")
-print(f"  Generic Core: {len(questions_df[questions_df['togglecategory'] == 'Generic Core'])} questions")
-print(f"  Financial Crisis: {len(questions_df[questions_df['togglecategory'] == 'Toggle Financial Crisis'])} questions")
-print(f"  Pandemic/Disaster: {len(questions_df[questions_df['togglecategory'] == 'Toggle Pandemic Disaster'])} questions")
+    combined_text = f"{source} {question_text}"
+    source_is_understanding_society = "understanding society" in source
+    source_is_katrina = "hurricane katrina 2007" in source
+    source_is_covid = source == "covid-19"
+    source_is_shutdown_crisis = source == "govt shutdown crisis"
+    source_is_shutdown_income = source == "govt shutdown income"
 
+    disaster_cues = {
+        "katrina",
+        "hurricane",
+        "rita",
+        "flood",
+        "flooding",
+        "evacuat",
+        "displaced",
+        "temporary housing",
+        "property damage",
+        "home damaged",
+        "home destroyed",
+        "original home",
+        "without electricity",
+        "without running water",
+        "move to a different city",
+        "fema",
+        "disaster relief",
+        "emergency management",
+        "disturbing memories",
+        "disturbing dreams",
+        "nightmares",
+        "physically injured",
+        "killed",
+    }
+    pandemic_cues = {
+        "covid",
+        "pandemic",
+        "coronavirus",
+        "stimulus",
+        "stimulus payment",
+        "paycheck protection",
+        "remote work",
+        "work from home",
+        "essential work",
+        "laid off",
+        "furlough",
+    }
+    financial_crisis_cues = {
+        "shutdown",
+        "govt",
+        "government closure",
+        "missed paycheck",
+        "miss any paychecks",
+        "retroactive pay",
+        "federal worker",
+        "zero dollars",
+    }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 8: Greedy Selection by Time Budget
-# ═══════════════════════════════════════════════════════════════════════════════
+    has_disaster_cue = _has_any_cue(question_text, disaster_cues)
+    has_pandemic_cue = _has_any_cue(question_text, pandemic_cues)
+    has_financial_crisis_cue = _has_any_cue(question_text, financial_crisis_cues)
+    generic_constructs = {"Economic / Income", "Employment", "Financial Coping"}
 
-def greedy_module_selection(questions_df, time_budget_minutes=30, seconds_per_word=7):
-    """
-    Select questions greedily by descending Ri until time budget exhausted.
-    
-    Parameters:
-        time_budget_minutes: Hard cap (default 30 minutes)
-        seconds_per_word: Duration estimate (default 7 seconds)
-    
-    Returns: DataFrame with 'selectedformodule' flag
-    """
-    
-    # Sort by Ri descending
-    sorted_df = questions_df.sort_values('Ri', ascending=False).copy()
-    
-    # Time budget in seconds
-    budget_seconds = time_budget_minutes * 60
-    
-    # Greedy selection
-    cumulative_time = 0
-    selected_indices = []
-    
-    for idx, row in sorted_df.iterrows():
-        question_time = row['wordcount'] * seconds_per_word
-        
-        if cumulative_time + question_time <= budget_seconds:
-            cumulative_time += question_time
-            selected_indices.append(idx)
-        else:
-            break  # Budget exhausted
-    
-    # Mark selected questions
-    questions_df['selectedformodule'] = False
-    questions_df.loc[selected_indices, 'selectedformodule'] = True
-    
-    print(f"✓ Selected {len(selected_indices)} questions within {time_budget_minutes}-minute budget")
-    print(f"  Total estimated time: {cumulative_time/60:.1f} minutes")
-    
-    return questions_df
+    if source_is_understanding_society:
+        return "Generic Core"
 
-# Apply greedy selection
-questions_df = greedy_module_selection(questions_df)
+    if source_is_shutdown_crisis or has_financial_crisis_cue:
+        return "Toggle: Financial Crisis"
 
+    if has_disaster_cue or source_is_katrina:
+        return "Toggle: Pandemic / Disaster"
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 9: Time Budget Breakdown by Toggle
-# ═══════════════════════════════════════════════════════════════════════════════
+    if has_pandemic_cue:
+        return "Toggle: Pandemic / Disaster"
 
-def calculate_toggle_times(questions_df, seconds_per_word=7):
-    """
-    Calculate estimated completion time for each toggle category.
-    """
-    
-    selected = questions_df[questions_df['selectedformodule'] == True]
-    
-    toggle_times = {}
-    
-    for toggle in ['Generic Core', 'Toggle Financial Crisis', 'Toggle Pandemic Disaster']:
-        toggle_questions = selected[selected['togglecategory'] == toggle]
-        total_words = toggle_questions['wordcount'].sum()
-        total_seconds = total_words * seconds_per_word
-        total_minutes = total_seconds / 60
-        
-        toggle_times[toggle] = {
-            'nquestions': len(toggle_questions),
-            'total_minutes': total_minutes
-        }
-    
-    print("\n" + "="*60)
-    print("TIME BUDGET BREAKDOWN")
-    print("="*60)
-    for toggle, metrics in toggle_times.items():
-        print(f"{toggle}:")
-        print(f"  Questions: {metrics['nquestions']}")
-        print(f"  Estimated time: {metrics['total_minutes']:.1f} minutes")
-    
-    print("\nDEPLOYMENT SCENARIOS:")
-    print(f"  Economic crisis (Core + Financial): {toggle_times['Generic Core']['total_minutes'] + toggle_times['Toggle Financial Crisis']['total_minutes']:.1f} min")
-    print(f"  Physical crisis (Core + Disaster): {toggle_times['Generic Core']['total_minutes'] + toggle_times['Toggle Pandemic Disaster']['total_minutes']:.1f} min")
-    print("="*60 + "\n")
-    
-    return toggle_times
+    if source_is_shutdown_income:
+        return "Generic Core"
 
-toggle_times = calculate_toggle_times(questions_df)
+    if source_is_covid:
+        if constructs & {"Government Aid", "Housing / Shelter", "Trauma / Health"}:
+            return "Toggle: Pandemic / Disaster"
+        if constructs <= generic_constructs:
+            return "Generic Core"
 
+    if "Demographics" in constructs and constructs <= {"Demographics"}:
+        return "Generic Core"
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 10: Export Ranked Questions CSV
-# ═══════════════════════════════════════════════════════════════════════════════
+    if module_type == "generic" or constructs <= generic_constructs:
+        return "Generic Core"
 
-# Prepare export DataFrame
-export_df = questions_df[[
-    'questiontext', 'source', 'moduletype', 'togglecategory',
-    'keywords', 'nkeywords', 'constructs', 'wordcount', 'complexity',
-    'Ui', 'Bi', 'Ri', 'selectedformodule'
-]].copy()
+    if constructs & {"Trauma / Health", "Housing / Shelter"}:
+        return "Toggle: Pandemic / Disaster"
 
-# Convert lists to strings for CSV export
-export_df['keywords'] = export_df['keywords'].apply(lambda x: ', '.join(x) if isinstance(x, list) else '')
-export_df['constructs'] = export_df['constructs'].apply(lambda x: ', '.join(x) if isinstance(x, list) else '')
+    if constructs & {"Government Aid"} and source_is_covid:
+        return "Toggle: Pandemic / Disaster"
 
-# Sort by Ri descending
-export_df = export_df.sort_values('Ri', ascending=False).reset_index(drop=True)
+    if constructs & {"Government Aid"} and source_is_shutdown_crisis:
+        return "Toggle: Financial Crisis"
 
-# Export
-export_df.to_csv('PSID_Ranked_Questions_Katrina_Integrated.csv', index=False)
-
-print(f"✓ Exported {len(export_df)} ranked questions to CSV")
-print(f"  File: PSID_Ranked_Questions_Katrina_Integrated.csv")
+    return "Generic Core"
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# CELL 11-14: Visualization Generation
-# ═══════════════════════════════════════════════════════════════════════════════
+def select_for_time_budget(
+    df: pd.DataFrame,
+    score_col: str = "Ri",
+    word_count_col: str = "word_count",
+    selected_col: str = "selected_for_module",
+    toggle_col: str = "toggle_category",
+) -> pd.DataFrame:
+    def add_rows(candidate_df: pd.DataFrame, running_seconds: int) -> int:
+        for index, row in candidate_df.sort_values(score_col, ascending=False).iterrows():
+            if index in selected_indices:
+                continue
+            question_seconds = row[word_count_col] * SECS_PER_WORD
+            if running_seconds + question_seconds <= MAX_SECONDS:
+                selected_indices.append(index)
+                running_seconds += question_seconds
+        return running_seconds
 
-# [These cells would contain the code for generating the five publication-quality
-# visualizations shown in the report:
-# 
-# 1. Top-Ranked Questions (horizontal bar chart)
-# 2. Utility vs. Burden Frontier (scatter plot)
-# 3. Construct Coverage by Source (heatmap)
-# 4. Time Budget Allocation (stacked bar chart)
-# 5. Toggle Routing Logic (flow diagram)
-# 
-# Code already implemented in previous execution - see Katrina_Integration_Dashboard.png]
+    cumulative_seconds = 0
+    selected_indices: list[int] = []
+
+    if toggle_col in df.columns:
+        generic_core_df = df[df[toggle_col] == "Generic Core"]
+        cumulative_seconds = add_rows(generic_core_df, cumulative_seconds)
+
+        remaining_df = df.drop(index=selected_indices)
+        cumulative_seconds = add_rows(remaining_df, cumulative_seconds)
+    else:
+        cumulative_seconds = add_rows(df, cumulative_seconds)
+
+    updated = df.copy()
+    updated[selected_col] = False
+    updated.loc[selected_indices, selected_col] = True
+    return updated
 
 
-print("\n" + "="*80)
-print("HURRICANE KATRINA INTEGRATION COMPLETE")
-print("="*80)
-print(f"✓ Processed {len(questions_df)} questions from 5 sources")
-print(f"✓ Katrina contribution: 37 questions transforming Trauma/Health and Housing constructs")
-print(f"✓ Top-ranked Katrina question: Ri = {questions_df[questions_df['source']=='Hurricane Katrina 2007']['Ri'].max():.2f}")
-print(f"✓ Module assembly: {questions_df['selectedformodule'].sum()} questions selected")
-print(f"✓ Deployment-ready with toggle architecture")
-print("="*80)
+__all__ = [
+    "ALPHA",
+    "BETA",
+    "CSV_PATH",
+    "COLUMN_RENAME_MAP",
+    "IDEAL_SECONDS",
+    "MAX_SECONDS",
+    "SECS_PER_WORD",
+    "SOURCE_TO_CRISIS_ORIGIN",
+    "TAXONOMY",
+    "TOGGLE_LABEL_MAP",
+    "classify_toggle",
+    "compute_burden",
+    "compute_complexity",
+    "compute_utility",
+    "compute_word_count",
+    "extract_constructs",
+    "extract_keywords",
+    "normalize_ranked_questions",
+    "parse_keywords",
+    "select_for_time_budget",
+    "tag_keywords",
+]
+
+
+def main() -> None:
+    df = normalize_ranked_questions(pd.read_csv(CSV_PATH))
+    print(f"Loaded {len(df)} ranked questions from {CSV_PATH}")
+    print(df["source"].value_counts().to_string())
+
+
+if __name__ == "__main__":
+    main()
