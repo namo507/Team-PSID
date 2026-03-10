@@ -175,7 +175,7 @@ This prevents false positives such as "age" matching inside "images" or "home" m
 Each keyword is mapped to one of **seven crisis constructs** with expert-assigned impact weights:
 
 | Construct | Example Keywords | Weight Range | Entries |
-|:----------------|:----------------|:-----------------:|:-----------------:|
+|:-----------------|:-----------------|:-----------------:|:-----------------:|
 | **Economic / Income** | income, earnings, wages, salary, receipts, operating expenses, lost earnings, business | 0.75–0.80 | 15 |
 | **Employment** | furloughed, laid off, essential work, stopped working, working, job, employer | 0.65–0.75 | 12 |
 | **Financial Coping** | savings, credit card, retirement savings, food bank, financial difficulties, cut back, manage | 0.70–0.85 | 15 |
@@ -514,7 +514,7 @@ The stacked bar chart (Figure: `fig_time_budget.png`) provides a visual breakdow
 **Total deployment scenarios:**
 
 | Scenario | Components | Time (min) | Status |
-|:----------------|:----------------|:-----------------:|:-----------------:|
+|:-----------------|:-----------------|:-----------------:|:-----------------:|
 | Economic crisis | Generic Core + Financial Crisis | 6.8 | ✓ Well within 30-min cap |
 | Physical crisis | Generic Core + Pandemic/Disaster | 28.0 | ✓ Within 30-min cap |
 | Full module (all selected) | All 28 questions | 29.9 | ✓ Within 30-min cap |
