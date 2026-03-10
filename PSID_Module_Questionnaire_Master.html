@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSID Questionnaire Master Viewer</title>
+  <style>
+    :root {
+      --ink: #10243a;
+      --muted: #5f7287;
+      --line: #d7dee6;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-strong: rgba(255, 255, 255, 0.98);
+      --page: radial-gradient(circle at top left, rgba(254, 240, 138, 0.45), transparent 26%),
+              radial-gradient(circle at right top, rgba(147, 197, 253, 0.35), transparent 30%),
+              linear-gradient(160deg, #f5f7f2, #f8fbfe 44%, #eef4f8);
+      --navy: #143b63;
+      --copper: #b45309;
+      --brick: #b91c1c;
+      --sky: #0f766e;
+      --shadow-lg: 0 24px 48px rgba(16, 36, 58, 0.12);
+      --shadow-md: 0 12px 28px rgba(16, 36, 58, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1520px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #17395d 0%, #25517f 40%, #9a3412 100%);
+      color: #fff;
+      border-radius: var(--radius-xl);
+      padding: 34px 34px 28px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 18px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -100px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.24), transparent 66%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      letter-spacing: 0.01em;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      max-width: 940px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-md);
+      padding: 14px 15px;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card .label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.78;
+      margin-bottom: 5px;
+    }
+
+    .hero-card .value {
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .viewer {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .panel {
+      padding: 20px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .eyebrow {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--copper);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .panel h2,
+    .viewer-head h2 {
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+    }
+
+    .panel p,
+    .viewer-head p,
+    .meta-card p,
+    .print-card p {
+      color: var(--muted);
+    }
+
+    .tab-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 20px;
+    }
+
+    .tab-button {
+      width: 100%;
+      border: 1px solid #ccd6e0;
+      background: var(--surface-strong);
+      border-radius: 16px;
+      padding: 14px 14px 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .tab-button:hover,
+    .tab-button:focus-visible {
+      transform: translateY(-1px);
+      border-color: #8da3b7;
+      box-shadow: 0 10px 24px rgba(16, 36, 58, 0.08);
+      outline: none;
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: transparent;
+      background: linear-gradient(135deg, #fff7ed, #ffffff 44%, #eff6ff);
+      box-shadow: inset 0 0 0 2px rgba(20, 59, 99, 0.18), 0 14px 28px rgba(16, 36, 58, 0.1);
+    }
+
+    .tab-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .tab-copy {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.generic {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .tag.specific {
+      background: #fee2e2;
+      color: var(--brick);
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid transparent;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .action:hover {
+      transform: translateY(-1px);
+    }
+
+    .action.primary {
+      background: var(--navy);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(20, 59, 99, 0.22);
+    }
+
+    .action.secondary {
+      background: #fff;
+      color: var(--ink);
+      border-color: #ccd6e0;
+    }
+
+    .viewer {
+      overflow: hidden;
+    }
+
+    .viewer-head {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 252, 0.94));
+    }
+
+    .viewer-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(251, 252, 254, 0.86);
+    }
+
+    .meta-card {
+      border: 1px solid #dde5ed;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .meta-card .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .meta-card .value {
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.is-active {
+      display: block;
+    }
+
+    .frame-wrap {
+      padding: 16px;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 1280px;
+      border: 1px solid #d7dee6;
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .print-sheet {
+      display: none;
+      padding: 22px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .print-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .print-card {
+      border: 1px solid #d7dee6;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .print-card h3 {
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+    }
+
+    .print-card a {
+      color: var(--navy);
+      word-break: break-word;
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
+
+      iframe {
+        height: 980px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero {
+        padding: 24px 20px 20px;
+      }
+
+      .viewer-meta,
+      .print-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .hero,
+      .panel,
+      .viewer-head,
+      .viewer-meta,
+      .frame-wrap {
+        box-shadow: none;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .panel,
+      .viewer {
+        border: 1px solid #cbd5e1;
+      }
+
+      .tab-list,
+      .actions,
+      iframe {
+        display: none !important;
+      }
+
+      .print-sheet {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <h1>PSID Questionnaire Master Viewer</h1>
+      <p>
+        This review surface consolidates the production questionnaire demos into a single stakeholder page. Use the tabs to switch between the generic baseline and the crisis-specific add-on, or print this page as a compact cover sheet with direct artifact links.
+      </p>
+      <div class="hero-grid">
+        <div class="hero-card"><span class="label">Generic demo</span><span class="value">18 questions</span></div>
+        <div class="hero-card"><span class="label">Specific demo</span><span class="value">12 + 14 questions</span></div>
+        <div class="hero-card"><span class="label">Analytic benchmark</span><span class="value">28 selected questions</span></div>
+        <div class="hero-card"><span class="label">Refresh path</span><span class="value">Notebook build_all()</span></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel">
+        <div class="eyebrow">Review Controls</div>
+        <h2>Choose the active view</h2>
+        <p>
+          The live preview is intentionally single-panel to make screenshots cleaner and reduce scroll fatigue during review sessions.
+        </p>
+
+        <div class="tab-list" role="tablist" aria-label="Questionnaire tabs">
+          <button class="tab-button" id="tab-generic" type="button" role="tab" aria-selected="true" aria-controls="panel-generic" data-target="generic">
+            <span class="tab-title">Expanded Generic Foundation <span class="tag generic">Generic Demo</span></span>
+            <span class="tab-copy">Standalone baseline instrument for any crisis type.</span>
+          </button>
+          <button class="tab-button" id="tab-specific" type="button" role="tab" aria-selected="false" aria-controls="panel-specific" data-target="specific">
+            <span class="tab-title">Combined Crisis-Specific Demo <span class="tag specific">Specific Demo</span></span>
+            <span class="tab-copy">Generic lead-in plus the active pandemic and disaster add-on.</span>
+          </button>
+        </div>
+
+        <div class="actions">
+          <a class="action primary" href="PSID_Generic_Module_Questionnaire.html" target="_blank" rel="noreferrer">Open Generic Demo</a>
+          <a class="action primary" href="PSID_Crisis_Specific_Questionnaire_Demo.html" target="_blank" rel="noreferrer">Open Crisis-Specific Demo</a>
+          <a class="action secondary" href="PSID_Crisis_Module_Dashboard.html" target="_blank" rel="noreferrer">Open Dashboard</a>
+          <a class="action secondary" href="PSID_NLP_Optimization_Report_Final.docx.md" target="_blank" rel="noreferrer">Open Final Report</a>
+        </div>
+      </aside>
+
+      <section class="viewer">
+        <div class="viewer-head">
+          <div class="eyebrow">Active Artifact</div>
+          <h2 id="viewer-title">Expanded Generic Foundation</h2>
+          <p id="viewer-description">Standalone baseline instrument for any crisis type.</p>
+        </div>
+
+        <div class="viewer-meta">
+          <div class="meta-card">
+            <span class="label">Mode</span>
+            <span class="value" id="viewer-mode">Generic Demo</span>
+          </div>
+          <div class="meta-card">
+            <span class="label">Review note</span>
+            <p id="viewer-note">Use this tab to review the shared instrument before layering on crisis-specific content.</p>
+          </div>
+          <div class="meta-card">
+            <span class="label">Print behavior</span>
+            <p>Printed output shows a compact artifact summary and direct file links instead of embedded iframes.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel is-active" id="panel-generic" role="tabpanel" aria-labelledby="tab-generic">
+          <div class="frame-wrap">
+            <iframe src="PSID_Generic_Module_Questionnaire.html" title="Expanded Generic Foundation Questionnaire"></iframe>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="panel-specific" role="tabpanel" aria-labelledby="tab-specific">
+          <div class="frame-wrap">
+            <iframe src="PSID_Crisis_Specific_Questionnaire_Demo.html" title="Combined Crisis-Specific Demo Questionnaire"></iframe>
+          </div>
+        </div>
+
+        <div class="print-sheet">
+          <div class="eyebrow">Print Summary</div>
+          <h2>PSID Questionnaire Deliverables</h2>
+          <p>
+            This cover sheet is intended for printed packets and PDF export. Open the linked files directly for live review of the full questionnaire experiences.
+          </p>
+          <div class="print-grid">
+            <article class="print-card">
+              <h3>Expanded Generic Foundation</h3>
+              <p>Standalone baseline instrument for any crisis type.</p>
+              <a href="PSID_Generic_Module_Questionnaire.html">PSID_Generic_Module_Questionnaire.html</a>
+            </article>
+            <article class="print-card">
+              <h3>Combined Crisis-Specific Demo</h3>
+              <p>Generic lead-in plus the active pandemic and disaster add-on.</p>
+              <a href="PSID_Crisis_Specific_Questionnaire_Demo.html">PSID_Crisis_Specific_Questionnaire_Demo.html</a>
+            </article>
+            <article class="print-card">
+              <h3>Dashboard</h3>
+              <p>Browser-ready metrics, charts, and benchmark summaries.</p>
+              <a href="PSID_Crisis_Module_Dashboard.html">PSID_Crisis_Module_Dashboard.html</a>
+            </article>
+            <article class="print-card">
+              <h3>Final Report</h3>
+              <p>Markdown narrative aligned to the final ranked CSV and artifact bundle.</p>
+              <a href="PSID_NLP_Optimization_Report_Final.docx.md">PSID_NLP_Optimization_Report_Final.docx.md</a>
+            </article>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      generic: {
+        title: "Expanded Generic Foundation",
+        description: "Standalone baseline instrument for any crisis type.",
+        mode: "Generic Demo",
+        note: "Use this tab to review the shared instrument before layering on crisis-specific content.",
+      },
+      specific: {
+        title: "Combined Crisis-Specific Demo",
+        description: "Generic lead-in plus the active pandemic and disaster add-on.",
+        mode: "Specific Demo",
+        note: "Use this tab to review how the pandemic and disaster follow-up content extends the generic foundation.",
+      },
+    };
+
+    const buttons = Array.from(document.querySelectorAll(".tab-button"));
+    const panels = Array.from(document.querySelectorAll(".tab-panel"));
+    const title = document.getElementById("viewer-title");
+    const description = document.getElementById("viewer-description");
+    const mode = document.getElementById("viewer-mode");
+    const note = document.getElementById("viewer-note");
+
+    function activateTab(target) {
+      buttons.forEach((button) => {
+        const isSelected = button.dataset.target === target;
+        button.setAttribute("aria-selected", String(isSelected));
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.id === `panel-${target}`);
+      });
+
+      title.textContent = views[target].title;
+      description.textContent = views[target].description;
+      mode.textContent = views[target].mode;
+      note.textContent = views[target].note;
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => activateTab(button.dataset.target));
+    });
+  </script>
+</body>
+</html>

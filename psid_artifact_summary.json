@@ -1,0 +1,41 @@
+{
+  "rows": 52,
+  "selected_rows": 28,
+  "selected_minutes": 29.17,
+  "all_minutes": 68.95,
+  "toggle_counts": {
+    "Toggle: Pandemic / Disaster": 44,
+    "Generic Core": 7,
+    "Toggle: Financial Crisis": 1
+  },
+  "selected_toggle_counts": {
+    "Toggle: Pandemic / Disaster": 20,
+    "Generic Core": 7,
+    "Toggle: Financial Crisis": 1
+  },
+  "source_counts": {
+    "Hurricane Katrina 2007": 37,
+    "COVID-19": 8,
+    "Govt Shutdown Income": 3,
+    "Understanding Society": 3,
+    "Govt Shutdown Crisis": 1
+  },
+  "selected_source_counts": {
+    "Hurricane Katrina 2007": 13,
+    "COVID-19": 8,
+    "Govt Shutdown Income": 3,
+    "Understanding Society": 3,
+    "Govt Shutdown Crisis": 1
+  },
+  "construct_counts": {
+    "Trauma / Health": 13,
+    "Employment": 7,
+    "Government Aid": 5,
+    "Housing / Shelter": 5,
+    "Economic / Income": 4,
+    "Financial Coping": 3,
+    "Demographics": 3
+  },
+  "avg_ri": 2.079,
+  "max_ri": 5.667
+}

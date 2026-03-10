@@ -1,168 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PSID Generic Crisis Module — Core Questionnaire</title>
-<style>
-  @media print { body { margin: 0.5in; } .no-print { display: none; } }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; color: #222; line-height: 1.6; max-width: 850px; margin: 0 auto; padding: 40px 30px; }
-  .header { border-bottom: 3px solid #1a237e; padding-bottom: 18px; margin-bottom: 30px; }
-  .header h1 { font-size: 22px; color: #1a237e; margin-bottom: 4px; }
-  .header h2 { font-size: 16px; color: #455a64; font-weight: 400; }
-  .meta { font-size: 12px; color: #607d8b; margin-top: 8px; }
-  .meta span { margin-right: 18px; }
-  .instructions { background: #e8eaf6; border-left: 4px solid #3f51b5; padding: 14px 18px; margin-bottom: 28px; border-radius: 4px; font-size: 13px; }
-  .section-header { background: #1a237e; color: #fff; padding: 10px 16px; border-radius: 4px 4px 0 0; margin-top: 28px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
-  .question-block { border: 1px solid #cfd8dc; border-top: none; padding: 16px 18px; margin-bottom: 0; }
-  .question-block:last-of-type { border-radius: 0 0 4px 4px; margin-bottom: 20px; }
-  .q-number { display: inline-block; background: #1a237e; color: #fff; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-size: 13px; font-weight: 700; margin-right: 10px; }
-  .q-text { font-size: 14px; font-weight: 600; color: #263238; margin-bottom: 10px; }
-  .q-meta { font-size: 11px; color: #78909c; margin-bottom: 8px; }
-  .q-meta span { margin-right: 14px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-  .badge-core { background: #e3f2fd; color: #1565c0; }
-  .badge-econ { background: #fff3e0; color: #e65100; }
-  .badge-emp { background: #e8f5e9; color: #2e7d32; }
-  .badge-demo { background: #f3e5f5; color: #6a1b9a; }
-  .badge-fin { background: #fce4ec; color: #c62828; }
-  .options { list-style: none; padding: 0; }
-  .options li { padding: 6px 0 6px 24px; position: relative; font-size: 13px; }
-  .options li::before { content: '○'; position: absolute; left: 4px; color: #90a4ae; font-size: 14px; }
-  .response-line { border-bottom: 1px solid #cfd8dc; margin: 8px 0 4px; height: 24px; }
-  .footer { margin-top: 30px; border-top: 2px solid #1a237e; padding-top: 14px; font-size: 11px; color: #607d8b; text-align: center; }
-  .score-tag { font-size: 10px; background: #e8eaf6; color: #3f51b5; padding: 2px 6px; border-radius: 3px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSID Generic Crisis Module - Expanded Foundation Questionnaire</title>
+  <style>
+    :root {
+      --ink: #1c2533;
+      --muted: #66758a;
+      --line: #d8e0ea;
+      --surface: #ffffff;
+      --page: linear-gradient(160deg, #f3f7fb, #fbfcfe 50%, #eef3f9);
+      --navy: #153a6b;
+      --teal: #0f766e;
+      --gold: #b45309;
+      --berry: #9d174d;
+      --violet: #6d28d9;
+      --shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.56;
+      padding: 34px 22px 54px;
+    }
+
+    .shell { max-width: 980px; margin: 0 auto; }
+
+    .hero {
+      background: linear-gradient(135deg, #153a6b, #1d4ed8 55%, #0f766e);
+      color: #fff;
+      border-radius: 24px;
+      padding: 28px 30px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 { font-size: 1.95rem; margin-bottom: 6px; }
+    .hero p { max-width: 780px; color: rgba(255,255,255,0.92); }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .hero-card {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .hero-card .label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .hero-card .value { font-size: 1rem; font-weight: 800; }
+
+    .note-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .note-box strong { color: var(--navy); }
+
+    .section { margin-top: 20px; }
+
+    .section-header {
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 18px 18px 0 0;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-header.demographics { background: linear-gradient(135deg, #153a6b, #1d4ed8); }
+    .section-header.work { background: linear-gradient(135deg, #0f766e, #0f9b8e); }
+    .section-header.money { background: linear-gradient(135deg, #b45309, #ea580c); }
+    .section-header.wellbeing { background: linear-gradient(135deg, #9d174d, #db2777); }
+
+    .section-stat { font-size: 0.78rem; opacity: 0.9; text-transform: none; }
+
+    .section-intro {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 18px 18px;
+      padding: 14px 18px 16px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 15px 18px 16px;
+      margin-top: 10px;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+    }
+
+    .question-head {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .q-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.84rem;
+      flex: 0 0 32px;
+      margin-top: 2px;
+      background: var(--navy);
+    }
+
+    .q-text { font-size: 0.99rem; font-weight: 700; margin-bottom: 8px; }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .badge.core { background: #dbeafe; color: #1d4ed8; }
+    .badge.expand { background: #ede9fe; color: #6d28d9; }
+    .badge.work { background: #dcfce7; color: #166534; }
+    .badge.money { background: #ffedd5; color: #b45309; }
+    .badge.house { background: #ccfbf1; color: #0f766e; }
+    .badge.health { background: #fce7f3; color: #9d174d; }
+    .badge.aid { background: #fef3c7; color: #a16207; }
+    .badge.note { background: #e5e7eb; color: #374151; }
+
+    .note { color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
+
+    .options {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .options li {
+      position: relative;
+      padding-left: 22px;
+      font-size: 0.93rem;
+    }
+
+    .options li::before {
+      content: "o";
+      position: absolute;
+      left: 2px;
+      color: #94a3b8;
+    }
+
+    .footer {
+      margin-top: 28px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 18px 20px;
+      font-size: 0.92rem;
+    }
+
+    .footer h3 { margin-bottom: 6px; font-size: 1rem; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .hero, .note-box, .question, .footer, .section-intro { box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
+  <div class="shell">
+    <section class="hero">
+      <h1>PSID Generic Crisis Module - Expanded Foundation Questionnaire</h1>
+      <p>
+        This standalone demo is intentionally longer than the strict scored core. It preserves the 7 always-on ranked items,
+        adds broader employment, housing, aid, and wellbeing prompts, and presents a generic front-end module that feels complete even before any crisis-specific toggle is added.
+      </p>
+      <div class="hero-grid">
+        <div class="hero-card"><span class="label">Scored core</span><span class="value">7 questions</span></div>
+        <div class="hero-card"><span class="label">Expanded demo</span><span class="value">18 questions</span></div>
+        <div class="hero-card"><span class="label">Estimated duration</span><span class="value">12-14 min</span></div>
+        <div class="hero-card"><span class="label">Intended use</span><span class="value">Any crisis type</span></div>
+      </div>
+    </section>
 
-<div class="header">
-  <h1>PANEL STUDY OF INCOME DYNAMICS</h1>
-  <h2>Generic Crisis Module — Core Questionnaire</h2>
-  <div class="meta">
-    <span><strong>Version:</strong> Final Optimized (March 2026)</span>
-    <span><strong>Director:</strong> Thomas Crossley</span>
-    <span><strong>Est. Duration:</strong> 4.9 minutes</span>
-    <span><strong>Mode:</strong> CATI / Web</span>
+    <section class="note-box">
+      <p><strong>Design note:</strong> The analytic model still deploys 7 Generic Core items in the selected 28-question module. This HTML intentionally expands the generic front-end to 18 questions so stakeholder demos show a richer, more interview-ready baseline instrument irrespective of crisis type.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-header demographics"><span>Section A - Demographics and household context</span><span class="section-stat">5 questions | 2.5 min</span></div>
+      <div class="section-intro">These items preserve minimal respondent identity and household structure, while adding enough context to support routing and downstream interpretation across any crisis scenario.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num">1</span><div><div class="q-text">What is the respondent's age?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.67</span></div><div class="note">Enter age in years.</div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">2</span><div><div class="q-text">What is your sex?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.23</span></div><ul class="options"><li>Male</li><li>Female</li><li>Another identity or prefer not to say</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">3</span><div><div class="q-text">Are you normally resident at this address?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.17</span></div><ul class="options"><li>Yes</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">4</span><div><div class="q-text">How many people currently live in your household, including yourself?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span></div><div class="note">Household size entry.</div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">5</span><div><div class="q-text">Do you have any children or dependents currently living with you?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge note">Household vulnerability context</span></div><ul class="options"><li>Yes</li><li>No</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header work"><span>Section B - Employment and income disruption</span><span class="section-stat">6 questions | 4.5 min</span></div>
+      <div class="section-intro">This block retains the highest-ranked work disruption questions and fills in generic labor-force context that applies across shutdowns, disasters, conflicts, and health emergencies.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num">6</span><div><div class="q-text">What is your current employment status?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge work">Employment</span></div><ul class="options"><li>Employed full time</li><li>Employed part time</li><li>Self-employed</li><li>Temporarily laid off or furloughed</li><li>Unemployed</li><li>Not in labor force</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">7</span><div><div class="q-text">Have you stopped this work?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge note">Ri 4.67</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">8</span><div><div class="q-text">Have you stopped working at this business?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge money">Economic / Income</span><span class="badge note">Ri 4.50</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">9</span><div><div class="q-text">Were there any wages or salaries from this job?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge money">Economic / Income</span><span class="badge note">Ri 2.73</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">10</span><div><div class="q-text">Did your hours of work fall because of the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge work">Employment</span></div><ul class="options"><li>Yes, a large reduction</li><li>Yes, a small reduction</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">11</span><div><div class="q-text">Did you lose earnings or income because of the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge money">Economic / Income</span></div><ul class="options"><li>Yes, a large loss</li><li>Yes, some loss</li><li>No</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header money"><span>Section C - Financial coping and public support</span><span class="section-stat">4 questions | 3.0 min</span></div>
+      <div class="section-intro">These questions capture high-value financial strain signals that repeatedly rank well regardless of the original source module.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num">12</span><div><div class="q-text">Have you experienced any financial difficulties?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge money">Financial coping</span><span class="badge note">Ri 5.67</span></div><ul class="options"><li>Yes, major difficulties</li><li>Yes, some difficulties</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">13</span><div><div class="q-text">How did your household cope with financial strain caused by the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge money">Financial coping</span></div><ul class="options"><li>Used savings</li><li>Borrowed on credit</li><li>Missed bills or payments</li><li>Asked family or friends for help</li><li>Cut back sharply on essentials</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">14</span><div><div class="q-text">Did you receive any government financial assistance because of the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge aid">Government aid</span></div><ul class="options"><li>Yes</li><li>No</li><li>Applied but did not receive</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">15</span><div><div class="q-text">Did your household fall behind on rent, mortgage, utilities, or other major bills?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge house">Housing / Shelter</span><span class="badge money">Economic / Income</span></div><ul class="options"><li>Yes</li><li>No</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header wellbeing"><span>Section D - Housing stability and wellbeing</span><span class="section-stat">3 questions | 2.5 min</span></div>
+      <div class="section-intro">The generic module should still acknowledge housing disruption and psychological strain even when the crisis type is not yet known.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num">16</span><div><div class="q-text">Did you have to leave your home temporarily because of the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge house">Housing / Shelter</span></div><ul class="options"><li>Yes</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">17</span><div><div class="q-text">Was your home damaged, unsafe, or otherwise difficult to live in because of the crisis?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge house">Housing / Shelter</span></div><ul class="options"><li>Yes, severely</li><li>Yes, somewhat</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num">18</span><div><div class="q-text">Since the crisis, how often have you felt worried, unable to relax, or unable to sleep well?</div><div class="meta-row"><span class="badge expand">Expanded generic item</span><span class="badge health">Trauma / Health</span></div><ul class="options"><li>Not at all</li><li>Several days</li><li>More than half the days</li><li>Nearly every day</li></ul></div></div></article>
+    </section>
+
+    <footer class="footer">
+      <h3>Implementation note</h3>
+      <p>This expanded questionnaire is a presentation-ready generic baseline. The analytic dashboard and ranked CSV still preserve the strict 7-question Generic Core used inside the selected 28-question final module.</p>
+    </footer>
   </div>
-</div>
-
-<div class="instructions">
-  <strong>Interviewer Instructions:</strong> This Generic Core module is <strong>always deployed</strong> regardless of crisis type. It captures universal demographic, employment, and financial baselines applicable to any macro-level crisis. Administer all 7 questions in sequence. This module forms the stable backbone of the PSID Crisis Survey.
-</div>
-
-<!-- Section A: Demographics -->
-<div class="section-header">SECTION A — DEMOGRAPHICS <span style="float:right; font-weight:400; font-size:12px;">3 Questions | ~1.8 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">1</span> What is the respondent's age?</div>
-  <div class="q-meta">
-    <span class="badge badge-demo">Demographics</span>
-    <span class="score-tag">Ri = 1.67</span>
-    <span>Source: Understanding Society</span>
-  </div>
-  <div class="response-line"></div>
-  <div style="font-size:12px; color:#90a4ae;">Enter age in years: ________</div>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">2</span> What is your sex?</div>
-  <div class="q-meta">
-    <span class="badge badge-demo">Demographics</span>
-    <span class="score-tag">Ri = 1.23</span>
-    <span>Source: Understanding Society</span>
-  </div>
-  <ul class="options">
-    <li>Male</li>
-    <li>Female</li>
-    <li>Other / Prefer not to say</li>
-  </ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">3</span> Can I just check, are you normally resident at this address?</div>
-  <div class="q-meta">
-    <span class="badge badge-demo">Demographics</span>
-    <span class="score-tag">Ri = 1.17</span>
-    <span>Source: Understanding Society</span>
-  </div>
-  <ul class="options">
-    <li>Yes</li>
-    <li>No</li>
-  </ul>
-</div>
-
-<!-- Section B: Employment -->
-<div class="section-header">SECTION B — EMPLOYMENT STATUS <span style="float:right; font-weight:400; font-size:12px;">2 Questions | ~1.0 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">4</span> Have you stopped this work?</div>
-  <div class="q-meta">
-    <span class="badge badge-emp">Employment</span>
-    <span class="score-tag">Ri = 4.67</span>
-    <span>Source: Govt Shutdown Income</span>
-  </div>
-  <ul class="options">
-    <li>Yes — stopped working</li>
-    <li>No — still working</li>
-    <li>Not applicable</li>
-  </ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">5</span> Have you stopped working at this business?</div>
-  <div class="q-meta">
-    <span class="badge badge-emp">Employment</span>
-    <span class="badge badge-econ">Economic/Income</span>
-    <span class="score-tag">Ri = 4.50</span>
-    <span>Source: Govt Shutdown Income</span>
-  </div>
-  <ul class="options">
-    <li>Yes — stopped working at business</li>
-    <li>No — still operating</li>
-    <li>Not applicable</li>
-  </ul>
-</div>
-
-<!-- Section C: Financial -->
-<div class="section-header">SECTION C — FINANCIAL BASELINE <span style="float:right; font-weight:400; font-size:12px;">2 Questions | ~2.1 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">6</span> Have you experienced any financial difficulties?</div>
-  <div class="q-meta">
-    <span class="badge badge-fin">Financial Coping</span>
-    <span class="score-tag">Ri = 5.67 (TOP)</span>
-    <span>Source: COVID-19</span>
-  </div>
-  <ul class="options">
-    <li>Yes — significant difficulties</li>
-    <li>Yes — some difficulties</li>
-    <li>No — no financial difficulties</li>
-  </ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number">7</span> Were/Was there any wages or salaries from this job/these jobs?</div>
-  <div class="q-meta">
-    <span class="badge badge-econ">Economic/Income</span>
-    <span class="badge badge-emp">Employment</span>
-    <span class="score-tag">Ri = 2.73</span>
-    <span>Source: Govt Shutdown Income</span>
-  </div>
-  <ul class="options">
-    <li>Yes — received wages/salary</li>
-    <li>No — no wages/salary received</li>
-    <li>Not applicable</li>
-  </ul>
-</div>
-
-<div class="footer">
-  <strong>PSID Generic Crisis Module — Core Questionnaire</strong><br>
-  Panel Study of Income Dynamics | Institute for Social Research | University of Michigan<br>
-  <em>This module is always deployed as the first component of any crisis survey activation.</em><br>
-  <em>Total estimated duration: 4.9 minutes | 7 questions | 3 constructs covered</em>
-</div>
-
 </body>
 </html>

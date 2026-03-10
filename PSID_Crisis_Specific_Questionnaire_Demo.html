@@ -1,372 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PSID Crisis Module — Pandemic/Natural Disaster/Financial/War Toggle Demo</title>
-<style>
-  @media print { body { margin: 0.5in; } .no-print { display: none; } .page-break { page-break-before: always; } }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; color: #222; line-height: 1.6; max-width: 850px; margin: 0 auto; padding: 40px 30px; }
-  .header { border-bottom: 3px solid #b71c1c; padding-bottom: 18px; margin-bottom: 20px; }
-  .header h1 { font-size: 20px; color: #b71c1c; margin-bottom: 4px; }
-  .header h2 { font-size: 15px; color: #455a64; font-weight: 400; }
-  .meta { font-size: 12px; color: #607d8b; margin-top: 8px; }
-  .meta span { margin-right: 14px; }
-  .instructions { background: #fce4ec; border-left: 4px solid #e91e63; padding: 14px 18px; margin-bottom: 20px; border-radius: 4px; font-size: 13px; }
-  .toggle-banner { background: linear-gradient(135deg, #880e4f, #c62828); color: #fff; padding: 12px 18px; border-radius: 6px; margin-bottom: 24px; }
-  .toggle-banner h3 { font-size: 15px; margin-bottom: 4px; }
-  .toggle-banner p { font-size: 12px; opacity: 0.9; }
-  .core-note { background: #e3f2fd; border-left: 4px solid #1565c0; padding: 10px 14px; margin-bottom: 20px; border-radius: 4px; font-size: 12px; color: #0d47a1; }
-  .section-header { padding: 10px 16px; border-radius: 4px 4px 0 0; margin-top: 24px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
-  .section-core { background: #1a237e; color: #fff; }
-  .section-pandemic { background: #880e4f; color: #fff; }
-  .section-financial { background: #e65100; color: #fff; }
-  .section-disaster { background: #1b5e20; color: #fff; }
-  .section-trauma { background: #4a148c; color: #fff; }
-  .section-war { background: #263238; color: #fff; }
-  .question-block { border: 1px solid #cfd8dc; border-top: none; padding: 14px 18px; }
-  .question-block:last-of-type { border-radius: 0 0 4px 4px; margin-bottom: 16px; }
-  .q-number { display: inline-block; background: #455a64; color: #fff; width: 26px; height: 26px; border-radius: 50%; text-align: center; line-height: 26px; font-size: 12px; font-weight: 700; margin-right: 8px; }
-  .q-number.core { background: #1a237e; }
-  .q-number.pandemic { background: #880e4f; }
-  .q-number.financial { background: #e65100; }
-  .q-number.disaster { background: #1b5e20; }
-  .q-number.trauma { background: #4a148c; }
-  .q-number.war { background: #263238; }
-  .q-text { font-size: 14px; font-weight: 600; color: #263238; margin-bottom: 8px; }
-  .q-meta { font-size: 11px; color: #78909c; margin-bottom: 8px; }
-  .q-meta span { margin-right: 12px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-  .badge-core { background: #e3f2fd; color: #1565c0; }
-  .badge-pandemic { background: #fce4ec; color: #c62828; }
-  .badge-housing { background: #e8f5e9; color: #2e7d32; }
-  .badge-trauma { background: #f3e5f5; color: #6a1b9a; }
-  .badge-govaid { background: #fff3e0; color: #e65100; }
-  .badge-emp { background: #e0f2f1; color: #00695c; }
-  .badge-econ { background: #fff8e1; color: #f57f17; }
-  .badge-fin { background: #fce4ec; color: #ad1457; }
-  .badge-demo { background: #ede7f6; color: #4527a0; }
-  .badge-reframed { background: #c8e6c9; color: #1b5e20; border: 1px solid #a5d6a7; }
-  .options { list-style: none; padding: 0; }
-  .options li { padding: 5px 0 5px 24px; position: relative; font-size: 13px; }
-  .options li::before { content: '○'; position: absolute; left: 4px; color: #90a4ae; font-size: 14px; }
-  .likert { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-  .likert-option { border: 1px solid #cfd8dc; border-radius: 4px; padding: 6px 12px; font-size: 12px; text-align: center; min-width: 60px; cursor: pointer; }
-  .response-line { border-bottom: 1px solid #cfd8dc; margin: 6px 0 4px; height: 20px; }
-  .score-tag { font-size: 10px; background: #fce4ec; color: #c62828; padding: 2px 6px; border-radius: 3px; }
-  .footer { margin-top: 30px; border-top: 2px solid #b71c1c; padding-top: 14px; font-size: 11px; color: #607d8b; text-align: center; }
-  .divider { border: none; border-top: 2px dashed #cfd8dc; margin: 24px 0; }
-  .war-note { background: #eceff1; border-left: 4px solid #263238; padding: 10px 14px; margin: 16px 0; border-radius: 4px; font-size: 12px; color: #37474f; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSID Crisis Module - Combined Demo Questionnaire</title>
+  <style>
+    :root {
+      --ink: #192739;
+      --muted: #64748b;
+      --line: #d6e0eb;
+      --surface: #ffffff;
+      --page: linear-gradient(135deg, #f2f6fb, #fbfcfe 50%, #eef4f8);
+      --core: #1d4ed8;
+      --pandemic: #be185d;
+      --disaster: #15803d;
+      --trauma: #6d28d9;
+      --financial: #c2410c;
+      --war: #334155;
+      --shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.52;
+      padding: 36px 22px 54px;
+    }
+
+    .shell { max-width: 980px; margin: 0 auto; }
+
+    .hero {
+      background: linear-gradient(135deg, #7f1d1d, #b91c1c 55%, #9d174d);
+      color: #fff;
+      border-radius: 24px;
+      padding: 28px 30px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 { font-size: 1.95rem; margin-bottom: 6px; }
+    .hero p { color: rgba(255,255,255,0.9); max-width: 780px; }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .hero-card {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .hero-card .label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .hero-card .value { font-size: 1rem; font-weight: 800; }
+
+    .notice {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .notice strong { color: #0f3d75; }
+    .notice p { color: var(--muted); font-size: 0.94rem; }
+
+    .banner {
+      border-radius: 18px;
+      color: #fff;
+      padding: 15px 18px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .banner.active { background: linear-gradient(135deg, #9d174d, #db2777); }
+    .banner.alt-financial { background: linear-gradient(135deg, #c2410c, #ea580c); }
+    .banner.alt-war { background: linear-gradient(135deg, #334155, #475569); }
+
+    .banner h2 { font-size: 1rem; margin-bottom: 4px; }
+    .banner p { font-size: 0.9rem; opacity: 0.92; }
+
+    .section { margin-top: 20px; }
+
+    .section-header {
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 18px 18px 0 0;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-header.core { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); }
+    .section-header.pandemic { background: linear-gradient(135deg, #be185d, #db2777); }
+    .section-header.disaster { background: linear-gradient(135deg, #15803d, #16a34a); }
+    .section-header.trauma { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+    .section-header.financial { background: linear-gradient(135deg, #c2410c, #ea580c); }
+    .section-header.war { background: linear-gradient(135deg, #334155, #475569); }
+
+    .section-stat { font-size: 0.78rem; opacity: 0.9; text-transform: none; }
+
+    .section-intro {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 18px 18px;
+      padding: 14px 18px 16px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 15px 18px 16px;
+      margin-top: 10px;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+    }
+
+    .question-head {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .q-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.84rem;
+      flex: 0 0 32px;
+      margin-top: 2px;
+    }
+
+    .q-num.core { background: var(--core); }
+    .q-num.pandemic { background: var(--pandemic); }
+    .q-num.disaster { background: var(--disaster); }
+    .q-num.trauma { background: var(--trauma); }
+    .q-num.financial { background: var(--financial); }
+    .q-num.war { background: var(--war); }
+
+    .q-text { font-size: 0.99rem; font-weight: 700; margin-bottom: 8px; }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .badge.core { background: #dbeafe; color: #1d4ed8; }
+    .badge.work { background: #dcfce7; color: #166534; }
+    .badge.money { background: #ffedd5; color: #b45309; }
+    .badge.house { background: #dcfce7; color: #166534; }
+    .badge.aid { background: #fef3c7; color: #a16207; }
+    .badge.health { background: #f3e8ff; color: #6d28d9; }
+    .badge.note { background: #e5e7eb; color: #374151; }
+
+    .note { color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
+
+    .options {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .options li {
+      position: relative;
+      padding-left: 22px;
+      font-size: 0.93rem;
+    }
+
+    .options li::before {
+      content: "o";
+      position: absolute;
+      left: 2px;
+      color: #94a3b8;
+    }
+
+    .options.check li::before { content: "[]"; }
+
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.88rem;
+    }
+
+    .matrix th,
+    .matrix td {
+      border: 1px solid #dbe4ee;
+      padding: 9px 10px;
+      text-align: center;
+    }
+
+    .matrix th { background: #eef2f7; font-weight: 800; }
+    .matrix td:first-child,
+    .matrix th:first-child { text-align: left; width: 42%; }
+
+    .footer {
+      margin-top: 28px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 18px 20px;
+      font-size: 0.92rem;
+    }
+
+    .footer h3 { margin-bottom: 6px; font-size: 1rem; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .hero, .banner, .notice, .question, .footer, .section-intro { box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
+  <div class="shell">
+    <section class="hero">
+      <h1>PSID Crisis Module - Combined Demo Questionnaire</h1>
+      <p>
+        This refreshed demo starts with a larger generic foundation so the questionnaire feels interview-ready even before the crisis-specific toggle starts.
+        It then shows the active Pandemic / Natural Disaster add-on built from the Katrina and COVID items, plus alternate financial-crisis and war/conflict prototype banks.
+      </p>
+      <div class="hero-grid">
+        <div class="hero-card"><span class="label">Generic foundation</span><span class="value">12 questions</span></div>
+        <div class="hero-card"><span class="label">Active toggle</span><span class="value">14 questions</span></div>
+        <div class="hero-card"><span class="label">Combined demo</span><span class="value">24-27 min</span></div>
+        <div class="hero-card"><span class="label">Mode</span><span class="value">CATI / Web</span></div>
+      </div>
+    </section>
 
-<div class="header">
-  <h1>PANEL STUDY OF INCOME DYNAMICS</h1>
-  <h2>Crisis-Specific Module — Combined Demo Questionnaire</h2>
-  <div class="meta">
-    <span><strong>Version:</strong> Final Optimized (March 2026)</span>
-    <span><strong>Director:</strong> Thomas Crossley</span>
-    <span><strong>Total Est. Duration:</strong> ~28 minutes (Core + Toggle)</span>
-    <span><strong>Mode:</strong> CATI / Web</span>
+    <section class="notice">
+      <p><strong>Important:</strong> The scored analytic model still identifies 7 strict Generic Core questions. This demo intentionally expands the front-end generic portion to 12 questions so the module reads like a complete interviewer instrument rather than a thin preamble.</p>
+    </section>
+
+    <section class="banner active">
+      <h2>Active demo toggle: Pandemic / Natural Disaster</h2>
+      <p>Shown here as 12 generic-foundation questions plus 14 toggle questions. The financial-crisis and war/conflict blocks below remain alternate templates.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-header core"><span>Part 1 - Generic Foundation</span><span class="section-stat">12 questions | 8-10 min</span></div>
+      <div class="section-intro">This version blends the 7 always-on scored core items with 5 generic expansion prompts that make the questionnaire more practical across crisis types.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num core">1</span><div><div class="q-text">What is the respondent's age?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.67</span></div><div class="note">Enter age in years.</div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">2</span><div><div class="q-text">What is your sex?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.23</span></div><ul class="options"><li>Male</li><li>Female</li><li>Another identity or prefer not to say</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">3</span><div><div class="q-text">Are you normally resident at this address?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge note">Ri 1.17</span></div><ul class="options"><li>Yes</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">4</span><div><div class="q-text">Have you experienced any financial difficulties?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge money">Financial coping</span><span class="badge note">Ri 5.67</span></div><ul class="options"><li>Yes, major difficulties</li><li>Yes, some difficulties</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">5</span><div><div class="q-text">Have you stopped this work?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge note">Ri 4.67</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">6</span><div><div class="q-text">Have you stopped working at this business?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge money">Economic / Income</span><span class="badge note">Ri 4.50</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">7</span><div><div class="q-text">Were there any wages or salaries from this job?</div><div class="meta-row"><span class="badge core">Always-on core</span><span class="badge work">Employment</span><span class="badge money">Economic / Income</span><span class="badge note">Ri 2.73</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">8</span><div><div class="q-text">How many people live in your household, including yourself?</div><div class="meta-row"><span class="badge note">Generic expansion</span></div><div class="note">Household size entry.</div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">9</span><div><div class="q-text">What is your current employment status?</div><div class="meta-row"><span class="badge note">Generic expansion</span><span class="badge work">Employment</span></div><ul class="options"><li>Employed full time</li><li>Employed part time</li><li>Self-employed</li><li>Temporarily laid off or furloughed</li><li>Unemployed</li><li>Not in labor force</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">10</span><div><div class="q-text">Did you lose earnings or income because of the crisis?</div><div class="meta-row"><span class="badge note">Generic expansion</span><span class="badge money">Economic / Income</span></div><ul class="options"><li>Yes, a large loss</li><li>Yes, some loss</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">11</span><div><div class="q-text">Did you receive any government financial assistance because of the crisis?</div><div class="meta-row"><span class="badge note">Generic expansion</span><span class="badge aid">Government aid</span></div><ul class="options"><li>Yes</li><li>No</li><li>Applied but did not receive</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num core">12</span><div><div class="q-text">Since the crisis, how often have you felt worried, unable to relax, or unable to sleep well?</div><div class="meta-row"><span class="badge note">Generic expansion</span><span class="badge health">Trauma / Health</span></div><ul class="options"><li>Not at all</li><li>Several days</li><li>More than half the days</li><li>Nearly every day</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header pandemic"><span>Part 2A - Pandemic Economic Impact</span><span class="section-stat">5 questions | 3.5 min</span></div>
+      <div class="section-intro">High-value COVID-era items that remain useful whenever a public-health emergency or wide-scale shutdown affects work and income.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num pandemic">13</span><div><div class="q-text">Did you lose earnings because of the pandemic?</div><div class="meta-row"><span class="badge money">Economic / Income</span><span class="badge note">Ri 5.67</span></div><ul class="options"><li>Yes, all earnings</li><li>Yes, some earnings</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num pandemic">14</span><div><div class="q-text">Did you receive a stimulus payment?</div><div class="meta-row"><span class="badge aid">Government aid</span><span class="badge note">Ri 4.67</span></div><ul class="options"><li>Yes</li><li>No</li><li>Do not know</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num pandemic">15</span><div><div class="q-text">Were you working in a job that was considered essential work?</div><div class="meta-row"><span class="badge work">Employment</span><span class="badge note">Ri 4.00</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not employed then</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num pandemic">16</span><div><div class="q-text">Did you only work from home?</div><div class="meta-row"><span class="badge work">Employment</span><span class="badge note">Ri 3.50</span></div><ul class="options"><li>Yes, fully remote</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num pandemic">17</span><div><div class="q-text">Were you laid off or furloughed because of the pandemic?</div><div class="meta-row"><span class="badge work">Employment</span><span class="badge note">Ri 2.32</span></div><ul class="options"><li>Yes, laid off</li><li>Yes, furloughed</li><li>No</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header disaster"><span>Part 2B - Disaster Housing and Displacement</span><span class="section-stat">5 questions | 8.0 min</span></div>
+      <div class="section-intro">Reframed Katrina items that preserve the housing, evacuation, and infrastructure-disruption concepts in a cleaner format.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num disaster">18</span><div><div class="q-text">Did you experience major flooding in your home from the disaster?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge note">Ri 2.68</span></div><ul class="options"><li>Yes, major flooding</li><li>Yes, minor flooding</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num disaster">19</span><div><div class="q-text">Did you evacuate from your home before the disaster hit?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge note">Ri 2.54</span></div><ul class="options"><li>Yes, mandatory evacuation</li><li>Yes, voluntary evacuation</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num disaster">20</span><div><div class="q-text">How severe was the property damage to your home?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge note">Ri 2.53</span></div><ul class="options"><li>Total destruction</li><li>Major damage</li><li>Moderate damage</li><li>Minor damage</li><li>No damage</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num disaster">21</span><div><div class="q-text">Was your home damaged or destroyed by the disaster?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge note">Ri 1.13 in source wording</span></div><ul class="options"><li>Destroyed</li><li>Damaged</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num disaster">22</span><div><div class="q-text">How long did you stay in temporary housing after the disaster?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge note">Ri 1.59</span></div><ul class="options"><li>Less than 1 week</li><li>1-4 weeks</li><li>1-3 months</li><li>More than 3 months</li><li>Did not use temporary housing</li></ul></div></div></article>
+    </section>
+
+    <section class="section">
+      <div class="section-header trauma"><span>Part 2C - Trauma, Injury, and Exposure</span><span class="section-stat">4 questions | 6.0 min</span></div>
+      <div class="section-intro">These questions keep the high-value trauma, fear, injury, and emergency-assistance content visible in the demo without forcing the entire Katrina battery.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num trauma">23</span><div><div class="q-text">How afraid were you during the disaster that you might be killed or seriously injured?</div><div class="meta-row"><span class="badge health">Trauma / Health</span><span class="badge note">Ri 1.68</span></div><ul class="options"><li>Not at all</li><li>Slightly</li><li>Moderately</li><li>Very</li><li>Extremely</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num trauma">24</span><div><div class="q-text">Were you physically injured in any way as a result of the disaster?</div><div class="meta-row"><span class="badge health">Trauma / Health</span><span class="badge note">Ri 1.45 in source wording</span></div><ul class="options"><li>Yes, hospitalized</li><li>Yes, treated but not hospitalized</li><li>Yes, minor injury</li><li>No</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num trauma">25</span><div><div class="q-text">Did you receive any help from FEMA?</div><div class="meta-row"><span class="badge aid">Government aid</span><span class="badge note">Ri 2.09 and 1.54 variants</span></div><ul class="options"><li>Yes</li><li>No, applied but did not receive</li><li>No, did not apply</li></ul></div></div></article>
+      <article class="question">
+        <div class="question-head"><span class="q-num trauma">26</span><div><div class="q-text">Since the disaster, how often have you experienced the following?</div><div class="meta-row"><span class="badge health">Trauma / Health</span><span class="badge note">Condensed from multiple Katrina distress items</span></div>
+          <table class="matrix">
+            <thead><tr><th>Symptom</th><th>Not at all</th><th>Several days</th><th>More than half the days</th><th>Nearly every day</th></tr></thead>
+            <tbody>
+              <tr><td>Repeated disturbing memories or dreams</td><td>o</td><td>o</td><td>o</td><td>o</td></tr>
+              <tr><td>Feeling nervous, anxious, or on edge</td><td>o</td><td>o</td><td>o</td><td>o</td></tr>
+              <tr><td>Feeling down or hopeless</td><td>o</td><td>o</td><td>o</td><td>o</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </article>
+    </section>
+
+    <section class="banner alt-financial">
+      <h2>Alternate add-on: Financial Crisis prototype bank</h2>
+      <p>Use this add-on instead of the pandemic/disaster toggle when the event is primarily an economic shutdown or recession shock.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-header financial"><span>Alternate Part 2 - Financial Crisis</span><span class="section-stat">3 questions | 4.0 min</span></div>
+      <div class="section-intro">The scored model currently selects one shutdown coping item. This demo adds two companion questions so the financial toggle reads like a usable mini-module.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num financial">F1</span><div><div class="q-text">How did your household manage financial difficulties caused by the shutdown?</div><div class="meta-row"><span class="badge money">Financial coping</span><span class="badge note">Model-selected source item, Ri 3.72</span></div><ul class="options check"><li>Used savings</li><li>Borrowed on credit</li><li>Sold belongings</li><li>Received help from others</li><li>Cut back sharply on spending</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num financial">F2</span><div><div class="q-text">Did your household miss a paycheck or salary payment because of the shutdown?</div><div class="meta-row"><span class="badge money">Economic / Income</span><span class="badge note">Prototype extension</span></div><ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num financial">F3</span><div><div class="q-text">Did you expect to receive back pay or repayment later?</div><div class="meta-row"><span class="badge aid">Government aid</span><span class="badge note">Prototype extension</span></div><ul class="options"><li>Yes</li><li>No</li><li>Unsure</li></ul></div></div></article>
+    </section>
+
+    <section class="banner alt-war">
+      <h2>Alternate add-on: War / conflict template</h2>
+      <p>This template is intentionally generic and remains outside the scored historical pool. It shows how the module could extend to a new crisis type without changing the analytic scoring already in the dashboard.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-header war"><span>Template Part 2 - War / Armed Conflict</span><span class="section-stat">4 prompt ideas</span></div>
+      <div class="section-intro">These questions are placeholders for a future scored bank if PSID wants to extend the taxonomy beyond shutdown, pandemic, and disaster coverage.</div>
+
+      <article class="question"><div class="question-head"><span class="q-num war">W1</span><div><div class="q-text">Were you forced to leave your home because of armed conflict or security concerns?</div><div class="meta-row"><span class="badge house">Housing / Shelter</span><span class="badge health">Trauma / Health</span><span class="badge note">Template</span></div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num war">W2</span><div><div class="q-text">Did conflict interrupt your work, business activity, or income source?</div><div class="meta-row"><span class="badge work">Employment</span><span class="badge money">Economic / Income</span><span class="badge note">Template</span></div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num war">W3</span><div><div class="q-text">Did you or anyone in your immediate family experience injury, detention, or threats of violence?</div><div class="meta-row"><span class="badge health">Trauma / Health</span><span class="badge note">Template</span></div></div></div></article>
+      <article class="question"><div class="question-head"><span class="q-num war">W4</span><div><div class="q-text">Did you receive assistance from government, humanitarian, or refugee-support agencies?</div><div class="meta-row"><span class="badge aid">Government Aid</span><span class="badge note">Template</span></div></div></div></article>
+    </section>
+
+    <footer class="footer">
+      <h3>Implementation note</h3>
+      <p>The report and dashboard still reflect the ranked analytic selection of 7 Generic Core questions and 28 selected questions overall. This combined demo is intentionally more expansive so the field materials feel complete and realistic when shared with stakeholders.</p>
+    </footer>
   </div>
-</div>
-
-<div class="instructions">
-  <strong>Activation Protocol:</strong> This questionnaire demonstrates the <strong>full integrated module</strong> — the Generic Core (always deployed) seamlessly combined with the activated <strong>Pandemic/Natural Disaster toggle</strong>. It features reframed, low-burden versions of Hurricane Katrina displacement, property damage, and mental health items alongside COVID-19 economic impact questions. Additional toggle templates for <strong>Financial Crisis</strong> and <strong>War/Conflict</strong> scenarios are shown at the end.
-</div>
-
-<div class="toggle-banner">
-  <h3>ACTIVE TOGGLE: Pandemic / Natural Disaster</h3>
-  <p>Activated for: Hurricane Katrina-type events, COVID-19 pandemics, natural disasters | 20 toggle questions + 7 Generic Core = 27 total</p>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- PART 1: GENERIC CORE (Always Deployed)                 -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div class="core-note">
-  <strong>GENERIC CORE MODULE</strong> — The following 7 questions are always deployed as the first section of any crisis survey, regardless of which toggle is activated. Est. time: 4.9 minutes.
-</div>
-
-<div class="section-header section-core">PART 1 — GENERIC CORE: DEMOGRAPHICS & ECONOMIC BASELINE <span style="float:right; font-weight:400; font-size:12px;">7 Questions | ~4.9 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">1</span> What is the respondent's age?</div>
-  <div class="q-meta"><span class="badge badge-demo">Demographics</span> <span class="score-tag">Ri = 1.67</span></div>
-  <div style="font-size:12px; color:#90a4ae;">Enter age: ________</div>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">2</span> What is your sex?</div>
-  <div class="q-meta"><span class="badge badge-demo">Demographics</span> <span class="score-tag">Ri = 1.23</span></div>
-  <ul class="options"><li>Male</li><li>Female</li><li>Other / Prefer not to say</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">3</span> Are you normally resident at this address?</div>
-  <div class="q-meta"><span class="badge badge-demo">Demographics</span> <span class="score-tag">Ri = 1.17</span></div>
-  <ul class="options"><li>Yes</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">4</span> Have you experienced any financial difficulties?</div>
-  <div class="q-meta"><span class="badge badge-fin">Financial Coping</span> <span class="score-tag">Ri = 5.67 (TOP)</span></div>
-  <ul class="options"><li>Yes — significant difficulties</li><li>Yes — some difficulties</li><li>No financial difficulties</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">5</span> Have you stopped this work?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="score-tag">Ri = 4.67</span></div>
-  <ul class="options"><li>Yes — stopped</li><li>No — still working</li><li>Not applicable</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">6</span> Have you stopped working at this business?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="badge badge-econ">Economic/Income</span> <span class="score-tag">Ri = 4.50</span></div>
-  <ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number core">7</span> Were there any wages or salaries from this job?</div>
-  <div class="q-meta"><span class="badge badge-econ">Economic/Income</span> <span class="badge badge-emp">Employment</span> <span class="score-tag">Ri = 2.73</span></div>
-  <ul class="options"><li>Yes — received wages/salary</li><li>No — none received</li><li>Not applicable</li></ul>
-</div>
-
-<hr class="divider">
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- PART 2: PANDEMIC / NATURAL DISASTER TOGGLE              -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div class="section-header section-pandemic">PART 2A — PANDEMIC ECONOMIC IMPACT <span style="float:right; font-weight:400; font-size:12px;">6 Questions | ~3.7 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">8</span> Did you lose earnings because of the pandemic?</div>
-  <div class="q-meta"><span class="badge badge-pandemic">Pandemic</span> <span class="badge badge-econ">Economic/Income</span> <span class="score-tag">Ri = 5.67 (TOP)</span></div>
-  <ul class="options"><li>Yes — lost all earnings</li><li>Yes — lost some earnings</li><li>No earnings lost</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">9</span> Did you receive a stimulus payment?</div>
-  <div class="q-meta"><span class="badge badge-govaid">Government Aid</span> <span class="score-tag">Ri = 4.67</span></div>
-  <ul class="options"><li>Yes</li><li>No</li><li>Don't know</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">10</span> Were you working in a job that was considered essential work?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="score-tag">Ri = 4.00</span></div>
-  <ul class="options"><li>Yes — essential worker</li><li>No — non-essential</li><li>Not employed at the time</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">11</span> Did you only work from home?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="score-tag">Ri = 3.50</span></div>
-  <ul class="options"><li>Yes — fully remote</li><li>No — worked on-site or hybrid</li><li>Not applicable</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">12</span> Did you receive Paycheck Protection Program assistance?</div>
-  <div class="q-meta"><span class="badge badge-govaid">Government Aid</span> <span class="score-tag">Ri = 3.50</span></div>
-  <ul class="options"><li>Yes</li><li>No</li><li>Not applicable</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number pandemic">13</span> Were you laid off or furloughed because of the pandemic?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="badge badge-pandemic">Pandemic</span> <span class="score-tag">Ri = 2.32</span></div>
-  <ul class="options"><li>Yes — laid off</li><li>Yes — furloughed</li><li>No</li></ul>
-</div>
-
-<!-- Natural Disaster: Housing & Displacement -->
-<div class="section-header section-disaster">PART 2B — NATURAL DISASTER: HOUSING & DISPLACEMENT <span style="float:right; font-weight:400; font-size:12px;">7 Questions | ~10.1 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">14</span> Did you experience major flooding in your home from the disaster?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 2.68</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — major flooding</li><li>Yes — minor flooding</li><li>No flooding</li><li>Not applicable</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">15</span> Did you evacuate from your home before the disaster hit?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 2.54</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — mandatory evacuation</li><li>Yes — voluntary evacuation</li><li>No — did not evacuate</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">16</span> Did you lose your job because of the disaster?</div>
-  <div class="q-meta"><span class="badge badge-emp">Employment</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 2.13</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — permanently</li><li>Yes — temporarily</li><li>No</li><li>Not employed at the time</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">17</span> Was your business damaged or destroyed by the disaster?</div>
-  <div class="q-meta"><span class="badge badge-econ">Economic/Income</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 2.06</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — destroyed</li><li>Yes — damaged but repairable</li><li>No damage</li><li>Not applicable (no business)</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">18</span> How severe was the property damage to your home?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 2.00</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Total destruction</li><li>Major damage (uninhabitable)</li><li>Moderate damage (habitable with repairs)</li><li>Minor damage</li><li>No damage</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">19</span> Was your home damaged or destroyed by the disaster?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 1.66</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — destroyed</li><li>Yes — damaged</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number disaster">20</span> How long did you stay in temporary housing after the disaster?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 1.59</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Less than 1 week</li><li>1–4 weeks</li><li>1–3 months</li><li>3–6 months</li><li>More than 6 months</li><li>Did not use temporary housing</li></ul>
-</div>
-
-<!-- Trauma & Mental Health -->
-<div class="section-header section-trauma">PART 2C — TRAUMA, INJURY & MENTAL HEALTH <span style="float:right; font-weight:400; font-size:12px;">7 Questions | ~9.3 min</span></div>
-
-<div class="instructions" style="background: #f3e5f5; border-color: #9c27b0; margin-top: 0; border-radius: 0;">
-  <strong>Sensitivity Note:</strong> The following questions address physical injury, mortality, and trauma. Interviewers should follow IRB-approved protocols and provide respondent resources if distress is observed.
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">21</span> How afraid were you during the disaster that you might be killed or seriously injured?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span class="score-tag">Ri = 2.11</span> <span>Source: Katrina 2007</span></div>
-  <div class="likert">
-    <div class="likert-option">Not at all</div>
-    <div class="likert-option">Slightly</div>
-    <div class="likert-option">Moderately</div>
-    <div class="likert-option">Very afraid</div>
-    <div class="likert-option">Extremely afraid</div>
-  </div>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">22</span> Were you physically injured in any way as a result of the disaster?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 1.95</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — hospitalized</li><li>Yes — treated but not hospitalized</li><li>Yes — minor (no treatment needed)</li><li>No injury</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">23</span> Did you receive any help from FEMA (Federal Emergency Management Agency)?</div>
-  <div class="q-meta"><span class="badge badge-govaid">Government Aid</span> <span class="score-tag">Ri = 1.54</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes</li><li>No — applied but did not receive</li><li>No — did not apply</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">24</span> Did you experience hurricane-force winds at your location during the disaster?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span class="score-tag">Ri = 1.50</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes</li><li>No</li><li>Unsure</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">25</span> Since the disaster, have you been bothered by repeated disturbing memories, thoughts, or images?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 1.46</span> <span>Source: Katrina 2007 (PTSD Screening)</span></div>
-  <div class="likert">
-    <div class="likert-option">Not at all</div>
-    <div class="likert-option">Several days</div>
-    <div class="likert-option">More than half the days</div>
-    <div class="likert-option">Nearly every day</div>
-  </div>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">26</span> Were you displaced from where you were living because of the disaster?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-reframed">Reframed</span> <span class="score-tag">Ri = 1.45</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes — permanently relocated</li><li>Yes — temporarily displaced</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number trauma">27</span> Was anyone in your immediate family killed as a result of the disaster?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span class="score-tag">Ri = 1.45</span> <span>Source: Katrina 2007</span></div>
-  <ul class="options"><li>Yes</li><li>No</li><li>Prefer not to answer</li></ul>
-</div>
-
-<hr class="divider">
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- FINANCIAL CRISIS TOGGLE TEMPLATE                        -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div class="toggle-banner" style="background: linear-gradient(135deg, #e65100, #bf360c);">
-  <h3>ALTERNATIVE TOGGLE: Financial Crisis</h3>
-  <p>Activated for: Government shutdowns, recessions, fiscal shocks | 1 toggle question + 7 Generic Core = 8 total | Est. ~6.8 min</p>
-</div>
-
-<div class="section-header section-financial">PART 2 (ALT) — FINANCIAL CRISIS COPING <span style="float:right; font-weight:400; font-size:12px;">1 Question | ~1.9 min</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number financial">8</span> How did you/your family manage any financial difficulties due to the shutdown?</div>
-  <div class="q-meta"><span class="badge badge-fin">Financial Coping</span> <span class="badge badge-govaid">Government Aid</span> <span class="score-tag">Ri = 3.72</span> <span>Source: Govt Shutdown Crisis</span></div>
-  <p style="font-size:12px; color:#546e7a; margin-bottom:8px;"><em>Select all that apply:</em></p>
-  <ul class="options">
-    <li>Used savings</li>
-    <li>Used credit card(s)</li>
-    <li>Withdrew from retirement savings</li>
-    <li>Used a food bank</li>
-    <li>Sold belongings</li>
-    <li>Took a second job</li>
-    <li>Borrowed from family/friends</li>
-    <li>Cut back on spending</li>
-    <li>Other (specify): ___________</li>
-  </ul>
-</div>
-
-<hr class="divider">
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- WAR/CONFLICT TOGGLE TEMPLATE                            -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div class="toggle-banner" style="background: linear-gradient(135deg, #263238, #37474f);">
-  <h3>FUTURE TOGGLE TEMPLATE: War / Armed Conflict</h3>
-  <p>For future activation: Armed conflicts, civil unrest, military operations | Template questions below demonstrate extensibility of the module architecture</p>
-</div>
-
-<div class="war-note">
-  <strong>Note:</strong> This toggle template demonstrates the extensibility of the Generic Crisis Module architecture. These questions follow the same Utility-Burden optimization framework and would be scored, ranked, and selected using the identical NLP pipeline. The questions below are illustrative and would require expert review, IRB approval, and taxonomy expansion before deployment.
-</div>
-
-<div class="section-header section-war">PART 2 (TEMPLATE) — WAR / ARMED CONFLICT <span style="float:right; font-weight:400; font-size:12px;">5 Template Questions</span></div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number war">8</span> Were you displaced from your home due to armed conflict?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-trauma">Trauma/Health</span> <span style="font-size:10px; color:#78909c;">Template — pending scoring</span></div>
-  <ul class="options"><li>Yes — within country (internal displacement)</li><li>Yes — crossed international border (refugee)</li><li>No — remained at home</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number war">9</span> Was your property damaged or destroyed by military action?</div>
-  <div class="q-meta"><span class="badge badge-housing">Housing/Shelter</span> <span class="badge badge-econ">Economic/Income</span> <span style="font-size:10px; color:#78909c;">Template — pending scoring</span></div>
-  <ul class="options"><li>Yes — destroyed</li><li>Yes — damaged</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number war">10</span> Were you or an immediate family member physically injured due to the conflict?</div>
-  <div class="q-meta"><span class="badge badge-trauma">Trauma/Health</span> <span style="font-size:10px; color:#78909c;">Template — pending scoring</span></div>
-  <ul class="options"><li>Yes — self injured</li><li>Yes — family member injured</li><li>Yes — both</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number war">11</span> Did you lose your primary source of income due to the conflict?</div>
-  <div class="q-meta"><span class="badge badge-econ">Economic/Income</span> <span class="badge badge-emp">Employment</span> <span style="font-size:10px; color:#78909c;">Template — pending scoring</span></div>
-  <ul class="options"><li>Yes — completely</li><li>Yes — partially reduced</li><li>No</li></ul>
-</div>
-
-<div class="question-block">
-  <div class="q-text"><span class="q-number war">12</span> Have you received humanitarian aid from government or international organizations?</div>
-  <div class="q-meta"><span class="badge badge-govaid">Government Aid</span> <span style="font-size:10px; color:#78909c;">Template — pending scoring</span></div>
-  <ul class="options"><li>Yes — government aid</li><li>Yes — NGO/international organization</li><li>Yes — both</li><li>No — did not receive</li><li>No — did not apply</li></ul>
-</div>
-
-<div class="footer">
-  <strong>PSID Crisis-Specific Module — Combined Demo Questionnaire</strong><br>
-  Panel Study of Income Dynamics | Institute for Social Research | University of Michigan<br>
-  <em>Generic Core (7 questions, 4.9 min) + Pandemic/Disaster Toggle (20 questions, 23.1 min) = 27 questions, ~28.0 min</em><br>
-  <em>Financial Crisis Toggle (1 question, 1.9 min) and War/Conflict Toggle (template) shown as alternative activations.</em><br>
-  <em>All questions optimized using NLP Utility-Burden ranking: R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></em>
-</div>
-
 </body>
 </html>
