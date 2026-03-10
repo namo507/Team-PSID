@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSID Generic Crisis Module — Core Questionnaire</title>
+<style>
+  @media print { body { margin: 0.5in; } .no-print { display: none; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #222; line-height: 1.6; max-width: 850px; margin: 0 auto; padding: 40px 30px; }
+  .header { border-bottom: 3px solid #1a237e; padding-bottom: 18px; margin-bottom: 30px; }
+  .header h1 { font-size: 22px; color: #1a237e; margin-bottom: 4px; }
+  .header h2 { font-size: 16px; color: #455a64; font-weight: 400; }
+  .meta { font-size: 12px; color: #607d8b; margin-top: 8px; }
+  .meta span { margin-right: 18px; }
+  .instructions { background: #e8eaf6; border-left: 4px solid #3f51b5; padding: 14px 18px; margin-bottom: 28px; border-radius: 4px; font-size: 13px; }
+  .section-header { background: #1a237e; color: #fff; padding: 10px 16px; border-radius: 4px 4px 0 0; margin-top: 28px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+  .question-block { border: 1px solid #cfd8dc; border-top: none; padding: 16px 18px; margin-bottom: 0; }
+  .question-block:last-of-type { border-radius: 0 0 4px 4px; margin-bottom: 20px; }
+  .q-number { display: inline-block; background: #1a237e; color: #fff; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-size: 13px; font-weight: 700; margin-right: 10px; }
+  .q-text { font-size: 14px; font-weight: 600; color: #263238; margin-bottom: 10px; }
+  .q-meta { font-size: 11px; color: #78909c; margin-bottom: 8px; }
+  .q-meta span { margin-right: 14px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .badge-core { background: #e3f2fd; color: #1565c0; }
+  .badge-econ { background: #fff3e0; color: #e65100; }
+  .badge-emp { background: #e8f5e9; color: #2e7d32; }
+  .badge-demo { background: #f3e5f5; color: #6a1b9a; }
+  .badge-fin { background: #fce4ec; color: #c62828; }
+  .options { list-style: none; padding: 0; }
+  .options li { padding: 6px 0 6px 24px; position: relative; font-size: 13px; }
+  .options li::before { content: '○'; position: absolute; left: 4px; color: #90a4ae; font-size: 14px; }
+  .response-line { border-bottom: 1px solid #cfd8dc; margin: 8px 0 4px; height: 24px; }
+  .footer { margin-top: 30px; border-top: 2px solid #1a237e; padding-top: 14px; font-size: 11px; color: #607d8b; text-align: center; }
+  .score-tag { font-size: 10px; background: #e8eaf6; color: #3f51b5; padding: 2px 6px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PANEL STUDY OF INCOME DYNAMICS</h1>
+  <h2>Generic Crisis Module — Core Questionnaire</h2>
+  <div class="meta">
+    <span><strong>Version:</strong> Final Optimized (March 2026)</span>
+    <span><strong>Director:</strong> Thomas Crossley</span>
+    <span><strong>Est. Duration:</strong> 4.9 minutes</span>
+    <span><strong>Mode:</strong> CATI / Web</span>
+  </div>
+</div>
+
+<div class="instructions">
+  <strong>Interviewer Instructions:</strong> This Generic Core module is <strong>always deployed</strong> regardless of crisis type. It captures universal demographic, employment, and financial baselines applicable to any macro-level crisis. Administer all 7 questions in sequence. This module forms the stable backbone of the PSID Crisis Survey.
+</div>
+
+<!-- Section A: Demographics -->
+<div class="section-header">SECTION A — DEMOGRAPHICS <span style="float:right; font-weight:400; font-size:12px;">3 Questions | ~1.8 min</span></div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">1</span> What is the respondent's age?</div>
+  <div class="q-meta">
+    <span class="badge badge-demo">Demographics</span>
+    <span class="score-tag">Ri = 1.67</span>
+    <span>Source: Understanding Society</span>
+  </div>
+  <div class="response-line"></div>
+  <div style="font-size:12px; color:#90a4ae;">Enter age in years: ________</div>
+</div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">2</span> What is your sex?</div>
+  <div class="q-meta">
+    <span class="badge badge-demo">Demographics</span>
+    <span class="score-tag">Ri = 1.23</span>
+    <span>Source: Understanding Society</span>
+  </div>
+  <ul class="options">
+    <li>Male</li>
+    <li>Female</li>
+    <li>Other / Prefer not to say</li>
+  </ul>
+</div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">3</span> Can I just check, are you normally resident at this address?</div>
+  <div class="q-meta">
+    <span class="badge badge-demo">Demographics</span>
+    <span class="score-tag">Ri = 1.17</span>
+    <span>Source: Understanding Society</span>
+  </div>
+  <ul class="options">
+    <li>Yes</li>
+    <li>No</li>
+  </ul>
+</div>
+
+<!-- Section B: Employment -->
+<div class="section-header">SECTION B — EMPLOYMENT STATUS <span style="float:right; font-weight:400; font-size:12px;">2 Questions | ~1.0 min</span></div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">4</span> Have you stopped this work?</div>
+  <div class="q-meta">
+    <span class="badge badge-emp">Employment</span>
+    <span class="score-tag">Ri = 4.67</span>
+    <span>Source: Govt Shutdown Income</span>
+  </div>
+  <ul class="options">
+    <li>Yes — stopped working</li>
+    <li>No — still working</li>
+    <li>Not applicable</li>
+  </ul>
+</div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">5</span> Have you stopped working at this business?</div>
+  <div class="q-meta">
+    <span class="badge badge-emp">Employment</span>
+    <span class="badge badge-econ">Economic/Income</span>
+    <span class="score-tag">Ri = 4.50</span>
+    <span>Source: Govt Shutdown Income</span>
+  </div>
+  <ul class="options">
+    <li>Yes — stopped working at business</li>
+    <li>No — still operating</li>
+    <li>Not applicable</li>
+  </ul>
+</div>
+
+<!-- Section C: Financial -->
+<div class="section-header">SECTION C — FINANCIAL BASELINE <span style="float:right; font-weight:400; font-size:12px;">2 Questions | ~2.1 min</span></div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">6</span> Have you experienced any financial difficulties?</div>
+  <div class="q-meta">
+    <span class="badge badge-fin">Financial Coping</span>
+    <span class="score-tag">Ri = 5.67 (TOP)</span>
+    <span>Source: COVID-19</span>
+  </div>
+  <ul class="options">
+    <li>Yes — significant difficulties</li>
+    <li>Yes — some difficulties</li>
+    <li>No — no financial difficulties</li>
+  </ul>
+</div>
+
+<div class="question-block">
+  <div class="q-text"><span class="q-number">7</span> Were/Was there any wages or salaries from this job/these jobs?</div>
+  <div class="q-meta">
+    <span class="badge badge-econ">Economic/Income</span>
+    <span class="badge badge-emp">Employment</span>
+    <span class="score-tag">Ri = 2.73</span>
+    <span>Source: Govt Shutdown Income</span>
+  </div>
+  <ul class="options">
+    <li>Yes — received wages/salary</li>
+    <li>No — no wages/salary received</li>
+    <li>Not applicable</li>
+  </ul>
+</div>
+
+<div class="footer">
+  <strong>PSID Generic Crisis Module — Core Questionnaire</strong><br>
+  Panel Study of Income Dynamics | Institute for Social Research | University of Michigan<br>
+  <em>This module is always deployed as the first component of any crisis survey activation.</em><br>
+  <em>Total estimated duration: 4.9 minutes | 7 questions | 3 constructs covered</em>
+</div>
+
+</body>
+</html>
