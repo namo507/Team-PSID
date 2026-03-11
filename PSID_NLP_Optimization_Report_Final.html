@@ -361,10 +361,14 @@
     .figure-card img {
       width: 100%;
       display: block;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
       border-bottom: 1px solid var(--line);
       background: #edf3f8;
+      cursor: zoom-in;
+      transition: opacity 0.18s ease;
+    }
+
+    .figure-card img:hover {
+      opacity: 0.88;
     }
 
     .figure-copy {
@@ -423,6 +427,79 @@
       color: var(--muted);
       font-size: 0.86rem;
       margin: 22px 0 8px;
+    }
+
+    /* ── Lightbox overlay ── */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(10, 20, 35, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .lightbox-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-overlay img {
+      max-width: 92vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+      object-fit: contain;
+      transform: scale(0.92);
+      transition: transform 0.3s ease;
+    }
+
+    .lightbox-overlay.active img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 1.4rem;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s ease;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .lightbox-caption {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-align: center;
+      max-width: 80vw;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
     }
 
     @media (max-width: 768px) {
@@ -892,5 +969,40 @@
 
     <div class="footer-note">Prepared for Thomas Crossley, PSID Director. Final validated metrics sourced from the refreshed ranked-question workflow.</div>
   </div>
+
+  <!-- Lightbox overlay -->
+  <div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
+  <script>
+    (function () {
+      const overlay = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lightbox-img');
+      const lbCaption = document.getElementById('lightbox-caption');
+
+      document.querySelectorAll('.figure-card img').forEach(function (img) {
+        img.addEventListener('click', function () {
+          lbImg.src = img.src;
+          lbImg.alt = img.alt;
+          var card = img.closest('.figure-card');
+          var heading = card ? card.querySelector('h3') : null;
+          lbCaption.textContent = heading ? heading.textContent : img.alt;
+          overlay.classList.add('active');
+        });
+      });
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === lbImg) return;
+        overlay.classList.remove('active');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') overlay.classList.remove('active');
+      });
+    })();
+  </script>
 </body>
 </html>

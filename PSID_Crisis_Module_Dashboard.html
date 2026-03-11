@@ -265,6 +265,12 @@
       object-fit: cover;
       background: #eef4f8;
       border-bottom: 1px solid var(--line);
+      cursor: zoom-in;
+      transition: opacity 0.18s ease;
+    }
+
+    .report-preview-card img:hover {
+      opacity: 0.88;
     }
 
     .report-preview-copy {
@@ -327,11 +333,13 @@
     }
 
     .chart-wrap {
-      min-height: 360px;
+      min-height: 440px;
+      position: relative;
     }
 
     .chart-tall {
-      min-height: 420px;
+      min-height: 520px;
+      position: relative;
     }
 
     .subnote {
@@ -409,12 +417,438 @@
     .badge.disaster { background: #fee2e2; color: #b91c1c; }
     .badge.selected { background: #dcfce7; color: #166534; }
     .badge.not-selected { background: #e5e7eb; color: #374151; }
+    .badge.blue { background: #dbeafe; color: #1d4ed8; }
+    .badge.teal { background: #ccfbf1; color: #0f766e; }
+    .badge.orange { background: #ffedd5; color: #b45309; }
+    .badge.red { background: #fee2e2; color: #b91c1c; }
+    .badge.green { background: #dcfce7; color: #166534; }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    /* ── Section quick-nav ── */
+    .section-nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .section-nav a {
+      display: block;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #fff;
+      transition: background 0.18s ease;
+    }
+
+    .section-nav a:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .section-nav .nav-label {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      margin-bottom: 3px;
+    }
+
+    .section-nav .nav-value {
+      display: block;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    /* ── Insight cards ── */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .insight-card {
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .insight-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .insight-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    /* ── Formula cards ── */
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .formula-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .formula-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .formula-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .equation {
+      display: inline-flex;
+      align-items: center;
+      min-height: 52px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: #f4f7fb;
+      border: 1px solid #d8e2ea;
+      font-size: 1.22rem;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .equation small {
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    /* ── Table cards ── */
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .table-card header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 252, 0.92));
+    }
+
+    .table-card header h3 {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .table-card header p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    /* ── Figure cards (static images) ── */
+    .figure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .figure-card {
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff, #f9fbfd);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .figure-card img {
+      width: 100%;
+      display: block;
+      border-bottom: 1px solid var(--line);
+      background: #edf3f8;
+      cursor: zoom-in;
+      transition: opacity 0.18s ease;
+    }
+
+    .figure-card img:hover {
+      opacity: 0.88;
+    }
+
+    .figure-copy {
+      padding: 16px 18px;
+    }
+
+    .figure-copy h3 {
+      font-size: 0.96rem;
+      margin-bottom: 6px;
+    }
+
+    .figure-copy p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    /* ── Footer / recommendation cards ── */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .rec-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .rec-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .rec-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .rec-card ul {
+      margin-left: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .rec-card ul li {
+      margin-bottom: 6px;
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 28px 0 18px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
 
     .footer {
       margin-top: 20px;
       text-align: center;
       color: var(--muted);
       font-size: 0.84rem;
+    }
+
+    /* ── Expand button on chart panels ── */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .panel-header h2 {
+      margin-bottom: 0;
+    }
+
+    .expand-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .expand-btn:hover {
+      background: #f0f5fa;
+      color: var(--ink);
+      border-color: #b3c4d6;
+    }
+
+    /* ── Chart fullscreen overlay ── */
+    .chart-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(10, 20, 35, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .chart-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .chart-modal-inner {
+      width: 92vw;
+      height: 82vh;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+
+    .chart-modal-inner canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .chart-modal-title {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .chart-modal-close {
+      position: absolute;
+      top: -48px;
+      right: 0;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 1.3rem;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s ease;
+    }
+
+    .chart-modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ── Image lightbox ── */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(10, 20, 35, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .lightbox-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-overlay img {
+      max-width: 92vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+      object-fit: contain;
+      transform: scale(0.92);
+      transition: transform 0.3s ease;
+    }
+
+    .lightbox-overlay.active img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 1.4rem;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s ease;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .lightbox-caption {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-align: center;
+      max-width: 80vw;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
     }
 
     @media (max-width: 768px) {
@@ -430,7 +864,15 @@
         font-size: 1.7rem;
       }
 
-      .report-grid {
+      .section-nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .insight-grid,
+      .formula-grid,
+      .table-grid,
+      .figure-grid,
+      .rec-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -438,10 +880,10 @@
 </head>
 <body>
   <div class="shell">
-    <section class="hero">
+    <section class="hero" id="top">
       <h1>PSID Crisis Module Dashboard</h1>
       <p>
-        Current CSV-driven dashboard for the Katrina-integrated crisis module. The figures and table below are refreshed from the final ranked-question file and the maintained taxonomy helpers.
+        Unified dashboard and report for the Katrina-integrated crisis module. Interactive charts, validated figures, methodology, data tables, and stakeholder deliverables are all consolidated on this single page.
       </p>
       <div class="kpis">
         <div class="kpi"><div class="kpi-label">Total questions</div><div class="kpi-value" id="kpi-total">0</div></div>
@@ -449,6 +891,14 @@
         <div class="kpi"><div class="kpi-label">Selected minutes</div><div class="kpi-value" id="kpi-minutes">0</div></div>
         <div class="kpi"><div class="kpi-label">Average Ri</div><div class="kpi-value" id="kpi-avg-ri">0</div></div>
         <div class="kpi"><div class="kpi-label">Max Ri</div><div class="kpi-value" id="kpi-max-ri">0</div></div>
+      </div>
+      <div class="section-nav">
+        <a href="#executive-summary"><span class="nav-label">Summary</span><span class="nav-value">Executive overview</span></a>
+        <a href="#methodology"><span class="nav-label">Method</span><span class="nav-value">Formulae &amp; constants</span></a>
+        <a href="#interactive-charts"><span class="nav-label">Charts</span><span class="nav-value">Interactive exploration</span></a>
+        <a href="#report-figures"><span class="nav-label">Figures</span><span class="nav-value">Five visual outputs</span></a>
+        <a href="#data-tables"><span class="nav-label">Tables</span><span class="nav-value">Selection &amp; timing</span></a>
+        <a href="#recommendations"><span class="nav-label">Insights</span><span class="nav-value">Interpretation &amp; next steps</span></a>
       </div>
     </section>
 
@@ -479,68 +929,88 @@
       </div>
     </section>
 
-    <section class="panel">
-      <h2>Optimization Report Highlights</h2>
-      <p class="subnote">The final report is now surfaced as a formatted web page and summarized directly inside the dashboard for faster stakeholder review.</p>
-      <div class="report-grid">
-        <div class="report-summary">
-          <div class="report-metrics">
-            <div class="report-metric">
-              <div class="report-metric-label">Final corpus</div>
-              <div class="report-metric-value">52 rows</div>
-            </div>
-            <div class="report-metric">
-              <div class="report-metric-label">Selected module</div>
-              <div class="report-metric-value">28 rows</div>
-            </div>
-            <div class="report-metric">
-              <div class="report-metric-label">Deployment time</div>
-              <div class="report-metric-value">29.17 min</div>
-            </div>
-            <div class="report-metric">
-              <div class="report-metric-label">Average R<sub>i</sub></div>
-              <div class="report-metric-value">2.079</div>
-            </div>
-          </div>
-
-          <div class="report-callout">
-            <h3>Method summary</h3>
-            <p>The ranking objective optimizes information yield per unit of burden, then applies a hard 30-minute budget so the final module stays deployable.</p>
-            <div class="equation-box">R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></div>
-            <p>
-              Utility comes from taxonomy-weighted crisis keywords. Burden penalizes longer wording and structural complexity. Katrina integration is what strengthened trauma, housing, displacement, and aid coverage in the final selected set.
-            </p>
-          </div>
-
-          <div class="report-callout">
-            <h3>Why the final report matters</h3>
-            <p>The formatted report now packages the figures, source tables, toggle breakdowns, constants, and time-budget evidence in a way that is appropriate for public review on GitHub Pages instead of exposing a raw markdown export.</p>
-          </div>
-
-          <div class="report-links">
-            <a class="report-link primary" href="PSID_NLP_Optimization_Report_Final.html">Open formatted report</a>
-            <a class="report-link secondary" href="PSID_NLP_Optimization_Report_Final.docx.md">View source note</a>
-          </div>
-        </div>
-
-        <div class="report-preview-grid">
-          <article class="report-preview-card">
-            <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
-            <div class="report-preview-copy">
-              <h3>Top-ranked questions</h3>
-              <p>Highest-value questions remain compact items around hardship, earnings loss, and work disruption.</p>
-            </div>
-          </article>
-          <article class="report-preview-card">
-            <img src="fig_construct_heatmap.png" alt="Construct heatmap">
-            <div class="report-preview-copy">
-              <h3>Construct coverage</h3>
-              <p>The selected set now shows visible trauma and health, housing, and aid coverage alongside employment and income disruption.</p>
-            </div>
-          </article>
-        </div>
+    <section class="panel" id="executive-summary">
+      <h2>Executive Summary</h2>
+      <p>
+        The final ranked workflow uses the Katrina-integrated output as the single source of truth for report tables, figure generation, dashboard data, and stakeholder-facing questionnaire artifacts. The selected module keeps the always-on Generic Core intentionally short, then spends the remaining budget on the higher-value crisis-specific add-on, which is now dominated by Pandemic / Disaster content because the Katrina bank materially improved housing, trauma, displacement, and government-aid coverage.
+      </p>
+      <div class="badge-row">
+        <span class="badge blue">Generic Core: 7 questions</span>
+        <span class="badge orange">Financial Crisis add-on: 1 question</span>
+        <span class="badge red">Pandemic / Disaster add-on: 20 questions</span>
+        <span class="badge green">Time cap met: 29.17 / 30 minutes</span>
+      </div>
+      <div class="insight-grid">
+        <article class="insight-card">
+          <h3>Corpus expansion changed the instrument</h3>
+          <p>Katrina integration pushed the final module beyond purely economic exposure. The selected set now shows strong representation for trauma and health, housing and shelter, and government aid alongside employment and financial coping.</p>
+        </article>
+        <article class="insight-card">
+          <h3>Selection remains analytically disciplined</h3>
+          <p>The ranked selection still trims a 68.95-minute corpus into a 29.17-minute deployment benchmark by privileging questions with stronger utility and lower burden. That is the core value of the optimization workflow.</p>
+        </article>
+        <article class="insight-card">
+          <h3>Deliverables are now synchronized</h3>
+          <p>The notebook refresh cell, generated figures, dashboard bundle, HTML questionnaires, and this page all reflect the same final ranked-question file instead of drifting across separate manual exports.</p>
+        </article>
       </div>
     </section>
+
+    <section class="panel" id="methodology">
+      <h2>Method Summary and Formula Definitions</h2>
+      <p>Questions are ranked with a utility-to-burden ratio that balances analytical value against respondent effort. Utility is driven by taxonomy-weighted crisis keywords. Burden penalizes longer wording and question complexity so that high-value, shorter questions can rise to the top.</p>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Ranking score</h3>
+          <div class="equation">R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></div>
+          <p><strong>R<sub>i</sub></strong> is the final ranking score for question <strong>i</strong>. Higher values indicate better information return per unit of burden.</p>
+        </article>
+        <article class="formula-card">
+          <h3>Utility definition</h3>
+          <div class="equation">U<sub>i</sub> = &Sigma; w<sub>k</sub></div>
+          <p><strong>U<sub>i</sub></strong> sums taxonomy impact weights for the crisis-relevant keywords extracted from the question text. More consequential constructs receive larger weights.</p>
+        </article>
+        <article class="formula-card">
+          <h3>Burden definition</h3>
+          <div class="equation"><small>B<sub>i</sub> = max(&alpha;N<sub>i</sub> + &beta;C<sub>i</sub>, 0.1)</small></div>
+          <p><strong>B<sub>i</sub></strong> scales with question length <strong>N<sub>i</sub></strong> and structural complexity <strong>C<sub>i</sub></strong>, with a minimum floor so the ratio remains stable.</p>
+        </article>
+      </div>
+      <div class="table-grid">
+        <article class="table-card">
+          <header>
+            <h3>Pipeline constants</h3>
+            <p>Configured parameters used by the maintained notebook and artifact generator.</p>
+          </header>
+          <table>
+            <thead><tr><th>Constant</th><th class="num">Value</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>ALPHA</td><td class="num">0.10</td><td>Word-count burden coefficient</td></tr>
+              <tr><td>BETA</td><td class="num">0.20</td><td>Complexity burden coefficient</td></tr>
+              <tr><td>SECS_PER_WORD</td><td class="num">7</td><td>Duration estimate for mixed-mode completion</td></tr>
+              <tr><td>MAX_SECONDS</td><td class="num">1800</td><td>Hard 30-minute ceiling</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Operational interpretation</h3>
+            <p>What the optimization objective means in field terms.</p>
+          </header>
+          <table>
+            <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+            <tbody>
+              <tr><td>Generic Core</td><td>Always-on questions that remain useful across crisis types.</td></tr>
+              <tr><td>Toggle subset</td><td>Event-specific bank activated for financial shocks or pandemic and disaster events.</td></tr>
+              <tr><td>Selected for module</td><td>Final decision flag stored in the ranked CSV and reused by all downstream artifacts.</td></tr>
+              <tr><td>Time budget</td><td>Total deployment duration constrained to stay below 30 minutes.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <div class="section-divider" id="interactive-charts">Interactive Exploration</div>
 
     <section class="panel">
       <h2>Filters</h2>
@@ -570,7 +1040,10 @@
 
     <section class="grid-two">
       <div class="panel">
-        <h2>Utility vs Burden</h2>
+        <div class="panel-header">
+          <h2>Utility vs Burden</h2>
+          <button class="expand-btn" data-chart="scatter">⛶ Expand</button>
+        </div>
         <p class="subnote">Bubble radius tracks Ri. Selected questions are highlighted with a darker outline.</p>
         <div class="chart-wrap"><canvas id="scatterChart"></canvas></div>
         <div class="legend">
@@ -581,7 +1054,10 @@
         </div>
       </div>
       <div class="panel">
-        <h2>Top Ranked Questions</h2>
+        <div class="panel-header">
+          <h2>Top Ranked Questions</h2>
+          <button class="expand-btn" data-chart="top">⛶ Expand</button>
+        </div>
         <p class="subnote">The filtered top 12 questions ordered by Ri.</p>
         <div class="chart-tall"><canvas id="topChart"></canvas></div>
       </div>
@@ -589,14 +1065,137 @@
 
     <section class="grid-two">
       <div class="panel">
-        <h2>Source by Toggle Category</h2>
+        <div class="panel-header">
+          <h2>Source by Toggle Category</h2>
+          <button class="expand-btn" data-chart="toggle">⛶ Expand</button>
+        </div>
         <p class="subnote">Stacked counts by source, based on the currently filtered rows.</p>
         <div class="chart-wrap"><canvas id="toggleChart"></canvas></div>
       </div>
       <div class="panel">
-        <h2>Construct Frequency</h2>
+        <div class="panel-header">
+          <h2>Construct Frequency</h2>
+          <button class="expand-btn" data-chart="construct">⛶ Expand</button>
+        </div>
         <p class="subnote">Exploded construct counts from the taxonomy-derived construct assignments.</p>
         <div class="chart-wrap"><canvas id="constructChart"></canvas></div>
+      </div>
+    </section>
+
+    <div class="section-divider" id="report-figures">Report Figures</div>
+
+    <section class="panel">
+      <h2>Figures Regenerated From the Final Ranked Dataset</h2>
+      <p class="subnote">These figures are the same artifact outputs referenced by the refreshed notebook. They show the question ranking profile, module composition, construct spread, and time-budget implications of the final selected benchmark. Click any figure to enlarge.</p>
+      <div class="figure-grid">
+        <article class="figure-card">
+          <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
+          <div class="figure-copy">
+            <h3>Figure 1. Top-ranked selected questions</h3>
+            <p>The highest-ranked retained questions are still led by financial hardship, earnings loss, work interruption, and other compact but analytically rich crisis signals.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_toggle_comparison.png" alt="Toggle comparison across the selected module">
+          <div class="figure-copy">
+            <h3>Figure 2. Toggle comparison across the selected module</h3>
+            <p>The final benchmark is dominated by Pandemic / Disaster content because the Katrina bank contributes many high-value housing, trauma, displacement, and aid questions.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_utility_vs_burden.png" alt="Utility versus burden profile">
+          <div class="figure-copy">
+            <h3>Figure 3. Utility versus burden profile</h3>
+            <p>Selected questions cluster in the more favorable region where higher utility can still be achieved without disproportionate burden.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_construct_heatmap.png" alt="Construct heatmap for the selected module">
+          <div class="figure-copy">
+            <h3>Figure 4. Construct heatmap for the selected module</h3>
+            <p>The final module now covers a broader crisis spectrum, with trauma and health, housing, and government aid clearly visible alongside labor-market disruption.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_time_budget.png" alt="Time budget breakdown">
+          <div class="figure-copy">
+            <h3>Figure 5. Time budget breakdown</h3>
+            <p>The module is intentionally tight. Most of the deployment time is spent on the Pandemic / Disaster bank, while the Generic Core remains short and reusable.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="section-divider" id="data-tables">Selection Outcome Tables</div>
+
+    <section class="panel">
+      <h2>Selection Outcome and Supporting Tables</h2>
+      <p class="subnote">The tables below summarize the validated notebook outputs used to justify the final module structure and to show how the selected set differs from the full integrated corpus.</p>
+      <div class="table-grid">
+        <article class="table-card">
+          <header>
+            <h3>Source contribution</h3>
+            <p>Question counts by source before and after final selection.</p>
+          </header>
+          <table>
+            <thead><tr><th>Source</th><th class="num">Total</th><th class="num">Selected</th></tr></thead>
+            <tbody>
+              <tr><td>Hurricane Katrina 2007</td><td class="num">37</td><td class="num">13</td></tr>
+              <tr><td>COVID-19</td><td class="num">8</td><td class="num">8</td></tr>
+              <tr><td>Govt Shutdown Income</td><td class="num">3</td><td class="num">3</td></tr>
+              <tr><td>Understanding Society</td><td class="num">3</td><td class="num">3</td></tr>
+              <tr><td>Govt Shutdown Crisis</td><td class="num">1</td><td class="num">1</td></tr>
+              <tr><td><strong>Total</strong></td><td class="num"><strong>52</strong></td><td class="num"><strong>28</strong></td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Toggle distribution</h3>
+            <p>Selected module composition by routing category.</p>
+          </header>
+          <table>
+            <thead><tr><th>Toggle category</th><th class="num">Total</th><th class="num">Selected</th></tr></thead>
+            <tbody>
+              <tr><td>Toggle: Pandemic / Disaster</td><td class="num">44</td><td class="num">20</td></tr>
+              <tr><td>Generic Core</td><td class="num">7</td><td class="num">7</td></tr>
+              <tr><td>Toggle: Financial Crisis</td><td class="num">1</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Construct coverage</h3>
+            <p>Construct counts inside the selected final module.</p>
+          </header>
+          <table>
+            <thead><tr><th>Construct</th><th class="num">Selected count</th></tr></thead>
+            <tbody>
+              <tr><td>Trauma / Health</td><td class="num">13</td></tr>
+              <tr><td>Employment</td><td class="num">7</td></tr>
+              <tr><td>Government Aid</td><td class="num">5</td></tr>
+              <tr><td>Housing / Shelter</td><td class="num">5</td></tr>
+              <tr><td>Economic / Income</td><td class="num">4</td></tr>
+              <tr><td>Financial Coping</td><td class="num">3</td></tr>
+              <tr><td>Demographics</td><td class="num">3</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Time budget breakdown</h3>
+            <p>Validated deployment time by active module component.</p>
+          </header>
+          <table>
+            <thead><tr><th>Module component</th><th class="num">Questions</th><th class="num">Minutes</th></tr></thead>
+            <tbody>
+              <tr><td>Generic Core</td><td class="num">7</td><td class="num">4.87</td></tr>
+              <tr><td>Toggle: Financial Crisis</td><td class="num">1</td><td class="num">1.17</td></tr>
+              <tr><td>Toggle: Pandemic / Disaster</td><td class="num">20</td><td class="num">23.13</td></tr>
+              <tr><td><strong>Total selected</strong></td><td class="num"><strong>28</strong></td><td class="num"><strong>29.17</strong></td></tr>
+            </tbody>
+          </table>
+        </article>
       </div>
     </section>
 
@@ -622,13 +1221,60 @@
       </div>
     </section>
 
-    <div class="footer">Dashboard data source: PSID_Ranked_Questions_Final.csv via generated local bundle psid_dashboard_data.js.</div>
+    <div class="section-divider" id="recommendations">Interpretation &amp; Recommendations</div>
+
+    <section class="panel">
+      <h2>Interpretation and Recommendations</h2>
+      <div class="rec-grid">
+        <article class="rec-card">
+          <h3>Interpretation</h3>
+          <p>Three conclusions remain stable after the final refresh. First, the Generic Core is intentionally small and should stay that way. Second, Katrina materially changes the value of the Pandemic / Disaster toggle by adding high-value physical-shock content. Third, the 29.17-minute final benchmark should be treated as the upper deployment bound rather than something to expand casually.</p>
+        </article>
+        <article class="rec-card">
+          <h3>Recommendations</h3>
+          <ul>
+            <li>Keep the ranked 28-question analytic module as the benchmark production artifact.</li>
+            <li>Use the HTML questionnaire demos and dashboard for stakeholder communication, not the raw markdown export.</li>
+            <li>Regenerate future figures and report tables only through the maintained notebook refresh path and artifact generator.</li>
+            <li>If shortening is required, review the longest Katrina-derived items first instead of trimming the Generic Core.</li>
+          </ul>
+        </article>
+        <article class="rec-card">
+          <h3>Workflow alignment</h3>
+          <p>This dashboard now consolidates everything from the standalone report: <code>generate_psid_artifacts.py</code> refreshes the figures, summary JSON, and dashboard bundle; the final notebook triggers the same path; and this page, the master questionnaire viewer, and the report all reference the same final production artifacts.</p>
+        </article>
+      </div>
+    </section>
+
+    <div class="footer">Prepared for Thomas Crossley, PSID Director. Dashboard data source: PSID_Ranked_Questions_Final.csv via generated local bundle psid_dashboard_data.js.</div>
+  </div>
+
+  <!-- Chart fullscreen modal -->
+  <div class="chart-modal" id="chartModal">
+    <div class="chart-modal-inner">
+      <button class="chart-modal-close" aria-label="Close">&times;</button>
+      <canvas id="modalChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Image lightbox -->
+  <div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 
   <script>
     const dashboard = window.PSID_DASHBOARD || { summary: {}, rows: [] };
     const rows = dashboard.rows || [];
     const summary = dashboard.summary || {};
+
+    /* ── Chart.js global defaults for readability ── */
+    Chart.defaults.font.size = 13;
+    Chart.defaults.font.family = "'Avenir Next', 'Segoe UI', sans-serif";
+    Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold' };
+    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+    Chart.defaults.plugins.legend.labels.font = { size: 12, weight: '600' };
 
     const sourceFilter = document.getElementById('sourceFilter');
     const toggleFilter = document.getElementById('toggleFilter');
@@ -744,8 +1390,8 @@
             }
           },
           scales: {
-            x: { title: { display: true, text: 'Burden (Bi)' } },
-            y: { title: { display: true, text: 'Utility (Ui)' } }
+            x: { title: { display: true, text: 'Burden (Bi)', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } },
+            y: { title: { display: true, text: 'Utility (Ui)', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } }
           }
         }
       });
@@ -757,7 +1403,7 @@
       topChart = new Chart(document.getElementById('topChart'), {
         type: 'bar',
         data: {
-          labels: top.map(row => row.question_text.length > 58 ? `${row.question_text.slice(0, 58)}...` : row.question_text),
+          labels: top.map(row => row.question_text.length > 48 ? row.question_text.slice(0, 48) + '\u2026' : row.question_text),
           datasets: [{
             label: 'Ri',
             data: top.map(row => row.Ri),
@@ -768,8 +1414,29 @@
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { x: { title: { display: true, text: 'Ri score' } } }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function (items) {
+                  var idx = items[0].dataIndex;
+                  return top[top.length - 1 - idx] ? top[top.length - 1 - idx].question_text : items[0].label;
+                },
+                label: function (context) {
+                  return 'Ri: ' + context.parsed.x.toFixed(2);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Ri score', font: { size: 13, weight: 'bold' } },
+              ticks: { font: { size: 12 } }
+            },
+            y: {
+              ticks: { font: { size: 11 }, autoSkip: false }
+            }
+          }
         }
       });
     }
@@ -792,8 +1459,8 @@
           maintainAspectRatio: false,
           plugins: { legend: { position: 'bottom' } },
           scales: {
-            x: { stacked: true },
-            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Questions' } }
+            x: { stacked: true, ticks: { font: { size: 11 } } },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Questions', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } }
           }
         }
       });
@@ -823,7 +1490,10 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { x: { beginAtZero: true, title: { display: true, text: 'Occurrences' } } }
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Occurrences', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } },
+            y: { ticks: { font: { size: 12 }, autoSkip: false } }
+          }
         }
       });
     }
@@ -862,6 +1532,130 @@
     populateFilters();
     updateKpis(rows);
     refresh();
+
+    /* ── Fullscreen chart expand ── */
+    (function () {
+      var modal = document.getElementById('chartModal');
+      var modalCanvas = document.getElementById('modalChart');
+      var modalClose = modal.querySelector('.chart-modal-close');
+      var modalChart = null;
+
+      var chartBuilders = {
+        scatter: function (f) { return buildScatterFull(f, modalCanvas); },
+        top: function (f) { return buildTopFull(f, modalCanvas); },
+        toggle: function (f) { return buildToggleFull(f, modalCanvas); },
+        construct: function (f) { return buildConstructFull(f, modalCanvas); }
+      };
+
+      function buildScatterFull(filtered, canvas) {
+        var grouped = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'].map(function (toggle) {
+          var points = filtered.filter(function (row) { return row.toggle_category === toggle; }).map(function (row) {
+            return { x: row.Bi, y: row.Ui, r: Math.max(6, row.Ri * 5), borderWidth: row.selected ? 3 : 1, borderColor: row.selected ? '#15803d' : 'rgba(15,23,42,0.25)', question: row.question_text, source: row.source, ri: row.Ri, ui: row.Ui, bi: row.Bi };
+          });
+          return { label: toggle, data: points, backgroundColor: palette[toggle], borderColor: palette[toggle] };
+        });
+        return new Chart(canvas, {
+          type: 'bubble', data: { datasets: grouped },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } }, tooltip: { titleFont: { size: 14 }, bodyFont: { size: 13 }, callbacks: { label: function (ctx) { var p = ctx.raw; return p.question + ' | ' + p.source + ' | Ri ' + p.ri.toFixed(2); } } } },
+            scales: { x: { title: { display: true, text: 'Burden (Bi)', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { title: { display: true, text: 'Utility (Ui)', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } } }
+          }
+        });
+      }
+
+      function buildTopFull(filtered, canvas) {
+        var top = filtered.slice().sort(function (a, b) { return b.Ri - a.Ri; }).slice(0, 15).reverse();
+        return new Chart(canvas, {
+          type: 'bar',
+          data: { labels: top.map(function (r) { return r.question_text; }), datasets: [{ label: 'Ri', data: top.map(function (r) { return r.Ri; }), backgroundColor: top.map(function (r) { return palette[r.toggle_category] || '#64748b'; }) }] },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { titleFont: { size: 14 }, bodyFont: { size: 13 } } },
+            scales: { x: { title: { display: true, text: 'Ri score', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { ticks: { font: { size: 12 }, autoSkip: false } } }
+          }
+        });
+      }
+
+      function buildToggleFull(filtered, canvas) {
+        var sources = [].concat(new Set(filtered.map(function (r) { return r.source; }))).filter(function (v, i, a) { return a.indexOf(v) === i; });
+        var toggles = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'];
+        var datasets = toggles.map(function (toggle) {
+          return { label: toggle, data: sources.map(function (source) { return filtered.filter(function (r) { return r.source === source && r.toggle_category === toggle; }).length; }), backgroundColor: palette[toggle] };
+        });
+        return new Chart(canvas, {
+          type: 'bar', data: { labels: sources, datasets: datasets },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } } },
+            scales: { x: { stacked: true, ticks: { font: { size: 13 } } }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Questions', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } } }
+          }
+        });
+      }
+
+      function buildConstructFull(filtered, canvas) {
+        var counts = {};
+        filtered.forEach(function (row) { (row.constructs || []).forEach(function (c) { counts[c] = (counts[c] || 0) + 1; }); });
+        var sorted = Object.entries(counts).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12);
+        return new Chart(canvas, {
+          type: 'bar',
+          data: { labels: sorted.map(function (i) { return i[0]; }), datasets: [{ label: 'Frequency', data: sorted.map(function (i) { return i[1]; }), backgroundColor: '#0f766e' }] },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, title: { display: true, text: 'Occurrences', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { ticks: { font: { size: 13 }, autoSkip: false } } }
+          }
+        });
+      }
+
+      document.querySelectorAll('.expand-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-chart');
+          if (modalChart) { modalChart.destroy(); modalChart = null; }
+          modal.classList.add('active');
+          var filtered = applyFilters();
+          requestAnimationFrame(function () {
+            modalChart = chartBuilders[key](filtered);
+          });
+        });
+      });
+
+      function closeModal() {
+        modal.classList.remove('active');
+        if (modalChart) { modalChart.destroy(); modalChart = null; }
+      }
+
+      modalClose.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('active')) closeModal(); });
+    })();
+
+    /* ── Image lightbox for figure cards and preview cards ── */
+    (function () {
+      var overlay = document.getElementById('lightbox');
+      var lbImg = document.getElementById('lightbox-img');
+      var lbCaption = document.getElementById('lightbox-caption');
+
+      document.querySelectorAll('.figure-card img, .report-preview-card img').forEach(function (img) {
+        img.addEventListener('click', function () {
+          lbImg.src = img.src;
+          lbImg.alt = img.alt;
+          var card = img.closest('.figure-card') || img.closest('.report-preview-card');
+          var heading = card ? card.querySelector('h3') : null;
+          lbCaption.textContent = heading ? heading.textContent : img.alt;
+          overlay.classList.add('active');
+        });
+      });
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === lbImg) return;
+        overlay.classList.remove('active');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) overlay.classList.remove('active');
+      });
+    })();
   </script>
 </body>
 </html>
