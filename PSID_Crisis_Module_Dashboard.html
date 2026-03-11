@@ -342,6 +342,45 @@
       position: relative;
     }
 
+    .chart-wrap canvas,
+    .chart-tall canvas {
+      cursor: zoom-in;
+    }
+
+    .chart-hitarea {
+      position: absolute;
+      inset: 0;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(19, 34, 56, 0.02));
+      cursor: zoom-in;
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .chart-hitarea:hover {
+      border-color: #bfd0e2;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(37, 99, 235, 0.04));
+    }
+
+    .chart-hitarea-label {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(19, 34, 56, 0.8);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      pointer-events: none;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+    }
+
     .subnote {
       font-size: 0.88rem;
       color: var(--muted);
@@ -599,6 +638,24 @@
       opacity: 0.88;
     }
 
+    .figure-media {
+      position: relative;
+    }
+
+    .figure-hitarea {
+      position: absolute;
+      inset: 0;
+      border: 1px solid transparent;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(19, 34, 56, 0.04));
+      cursor: zoom-in;
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .figure-hitarea:hover {
+      border-color: #bfd0e2;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(37, 99, 235, 0.06));
+    }
+
     .figure-copy {
       padding: 16px 18px;
     }
@@ -744,6 +801,21 @@
       position: relative;
     }
 
+    .chart-modal-heading {
+      margin-bottom: 14px;
+      padding-right: 52px;
+    }
+
+    .chart-modal-heading h3 {
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .chart-modal-heading p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
     .chart-modal-inner canvas {
       width: 100% !important;
       height: 100% !important;
@@ -866,6 +938,12 @@
 
       .section-nav {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .chart-hitarea-label {
+        left: 12px;
+        right: 12px;
+        justify-content: center;
       }
 
       .insight-grid,
@@ -1045,7 +1123,12 @@
           <button class="expand-btn" data-chart="scatter">⛶ Expand</button>
         </div>
         <p class="subnote">Bubble radius tracks Ri. Selected questions are highlighted with a darker outline.</p>
-        <div class="chart-wrap"><canvas id="scatterChart"></canvas></div>
+        <div class="chart-wrap">
+          <canvas id="scatterChart"></canvas>
+          <button class="chart-hitarea" type="button" data-chart="scatter" aria-label="Expand Utility vs Burden chart">
+            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
+          </button>
+        </div>
         <div class="legend">
           <span class="legend-item"><span class="legend-swatch swatch-blue"></span> Generic Core</span>
           <span class="legend-item"><span class="legend-swatch swatch-orange"></span> Financial Crisis</span>
@@ -1059,7 +1142,12 @@
           <button class="expand-btn" data-chart="top">⛶ Expand</button>
         </div>
         <p class="subnote">The filtered top 12 questions ordered by Ri.</p>
-        <div class="chart-tall"><canvas id="topChart"></canvas></div>
+        <div class="chart-tall">
+          <canvas id="topChart"></canvas>
+          <button class="chart-hitarea" type="button" data-chart="top" aria-label="Expand Top Ranked Questions chart">
+            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1070,7 +1158,12 @@
           <button class="expand-btn" data-chart="toggle">⛶ Expand</button>
         </div>
         <p class="subnote">Stacked counts by source, based on the currently filtered rows.</p>
-        <div class="chart-wrap"><canvas id="toggleChart"></canvas></div>
+        <div class="chart-wrap">
+          <canvas id="toggleChart"></canvas>
+          <button class="chart-hitarea" type="button" data-chart="toggle" aria-label="Expand Source by Toggle Category chart">
+            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
+          </button>
+        </div>
       </div>
       <div class="panel">
         <div class="panel-header">
@@ -1078,7 +1171,12 @@
           <button class="expand-btn" data-chart="construct">⛶ Expand</button>
         </div>
         <p class="subnote">Exploded construct counts from the taxonomy-derived construct assignments.</p>
-        <div class="chart-wrap"><canvas id="constructChart"></canvas></div>
+        <div class="chart-wrap">
+          <canvas id="constructChart"></canvas>
+          <button class="chart-hitarea" type="button" data-chart="construct" aria-label="Expand Construct Frequency chart">
+            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1089,35 +1187,50 @@
       <p class="subnote">These figures are the same artifact outputs referenced by the refreshed notebook. They show the question ranking profile, module composition, construct spread, and time-budget implications of the final selected benchmark. Click any figure to enlarge.</p>
       <div class="figure-grid">
         <article class="figure-card">
-          <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
+          <div class="figure-media">
+            <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
+            <button class="figure-hitarea" type="button" aria-label="Expand Figure 1: Top-ranked selected questions"></button>
+          </div>
           <div class="figure-copy">
             <h3>Figure 1. Top-ranked selected questions</h3>
             <p>The highest-ranked retained questions are still led by financial hardship, earnings loss, work interruption, and other compact but analytically rich crisis signals.</p>
           </div>
         </article>
         <article class="figure-card">
-          <img src="fig_toggle_comparison.png" alt="Toggle comparison across the selected module">
+          <div class="figure-media">
+            <img src="fig_toggle_comparison.png" alt="Toggle comparison across the selected module">
+            <button class="figure-hitarea" type="button" aria-label="Expand Figure 2: Toggle comparison across the selected module"></button>
+          </div>
           <div class="figure-copy">
             <h3>Figure 2. Toggle comparison across the selected module</h3>
             <p>The final benchmark is dominated by Pandemic / Disaster content because the Katrina bank contributes many high-value housing, trauma, displacement, and aid questions.</p>
           </div>
         </article>
         <article class="figure-card">
-          <img src="fig_utility_vs_burden.png" alt="Utility versus burden profile">
+          <div class="figure-media">
+            <img src="fig_utility_vs_burden.png" alt="Utility versus burden profile">
+            <button class="figure-hitarea" type="button" aria-label="Expand Figure 3: Utility versus burden profile"></button>
+          </div>
           <div class="figure-copy">
             <h3>Figure 3. Utility versus burden profile</h3>
             <p>Selected questions cluster in the more favorable region where higher utility can still be achieved without disproportionate burden.</p>
           </div>
         </article>
         <article class="figure-card">
-          <img src="fig_construct_heatmap.png" alt="Construct heatmap for the selected module">
+          <div class="figure-media">
+            <img src="fig_construct_heatmap.png" alt="Construct heatmap for the selected module">
+            <button class="figure-hitarea" type="button" aria-label="Expand Figure 4: Construct heatmap for the selected module"></button>
+          </div>
           <div class="figure-copy">
             <h3>Figure 4. Construct heatmap for the selected module</h3>
             <p>The final module now covers a broader crisis spectrum, with trauma and health, housing, and government aid clearly visible alongside labor-market disruption.</p>
           </div>
         </article>
         <article class="figure-card">
-          <img src="fig_time_budget.png" alt="Time budget breakdown">
+          <div class="figure-media">
+            <img src="fig_time_budget.png" alt="Time budget breakdown">
+            <button class="figure-hitarea" type="button" aria-label="Expand Figure 5: Time budget breakdown"></button>
+          </div>
           <div class="figure-copy">
             <h3>Figure 5. Time budget breakdown</h3>
             <p>The module is intentionally tight. Most of the deployment time is spent on the Pandemic / Disaster bank, while the Generic Core remains short and reusable.</p>
@@ -1253,6 +1366,10 @@
   <div class="chart-modal" id="chartModal">
     <div class="chart-modal-inner">
       <button class="chart-modal-close" aria-label="Close">&times;</button>
+      <div class="chart-modal-heading">
+        <h3 id="chartModalTitle">Expanded chart</h3>
+        <p id="chartModalDescription">Open a larger view to inspect labels, values, and axis detail.</p>
+      </div>
       <canvas id="modalChart"></canvas>
     </div>
   </div>
@@ -1538,7 +1655,28 @@
       var modal = document.getElementById('chartModal');
       var modalCanvas = document.getElementById('modalChart');
       var modalClose = modal.querySelector('.chart-modal-close');
+      var modalTitle = document.getElementById('chartModalTitle');
+      var modalDescription = document.getElementById('chartModalDescription');
       var modalChart = null;
+
+      var chartMeta = {
+        scatter: {
+          title: 'Utility vs Burden',
+          description: 'Bubble radius tracks Ri, with selected questions outlined for easier inspection.'
+        },
+        top: {
+          title: 'Top Ranked Questions',
+          description: 'Full-size horizontal ranking chart with readable labels and precise Ri values.'
+        },
+        toggle: {
+          title: 'Source by Toggle Category',
+          description: 'Stacked source counts for the active filter state.'
+        },
+        construct: {
+          title: 'Construct Frequency',
+          description: 'Expanded view of taxonomy-derived construct counts across the filtered set.'
+        }
+      };
 
       var chartBuilders = {
         scatter: function (f) { return buildScatterFull(f, modalCanvas); },
@@ -1608,15 +1746,27 @@
         });
       }
 
-      document.querySelectorAll('.expand-btn').forEach(function (btn) {
+      function openChartModal(key) {
+        var meta = chartMeta[key] || {
+          title: 'Expanded chart',
+          description: 'Open a larger view to inspect labels, values, and axis detail.'
+        };
+
+        modalTitle.textContent = meta.title;
+        modalDescription.textContent = meta.description;
+
+        if (modalChart) { modalChart.destroy(); modalChart = null; }
+        modal.classList.add('active');
+        var filtered = applyFilters();
+        requestAnimationFrame(function () {
+          modalChart = chartBuilders[key](filtered);
+        });
+      }
+
+      document.querySelectorAll('.expand-btn, .chart-hitarea').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var key = btn.getAttribute('data-chart');
-          if (modalChart) { modalChart.destroy(); modalChart = null; }
-          modal.classList.add('active');
-          var filtered = applyFilters();
-          requestAnimationFrame(function () {
-            modalChart = chartBuilders[key](filtered);
-          });
+          openChartModal(key);
         });
       });
 
@@ -1636,8 +1786,9 @@
       var lbImg = document.getElementById('lightbox-img');
       var lbCaption = document.getElementById('lightbox-caption');
 
-      document.querySelectorAll('.figure-card img, .report-preview-card img').forEach(function (img) {
-        img.addEventListener('click', function () {
+      document.querySelectorAll('.figure-card img, .figure-hitarea, .report-preview-card img').forEach(function (target) {
+        target.addEventListener('click', function () {
+          var img = target.tagName === 'IMG' ? target : target.parentElement.querySelector('img');
           lbImg.src = img.src;
           lbImg.alt = img.alt;
           var card = img.closest('.figure-card') || img.closest('.report-preview-card');
