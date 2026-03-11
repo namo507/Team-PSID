@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSID NLP Optimization Report</title>
+  <style>
+    :root {
+      --ink: #14263b;
+      --muted: #5c6f83;
+      --line: #d8e2ea;
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-strong: #ffffff;
+      --page: radial-gradient(circle at top left, rgba(251, 191, 36, 0.2), transparent 28%),
+              radial-gradient(circle at right top, rgba(14, 116, 144, 0.14), transparent 32%),
+              linear-gradient(160deg, #f4f7f9, #f8fbfe 45%, #eef4f8);
+      --navy: #113b66;
+      --blue: #2563eb;
+      --teal: #0f766e;
+      --orange: #c76a11;
+      --brick: #b42318;
+      --green: #157347;
+      --shadow-lg: 0 24px 48px rgba(20, 38, 59, 0.12);
+      --shadow-md: 0 16px 32px rgba(20, 38, 59, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.55;
+      padding: 24px;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      padding: 34px 34px 28px;
+      color: #fff;
+      background: linear-gradient(135deg, #17395f 0%, #205989 46%, #a04b11 100%);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -100px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 66%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.08;
+      max-width: 980px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      max-width: 920px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .hero-actions,
+    .section-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-actions {
+      margin-top: 20px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 800;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button.primary {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 14px 28px rgba(17, 59, 102, 0.18);
+    }
+
+    .button.secondary {
+      color: #fff;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .button.panel-primary {
+      background: #113b66;
+      color: #fff;
+      border: 1px solid transparent;
+      box-shadow: 0 10px 22px rgba(17, 59, 102, 0.16);
+    }
+
+    .button.panel-secondary {
+      color: #113b66;
+      border: 1px solid #c9d6e3;
+      background: #fff;
+    }
+
+    .quick-nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .quick-link {
+      display: block;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: var(--radius-md);
+      padding: 14px 15px;
+      color: #fff;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-link span {
+      display: block;
+    }
+
+    .quick-link .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.74;
+      margin-bottom: 4px;
+    }
+
+    .quick-link .value {
+      font-weight: 800;
+    }
+
+    .kpi-grid,
+    .insight-grid,
+    .figure-grid,
+    .table-grid,
+    .formula-grid,
+    .footer-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin: 20px 0;
+    }
+
+    .panel,
+    .kpi-card,
+    .insight-card,
+    .figure-card,
+    .table-card,
+    .formula-card,
+    .footer-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-card {
+      padding: 18px 18px 16px;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .kpi-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .panel h2 {
+      font-size: 1.24rem;
+      margin-bottom: 8px;
+    }
+
+    .panel > p,
+    .figure-card p,
+    .table-card p,
+    .formula-card p,
+    .insight-card p,
+    .footer-card p {
+      color: var(--muted);
+    }
+
+    .insight-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      margin-top: 18px;
+    }
+
+    .insight-card {
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .insight-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .formula-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      margin-top: 18px;
+    }
+
+    .formula-card {
+      padding: 18px;
+    }
+
+    .equation {
+      display: inline-flex;
+      align-items: center;
+      min-height: 52px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: #f4f7fb;
+      border: 1px solid #d8e2ea;
+      font-size: 1.22rem;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .equation small {
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .table-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      margin-top: 18px;
+    }
+
+    .table-card {
+      overflow: hidden;
+    }
+
+    .table-card header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 252, 0.92));
+    }
+
+    .table-card header h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    thead {
+      background: #103c6a;
+      color: #fff;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e6edf3;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .figure-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      margin-top: 18px;
+    }
+
+    .figure-card {
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff, #f9fbfd);
+    }
+
+    .figure-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-bottom: 1px solid var(--line);
+      background: #edf3f8;
+    }
+
+    .figure-copy {
+      padding: 18px;
+    }
+
+    .figure-copy h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.blue { background: #dbeafe; color: #1d4ed8; }
+    .badge.teal { background: #ccfbf1; color: #0f766e; }
+    .badge.orange { background: #ffedd5; color: #b45309; }
+    .badge.red { background: #fee2e2; color: #b91c1c; }
+    .badge.green { background: #dcfce7; color: #166534; }
+
+    .footer-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      margin-top: 18px;
+    }
+
+    .footer-card {
+      padding: 18px;
+    }
+
+    .footer-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .footer-card ul {
+      margin-left: 18px;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin: 22px 0 8px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero {
+        padding: 24px 18px 22px;
+      }
+
+      .panel,
+      .kpi-card,
+      .insight-card,
+      .formula-card,
+      .footer-card {
+        padding: 18px;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero" id="top">
+      <span class="eyebrow">Panel Study of Income Dynamics</span>
+      <h1>Generic Crisis Module: NLP Optimization and Final Ranked Report</h1>
+      <p>
+        Web-formatted stakeholder report for the Katrina-integrated PSID crisis module. This page consolidates the final notebook-backed metrics, methodological definitions, timing tables, construct coverage, and refreshed figures into a single public artifact.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="PSID_Crisis_Module_Dashboard.html">Open Dashboard</a>
+        <a class="button primary" href="PSID_Module_Questionnaire_Master.html">Open Questionnaire Viewer</a>
+        <a class="button secondary" href="PSID_NLP_Optimization_Report_Final.docx.md">View Source Note</a>
+      </div>
+      <div class="quick-nav">
+        <a class="quick-link" href="#summary"><span class="label">Summary</span><span class="value">Validated headline metrics</span></a>
+        <a class="quick-link" href="#method"><span class="label">Method</span><span class="value">Formulae and constants</span></a>
+        <a class="quick-link" href="#tables"><span class="label">Tables</span><span class="value">Selection and timing structure</span></a>
+        <a class="quick-link" href="#figures"><span class="label">Figures</span><span class="value">Five refreshed visual outputs</span></a>
+      </div>
+    </section>
+
+    <section class="kpi-grid" id="summary">
+      <article class="kpi-card">
+        <div class="kpi-label">Total ranked questions</div>
+        <div class="kpi-value">52</div>
+        <div class="kpi-note">Integrated corpus across five PSID-related sources.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Selected module</div>
+        <div class="kpi-value">28</div>
+        <div class="kpi-note">Final benchmark module retained under the hard time cap.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Selected minutes</div>
+        <div class="kpi-value">29.17</div>
+        <div class="kpi-note">Compliant with the 30-minute ceiling.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Full corpus minutes</div>
+        <div class="kpi-value">68.95</div>
+        <div class="kpi-note">Illustrates the value of ranked pruning.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Average R<sub>i</sub></div>
+        <div class="kpi-value">2.079</div>
+        <div class="kpi-note">Mean utility-to-burden ratio across all rows.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Maximum R<sub>i</sub></div>
+        <div class="kpi-value">5.667</div>
+        <div class="kpi-note">Highest-scoring question retained in the module.</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Executive Summary</h2>
+      <p>
+        The final ranked workflow now uses the Katrina-integrated output as the single source of truth for report tables, figure generation, dashboard data, and stakeholder-facing questionnaire artifacts. The selected module keeps the always-on Generic Core intentionally short, then spends the remaining budget on the higher-value crisis-specific add-on, which is now dominated by Pandemic / Disaster content because the Katrina bank materially improved housing, trauma, displacement, and government-aid coverage.
+      </p>
+      <div class="badge-row">
+        <span class="badge blue">Generic Core: 7 questions</span>
+        <span class="badge orange">Financial Crisis add-on: 1 question</span>
+        <span class="badge red">Pandemic / Disaster add-on: 20 questions</span>
+        <span class="badge green">Time cap met: 29.17 / 30 minutes</span>
+      </div>
+      <div class="insight-grid">
+        <article class="insight-card">
+          <h3>Corpus expansion changed the instrument</h3>
+          <p>
+            Katrina integration pushed the final module beyond purely economic exposure. The selected set now shows strong representation for trauma and health, housing and shelter, and government aid alongside employment and financial coping.
+          </p>
+        </article>
+        <article class="insight-card">
+          <h3>Selection remains analytically disciplined</h3>
+          <p>
+            The ranked selection still trims a 68.95-minute corpus into a 29.17-minute deployment benchmark by privileging questions with stronger utility and lower burden. That is the core value of the optimization workflow.
+          </p>
+        </article>
+        <article class="insight-card">
+          <h3>Deliverables are now synchronized</h3>
+          <p>
+            The notebook refresh cell, generated figures, dashboard bundle, HTML questionnaires, and this web report all reflect the same final ranked-question file instead of drifting across separate manual exports.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="method">
+      <h2>Method Summary and Formula Definitions</h2>
+      <p>
+        Questions are ranked with a utility-to-burden ratio that balances analytical value against respondent effort. Utility is driven by taxonomy-weighted crisis keywords. Burden penalizes longer wording and question complexity so that high-value, shorter questions can rise to the top.
+      </p>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Ranking score</h3>
+          <div class="equation">R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></div>
+          <p>
+            <strong>R<sub>i</sub></strong> is the final ranking score for question <strong>i</strong>. Higher values indicate better information return per unit of burden.
+          </p>
+        </article>
+        <article class="formula-card">
+          <h3>Utility definition</h3>
+          <div class="equation">U<sub>i</sub> = &Sigma; w<sub>k</sub></div>
+          <p>
+            <strong>U<sub>i</sub></strong> sums taxonomy impact weights for the crisis-relevant keywords extracted from the question text. More consequential constructs receive larger weights.
+          </p>
+        </article>
+        <article class="formula-card">
+          <h3>Burden definition</h3>
+          <div class="equation"><small>B<sub>i</sub> = max(&alpha;N<sub>i</sub> + &beta;C<sub>i</sub>, 0.1)</small></div>
+          <p>
+            <strong>B<sub>i</sub></strong> scales with question length <strong>N<sub>i</sub></strong> and structural complexity <strong>C<sub>i</sub></strong>, with a minimum floor so the ratio remains stable.
+          </p>
+        </article>
+      </div>
+      <div class="table-grid">
+        <article class="table-card">
+          <header>
+            <h3>Pipeline constants</h3>
+            <p>Configured parameters used by the maintained notebook and artifact generator.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Constant</th>
+                <th class="num">Value</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ALPHA</td>
+                <td class="num">0.10</td>
+                <td>Word-count burden coefficient</td>
+              </tr>
+              <tr>
+                <td>BETA</td>
+                <td class="num">0.20</td>
+                <td>Complexity burden coefficient</td>
+              </tr>
+              <tr>
+                <td>SECS_PER_WORD</td>
+                <td class="num">7</td>
+                <td>Duration estimate for mixed-mode completion</td>
+              </tr>
+              <tr>
+                <td>MAX_SECONDS</td>
+                <td class="num">1800</td>
+                <td>Hard 30-minute ceiling</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Operational interpretation</h3>
+            <p>What the optimization objective means in field terms.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generic Core</td>
+                <td>Always-on questions that remain useful across crisis types.</td>
+              </tr>
+              <tr>
+                <td>Toggle subset</td>
+                <td>Event-specific bank activated for financial shocks or pandemic and disaster events.</td>
+              </tr>
+              <tr>
+                <td>Selected for module</td>
+                <td>Final decision flag stored in the ranked CSV and reused by all downstream artifacts.</td>
+              </tr>
+              <tr>
+                <td>Time budget</td>
+                <td>Total deployment duration constrained to stay below 30 minutes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="tables">
+      <h2>Selection Outcome and Supporting Tables</h2>
+      <p>
+        The tables below summarize the validated notebook outputs used to justify the final module structure and to show how the selected set differs from the full integrated corpus.
+      </p>
+      <div class="table-grid">
+        <article class="table-card">
+          <header>
+            <h3>Source contribution</h3>
+            <p>Question counts by source before and after final selection.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th class="num">Total</th>
+                <th class="num">Selected</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hurricane Katrina 2007</td>
+                <td class="num">37</td>
+                <td class="num">13</td>
+              </tr>
+              <tr>
+                <td>COVID-19</td>
+                <td class="num">8</td>
+                <td class="num">8</td>
+              </tr>
+              <tr>
+                <td>Govt Shutdown Income</td>
+                <td class="num">3</td>
+                <td class="num">3</td>
+              </tr>
+              <tr>
+                <td>Understanding Society</td>
+                <td class="num">3</td>
+                <td class="num">3</td>
+              </tr>
+              <tr>
+                <td>Govt Shutdown Crisis</td>
+                <td class="num">1</td>
+                <td class="num">1</td>
+              </tr>
+              <tr>
+                <td><strong>Total</strong></td>
+                <td class="num"><strong>52</strong></td>
+                <td class="num"><strong>28</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Toggle distribution</h3>
+            <p>Selected module composition by routing category.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Toggle category</th>
+                <th class="num">Total</th>
+                <th class="num">Selected</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Toggle: Pandemic / Disaster</td>
+                <td class="num">44</td>
+                <td class="num">20</td>
+              </tr>
+              <tr>
+                <td>Generic Core</td>
+                <td class="num">7</td>
+                <td class="num">7</td>
+              </tr>
+              <tr>
+                <td>Toggle: Financial Crisis</td>
+                <td class="num">1</td>
+                <td class="num">1</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Construct coverage</h3>
+            <p>Construct counts inside the selected final module.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Construct</th>
+                <th class="num">Selected count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trauma / Health</td>
+                <td class="num">13</td>
+              </tr>
+              <tr>
+                <td>Employment</td>
+                <td class="num">7</td>
+              </tr>
+              <tr>
+                <td>Government Aid</td>
+                <td class="num">5</td>
+              </tr>
+              <tr>
+                <td>Housing / Shelter</td>
+                <td class="num">5</td>
+              </tr>
+              <tr>
+                <td>Economic / Income</td>
+                <td class="num">4</td>
+              </tr>
+              <tr>
+                <td>Financial Coping</td>
+                <td class="num">3</td>
+              </tr>
+              <tr>
+                <td>Demographics</td>
+                <td class="num">3</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>Time budget breakdown</h3>
+            <p>Validated deployment time by active module component.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Module component</th>
+                <th class="num">Questions</th>
+                <th class="num">Minutes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generic Core</td>
+                <td class="num">7</td>
+                <td class="num">4.87</td>
+              </tr>
+              <tr>
+                <td>Toggle: Financial Crisis</td>
+                <td class="num">1</td>
+                <td class="num">1.17</td>
+              </tr>
+              <tr>
+                <td>Toggle: Pandemic / Disaster</td>
+                <td class="num">20</td>
+                <td class="num">23.13</td>
+              </tr>
+              <tr>
+                <td><strong>Total selected</strong></td>
+                <td class="num"><strong>28</strong></td>
+                <td class="num"><strong>29.17</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="figures">
+      <h2>Figures Regenerated From the Final Ranked Dataset</h2>
+      <p>
+        These figures are the same artifact outputs referenced by the dashboard and refreshed notebook. They show the question ranking profile, module composition, construct spread, and time-budget implications of the final selected benchmark.
+      </p>
+      <div class="figure-grid">
+        <article class="figure-card">
+          <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
+          <div class="figure-copy">
+            <h3>Figure 1. Top-ranked selected questions</h3>
+            <p>
+              The highest-ranked retained questions are still led by financial hardship, earnings loss, work interruption, and other compact but analytically rich crisis signals.
+            </p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_toggle_comparison.png" alt="Toggle comparison across the selected module">
+          <div class="figure-copy">
+            <h3>Figure 2. Toggle comparison across the selected module</h3>
+            <p>
+              The final benchmark is dominated by Pandemic / Disaster content because the Katrina bank contributes many high-value housing, trauma, displacement, and aid questions.
+            </p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_utility_vs_burden.png" alt="Utility versus burden profile">
+          <div class="figure-copy">
+            <h3>Figure 3. Utility versus burden profile</h3>
+            <p>
+              Selected questions cluster in the more favorable region where higher utility can still be achieved without disproportionate burden.
+            </p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_construct_heatmap.png" alt="Construct heatmap for the selected module">
+          <div class="figure-copy">
+            <h3>Figure 4. Construct heatmap for the selected module</h3>
+            <p>
+              The final module now covers a broader crisis spectrum, with trauma and health, housing, and government aid clearly visible alongside labor-market disruption.
+            </p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="fig_time_budget.png" alt="Time budget breakdown">
+          <div class="figure-copy">
+            <h3>Figure 5. Time budget breakdown</h3>
+            <p>
+              The module is intentionally tight. Most of the deployment time is spent on the Pandemic / Disaster bank, while the Generic Core remains short and reusable.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Interpretation and Recommendations</h2>
+      <div class="footer-grid">
+        <article class="footer-card">
+          <h3>Interpretation</h3>
+          <p>
+            Three conclusions remain stable after the final refresh. First, the Generic Core is intentionally small and should stay that way. Second, Katrina materially changes the value of the Pandemic / Disaster toggle by adding high-value physical-shock content. Third, the 29.17-minute final benchmark should be treated as the upper deployment bound rather than something to expand casually.
+          </p>
+        </article>
+        <article class="footer-card">
+          <h3>Recommendations</h3>
+          <ul>
+            <li>Keep the ranked 28-question analytic module as the benchmark production artifact.</li>
+            <li>Use the HTML questionnaire demos and dashboard for stakeholder communication, not the raw markdown export.</li>
+            <li>Regenerate future figures and report tables only through the maintained notebook refresh path and artifact generator.</li>
+            <li>If shortening is required, review the longest Katrina-derived items first instead of trimming the Generic Core.</li>
+          </ul>
+        </article>
+        <article class="footer-card">
+          <h3>Workflow alignment</h3>
+          <p>
+            This web report matches the current artifact workflow: `generate_psid_artifacts.py` refreshes the figures, summary JSON, and dashboard bundle; the final notebook triggers the same path; and the dashboard, master questionnaire viewer, and report all now point to the same final public deliverables.
+          </p>
+          <div class="section-actions">
+            <a class="button panel-primary" href="PSID_Crisis_Module_Dashboard.html">Return to Dashboard</a>
+            <a class="button panel-secondary" href="#top">Back to top</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="footer-note">Prepared for Thomas Crossley, PSID Director. Final validated metrics sourced from the refreshed ranked-question workflow.</div>
+  </div>
+</body>
+</html>
