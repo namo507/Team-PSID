@@ -29,6 +29,157 @@
   .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
   .header p { color: var(--muted); font-size: 0.875rem; margin-top: 4px; }
 
+  .header-actions,
+  .section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .action-link,
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+
+  .action-link:hover,
+  .nav-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .action-link.primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .action-link.primary:hover {
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .section-nav {
+    margin-top: 12px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section-head {
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .section-head p {
+    color: var(--muted);
+    font-size: 0.84rem;
+    margin-top: 4px;
+  }
+
+  .artifact-grid,
+  .method-grid,
+  .note-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .artifact-card,
+  .method-card,
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .artifact-card {
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .artifact-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .artifact-type {
+    display: inline-flex;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .artifact-card h3,
+  .method-card h3,
+  .note-card h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+
+  .artifact-card p,
+  .method-card p,
+  .note-card p,
+  .method-card li {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .method-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-bottom: 12px;
+  }
+
+  .formula {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #eff4fb;
+    border: 1px solid #dbe4ef;
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .note-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .note-card ul {
+    margin-left: 18px;
+  }
+
   /* Controls bar */
   .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
   .control-group { display: flex; flex-direction: column; gap: 4px; }
@@ -39,7 +190,7 @@
 
   /* Toggle switches */
   .toggle-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .toggle-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .toggle-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.15s; -webkit-user-select: none; user-select: none; }
   .toggle-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
   .toggle-chip:hover { border-color: var(--accent); }
   .toggle-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -58,6 +209,7 @@
 
   /* Table */
   .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
   .table-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
   .table-header h3 { font-size: 0.875rem; font-weight: 600; color: var(--primary); }
   .search-box { font-size: 0.8rem; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; width: 220px; }
@@ -79,21 +231,103 @@
   @media (max-width: 768px) {
     .chart-grid { grid-template-columns: 1fr; }
     .controls { flex-direction: column; align-items: stretch; }
+    .header-actions,
+    .section-nav { flex-direction: column; }
   }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
+  <div class="header" id="top">
     <h1>PSID Crisis Module Dashboard</h1>
-    <p>NLP-optimized question selection with Utility-Burden analysis across 52 candidate items</p>
+    <p>Single-page review surface for the final PSID crisis module. Use the linked artifacts, method cards, and anchored sections below to move from overview to detailed question inspection without leaving the page.</p>
+    <div class="header-actions">
+      <a class="action-link primary" href="PSID_NLP_Optimization_Report_Final.html">Open Final Report</a>
+      <a class="action-link" href="PSID_Module_Questionnaire_Master.html">Open Questionnaire Viewer</a>
+      <a class="action-link" href="PSID_Generic_Module_Questionnaire.html">Generic Demo</a>
+      <a class="action-link" href="PSID_Crisis_Specific_Questionnaire_Demo.html">Crisis-Specific Demo</a>
+    </div>
+    <div class="section-nav">
+      <a class="nav-link" href="#artifacts">Artifacts</a>
+      <a class="nav-link" href="#method">Method</a>
+      <a class="nav-link" href="#filters">Filters</a>
+      <a class="nav-link" href="#charts">Charts</a>
+      <a class="nav-link" href="#details">Question Details</a>
+    </div>
   </div>
 
+  <section class="section" id="artifacts">
+    <div class="section-head">
+      <h2>Linked Deliverables</h2>
+      <p>Each link opens the aligned stakeholder artifact for this same ranked-question workflow.</p>
+    </div>
+    <div class="artifact-grid">
+      <a class="artifact-card" href="PSID_NLP_Optimization_Report_Final.html">
+        <span class="artifact-type">Report</span>
+        <h3>Final Web Report</h3>
+        <p>Formatted public report with the final figures, time budget, and interpretation.</p>
+      </a>
+      <a class="artifact-card" href="PSID_Module_Questionnaire_Master.html">
+        <span class="artifact-type">Viewer</span>
+        <h3>Questionnaire Master Viewer</h3>
+        <p>Single review page for both the generic foundation and crisis-specific questionnaire demo.</p>
+      </a>
+      <a class="artifact-card" href="PSID_Generic_Module_Questionnaire.html">
+        <span class="artifact-type">Generic</span>
+        <h3>Generic Questionnaire Demo</h3>
+        <p>Expanded baseline instrument showing the reusable foundation questions.</p>
+      </a>
+      <a class="artifact-card" href="PSID_Crisis_Specific_Questionnaire_Demo.html">
+        <span class="artifact-type">Specific</span>
+        <h3>Crisis-Specific Demo</h3>
+        <p>Generic lead-in plus the active pandemic and disaster follow-up content.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="section" id="method">
+    <div class="section-head">
+      <h2>How To Read The Ranking</h2>
+      <p>The dashboard scores each item by information value relative to respondent burden so the retained module stays compact but analytically useful.</p>
+    </div>
+    <div class="method-grid">
+      <div class="method-card">
+        <h3>Priority score</h3>
+        <div class="formula">Rᵢ = Uᵢ / Bᵢ</div>
+        <p>Rᵢ is the main ranking signal. Higher values mean the item returns more useful crisis information per unit of burden.</p>
+      </div>
+      <div class="method-card">
+        <h3>Utility</h3>
+        <div class="formula">Uᵢ = Σ weighted signals</div>
+        <p>Uᵢ rises when a question captures stronger crisis constructs such as hardship, trauma, displacement, aid, or employment disruption.</p>
+      </div>
+      <div class="method-card">
+        <h3>Burden</h3>
+        <div class="formula">Bᵢ = length + complexity</div>
+        <p>Bᵢ increases for longer wording or more complex prompts. Lower burden helps short high-value items surface to the top.</p>
+      </div>
+    </div>
+    <div class="note-grid">
+      <div class="note-card">
+        <h3>What selected means</h3>
+        <p>Selected rows are the final benchmark questions retained under the 30-minute deployment cap.</p>
+      </div>
+      <div class="note-card">
+        <h3>How to navigate</h3>
+        <p>Use the filters for scoped review, the charts for pattern detection, and the question table for exact row-level inspection.</p>
+      </div>
+      <div class="note-card">
+        <h3>What to look for</h3>
+        <p>Higher Rᵢ, moderate burden, and selected status usually indicate the clearest candidates for a compact production module.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Controls -->
-  <div class="controls">
+  <div class="controls" id="filters">
     <div class="control-group">
       <label>Source Filter</label>
-      <select id="sourceFilter">
+      <select id="sourceFilter" title="Filter questions by source">
         <option value="all">All Sources</option>
         <option value="COVID-19">COVID-19</option>
         <option value="Hurricane Katrina 2007">Hurricane Katrina 2007</option>
@@ -104,13 +338,13 @@
     </div>
     <div class="control-group">
       <label>Construct</label>
-      <select id="constructFilter">
+      <select id="constructFilter" title="Filter questions by construct">
         <option value="all">All Constructs</option>
       </select>
     </div>
     <div class="control-group">
       <label>Selection Status</label>
-      <select id="selectionFilter">
+      <select id="selectionFilter" title="Filter questions by selection status">
         <option value="all">All Questions</option>
         <option value="selected">Selected Only</option>
         <option value="not_selected">Not Selected</option>
@@ -132,6 +366,10 @@
   </div>
 
   <!-- Charts -->
+  <div class="section-head" id="charts">
+    <h2>Interactive Chart Summary</h2>
+    <p>A compact visual read of ranking strength, burden tradeoffs, toggle composition, and time usage.</p>
+  </div>
   <div class="chart-grid">
     <div class="chart-card">
       <h3>Top Questions by Utility-Burden Ratio (Ri)</h3>
@@ -152,12 +390,16 @@
   </div>
 
   <!-- Table -->
+  <div class="section-head" id="details">
+    <h2>Question Details</h2>
+    <p>Use sorting and search for exact question review after narrowing the chart patterns above.</p>
+  </div>
   <div class="table-wrap">
     <div class="table-header">
       <h3>Question Details</h3>
       <input type="text" class="search-box" id="searchBox" placeholder="Search questions...">
     </div>
-    <div style="overflow-x:auto;">
+    <div class="table-scroll">
       <table>
         <thead>
           <tr>
@@ -176,7 +418,7 @@
   </div>
 
   <div class="footer">
-    PSID Generic Crisis Module &middot; NLP Optimization Pipeline &middot; Data from 4 historical survey instruments
+    PSID Generic Crisis Module · NLP Optimization Pipeline · Final ranked workflow with linked report and questionnaire artifacts
   </div>
 </div>
 
