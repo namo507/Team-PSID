@@ -1,1812 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PSID Crisis Module Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="psid_dashboard_data.js"></script>
-  <style>
-    :root {
-      --ink: #132238;
-      --muted: #607086;
-      --line: #d8e0ea;
-      --surface: #ffffff;
-      --page: linear-gradient(135deg, #edf3fb, #f8fbff 48%, #eef5f7);
-      --blue: #2563eb;
-      --orange: #d97706;
-      --red: #dc2626;
-      --green: #15803d;
-      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
-      color: var(--ink);
-      background: var(--page);
-      padding: 24px;
-      line-height: 1.45;
-    }
-
-    .shell {
-      max-width: 1520px;
-      margin: 0 auto;
-    }
-
-    .hero {
-      background: linear-gradient(135deg, #113869, #1b5ea3 62%, #4338ca);
-      color: #fff;
-      border-radius: 24px;
-      padding: 28px 30px;
-      box-shadow: var(--shadow);
-      margin-bottom: 22px;
-    }
-
-    .hero h1 {
-      font-size: 2.1rem;
-      margin-bottom: 8px;
-    }
-
-    .hero p {
-      max-width: 880px;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 1rem;
-    }
-
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .kpi {
-      background: rgba(255, 255, 255, 0.13);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 18px;
-      padding: 14px 16px;
-    }
-
-    .kpi-label {
-      font-size: 0.74rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.8;
-      margin-bottom: 4px;
-    }
-
-    .kpi-value {
-      font-size: 1.7rem;
-      font-weight: 800;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 18px 20px 20px;
-      margin-bottom: 18px;
-    }
-
-    .panel h2 {
-      font-size: 1.1rem;
-      margin-bottom: 14px;
-    }
-
-    .deliverables {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .deliverable-card {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px 16px 14px;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-    }
-
-    .deliverable-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
-      border-color: #bcd0e6;
-    }
-
-    .deliverable-type {
-      display: inline-flex;
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--blue);
-      margin-bottom: 8px;
-    }
-
-    .deliverable-card h3 {
-      font-size: 1rem;
-      margin-bottom: 6px;
-    }
-
-    .deliverable-card p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .report-grid {
-      display: grid;
-      grid-template-columns: minmax(320px, 1.2fr) minmax(280px, 0.8fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .report-summary {
-      display: grid;
-      gap: 16px;
-    }
-
-    .report-metrics {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-    }
-
-    .report-metric {
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px 15px;
-    }
-
-    .report-metric-label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      font-weight: 800;
-      margin-bottom: 5px;
-    }
-
-    .report-metric-value {
-      font-size: 1.4rem;
-      font-weight: 800;
-    }
-
-    .report-callout {
-      background: linear-gradient(135deg, #eff6ff, #fff7ed);
-      border: 1px solid #d8e0ea;
-      border-radius: 18px;
-      padding: 16px;
-    }
-
-    .report-callout h3 {
-      font-size: 0.98rem;
-      margin-bottom: 8px;
-    }
-
-    .report-callout p {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .equation-box {
-      display: inline-flex;
-      align-items: center;
-      min-height: 48px;
-      padding: 8px 12px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.84);
-      border: 1px solid #d8e0ea;
-      font-size: 1.1rem;
-      font-weight: 800;
-      margin: 12px 0;
-    }
-
-    .report-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .report-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-      padding: 0 16px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 800;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .report-link:hover {
-      transform: translateY(-1px);
-    }
-
-    .report-link.primary {
-      background: #113869;
-      color: #fff;
-      box-shadow: 0 10px 22px rgba(17, 56, 105, 0.2);
-    }
-
-    .report-link.secondary {
-      background: #fff;
-      color: var(--ink);
-      border: 1px solid #c7d2df;
-    }
-
-    .report-preview-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .report-preview-card {
-      overflow: hidden;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
-    }
-
-    .report-preview-card img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      background: #eef4f8;
-      border-bottom: 1px solid var(--line);
-      cursor: zoom-in;
-      transition: opacity 0.18s ease;
-    }
-
-    .report-preview-card img:hover {
-      opacity: 0.88;
-    }
-
-    .report-preview-copy {
-      padding: 13px 14px 14px;
-    }
-
-    .report-preview-copy h3 {
-      font-size: 0.94rem;
-      margin-bottom: 4px;
-    }
-
-    .report-preview-copy p {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px;
-      align-items: end;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .field select,
-    .field input {
-      border: 1px solid #c7d2df;
-      border-radius: 12px;
-      padding: 10px 12px;
-      font: inherit;
-      background: #fff;
-      color: var(--ink);
-    }
-
-    .grid-two,
-    .grid-four {
-      display: grid;
-      gap: 18px;
-    }
-
-    .grid-two {
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    }
-
-    .grid-four {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-
-    .chart-wrap {
-      min-height: 440px;
-      position: relative;
-    }
-
-    .chart-tall {
-      min-height: 520px;
-      position: relative;
-    }
-
-    .chart-wrap canvas,
-    .chart-tall canvas {
-      cursor: zoom-in;
-    }
-
-    .chart-hitarea {
-      position: absolute;
-      inset: 0;
-      border: 1px solid transparent;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(19, 34, 56, 0.02));
-      cursor: zoom-in;
-      transition: border-color 0.18s ease, background 0.18s ease;
-    }
-
-    .chart-hitarea:hover {
-      border-color: #bfd0e2;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(37, 99, 235, 0.04));
-    }
-
-    .chart-hitarea-label {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(19, 34, 56, 0.8);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      pointer-events: none;
-      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
-    }
-
-    .subnote {
-      font-size: 0.88rem;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin-top: 10px;
-      font-size: 0.84rem;
-      color: var(--muted);
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .legend-swatch {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-    }
-
-    .swatch-blue { background: var(--blue); }
-    .swatch-orange { background: var(--orange); }
-    .swatch-red { background: var(--red); }
-    .swatch-green { background: var(--green); }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
-    }
-
-    thead {
-      background: #0f3d75;
-      color: #fff;
-    }
-
-    th,
-    td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #e3e9f0;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    tbody tr:hover {
-      background: #f8fbff;
-    }
-
-    .num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .badge.generic { background: #dbeafe; color: #1d4ed8; }
-    .badge.financial { background: #ffedd5; color: #b45309; }
-    .badge.disaster { background: #fee2e2; color: #b91c1c; }
-    .badge.selected { background: #dcfce7; color: #166534; }
-    .badge.not-selected { background: #e5e7eb; color: #374151; }
-    .badge.blue { background: #dbeafe; color: #1d4ed8; }
-    .badge.teal { background: #ccfbf1; color: #0f766e; }
-    .badge.orange { background: #ffedd5; color: #b45309; }
-    .badge.red { background: #fee2e2; color: #b91c1c; }
-    .badge.green { background: #dcfce7; color: #166534; }
-
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    /* ── Section quick-nav ── */
-    .section-nav {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .section-nav a {
-      display: block;
-      text-decoration: none;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 14px;
-      padding: 12px 14px;
-      color: #fff;
-      transition: background 0.18s ease;
-    }
-
-    .section-nav a:hover {
-      background: rgba(255, 255, 255, 0.22);
-    }
-
-    .section-nav .nav-label {
-      display: block;
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 3px;
-    }
-
-    .section-nav .nav-value {
-      display: block;
-      font-weight: 700;
-      font-size: 0.88rem;
-    }
-
-    /* ── Insight cards ── */
-    .insight-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .insight-card {
-      background: linear-gradient(180deg, #ffffff, #f8fbff);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .insight-card h3 {
-      font-size: 1rem;
-      margin-bottom: 8px;
-    }
-
-    .insight-card p {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    /* ── Formula cards ── */
-    .formula-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .formula-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .formula-card h3 {
-      font-size: 1rem;
-      margin-bottom: 8px;
-    }
-
-    .formula-card p {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .equation {
-      display: inline-flex;
-      align-items: center;
-      min-height: 52px;
-      padding: 10px 14px;
-      border-radius: 16px;
-      background: #f4f7fb;
-      border: 1px solid #d8e2ea;
-      font-size: 1.22rem;
-      font-weight: 800;
-      margin: 12px 0;
-    }
-
-    .equation small {
-      font-size: 0.98rem;
-      font-weight: 700;
-    }
-
-    /* ── Table cards ── */
-    .table-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .table-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .table-card header {
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 252, 0.92));
-    }
-
-    .table-card header h3 {
-      font-size: 1rem;
-      margin-bottom: 5px;
-    }
-
-    .table-card header p {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    /* ── Figure cards (static images) ── */
-    .figure-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .figure-card {
-      overflow: hidden;
-      background: linear-gradient(180deg, #ffffff, #f9fbfd);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .figure-card img {
-      width: 100%;
-      display: block;
-      border-bottom: 1px solid var(--line);
-      background: #edf3f8;
-      cursor: zoom-in;
-      transition: opacity 0.18s ease;
-    }
-
-    .figure-card img:hover {
-      opacity: 0.88;
-    }
-
-    .figure-media {
-      position: relative;
-    }
-
-    .figure-hitarea {
-      position: absolute;
-      inset: 0;
-      border: 1px solid transparent;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(19, 34, 56, 0.04));
-      cursor: zoom-in;
-      transition: border-color 0.18s ease, background 0.18s ease;
-    }
-
-    .figure-hitarea:hover {
-      border-color: #bfd0e2;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(37, 99, 235, 0.06));
-    }
-
-    .figure-copy {
-      padding: 16px 18px;
-    }
-
-    .figure-copy h3 {
-      font-size: 0.96rem;
-      margin-bottom: 6px;
-    }
-
-    .figure-copy p {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    /* ── Footer / recommendation cards ── */
-    .rec-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .rec-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .rec-card h3 {
-      font-size: 1rem;
-      margin-bottom: 8px;
-    }
-
-    .rec-card p {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .rec-card ul {
-      margin-left: 18px;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .rec-card ul li {
-      margin-bottom: 6px;
-    }
-
-    /* ── Section divider ── */
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin: 28px 0 18px;
-      color: var(--muted);
-      font-size: 0.76rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .section-divider::before,
-    .section-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--line);
-    }
-
-    .footer {
-      margin-top: 20px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    /* ── Expand button on chart panels ── */
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-
-    .panel-header h2 {
-      margin-bottom: 0;
-    }
-
-    .expand-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      cursor: pointer;
-      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-    }
-
-    .expand-btn:hover {
-      background: #f0f5fa;
-      color: var(--ink);
-      border-color: #b3c4d6;
-    }
-
-    /* ── Chart fullscreen overlay ── */
-    .chart-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(10, 20, 35, 0.92);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-    }
-
-    .chart-modal.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .chart-modal-inner {
-      width: 92vw;
-      height: 82vh;
-      background: #fff;
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.35);
-      position: relative;
-    }
-
-    .chart-modal-heading {
-      margin-bottom: 14px;
-      padding-right: 52px;
-    }
-
-    .chart-modal-heading h3 {
-      font-size: 1.15rem;
-      margin-bottom: 4px;
-    }
-
-    .chart-modal-heading p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .chart-modal-inner canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    .chart-modal-title {
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    .chart-modal-close {
-      position: absolute;
-      top: -48px;
-      right: 0;
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-      font-size: 1.3rem;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.18s ease;
-    }
-
-    .chart-modal-close:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* ── Image lightbox ── */
-    .lightbox-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(10, 20, 35, 0.88);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: zoom-out;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-    }
-
-    .lightbox-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .lightbox-overlay img {
-      max-width: 92vw;
-      max-height: 90vh;
-      border-radius: 12px;
-      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
-      object-fit: contain;
-      transform: scale(0.92);
-      transition: transform 0.3s ease;
-    }
-
-    .lightbox-overlay.active img {
-      transform: scale(1);
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 20px;
-      right: 24px;
-      width: 44px;
-      height: 44px;
-      border: none;
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-      font-size: 1.4rem;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.18s ease;
-    }
-
-    .lightbox-close:hover {
-      background: rgba(255, 255, 255, 0.28);
-    }
-
-    .lightbox-caption {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255, 255, 255, 0.88);
-      font-size: 0.92rem;
-      font-weight: 600;
-      text-align: center;
-      max-width: 80vw;
-      padding: 8px 18px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    @media (max-width: 768px) {
-      body {
-        padding: 14px;
-      }
-
-      .hero {
-        padding: 22px 18px;
-      }
-
-      .hero h1 {
-        font-size: 1.7rem;
-      }
-
-      .section-nav {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .chart-hitarea-label {
-        left: 12px;
-        right: 12px;
-        justify-content: center;
-      }
-
-      .insight-grid,
-      .formula-grid,
-      .table-grid,
-      .figure-grid,
-      .rec-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSID Crisis Module Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #f8f9fb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #1e3a5f;
+    --accent: #2563eb;
+    --green: #059669;
+    --amber: #d97706;
+    --red: #dc2626;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+  .app { max-width: 1120px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* Header */
+  .header { margin-bottom: 28px; }
+  .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+  .header p { color: var(--muted); font-size: 0.875rem; margin-top: 4px; }
+
+  /* Controls bar */
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  .control-group { display: flex; flex-direction: column; gap: 4px; }
+  .control-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  select, input[type="range"] { font-size: 0.875rem; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+  select { min-width: 180px; cursor: pointer; }
+  select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+  /* Toggle switches */
+  .toggle-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .toggle-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .toggle-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .toggle-chip:hover { border-color: var(--accent); }
+  .toggle-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .kpi .value { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+  .kpi .label { font-size: 0.75rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  /* Charts */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .chart-card h3 { font-size: 0.875rem; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
+  .chart-card canvas { width: 100% !important; max-height: 280px; }
+
+  /* Table */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .table-header h3 { font-size: 0.875rem; font-weight: 600; color: var(--primary); }
+  .search-box { font-size: 0.8rem; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; width: 220px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead { background: var(--bg); }
+  th { text-align: left; padding: 10px 14px; font-weight: 600; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; cursor: pointer; white-space: nowrap; }
+  th:hover { color: var(--accent); }
+  td { padding: 9px 14px; border-top: 1px solid var(--border); }
+  tr:hover td { background: #f1f5f9; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+  .badge-core { background: #dbeafe; color: #1e40af; }
+  .badge-pandemic { background: #fce7f3; color: #9d174d; }
+  .badge-financial { background: #fef3c7; color: #92400e; }
+  .badge-selected { background: #d1fae5; color: #065f46; }
+  .badge-not { background: #f3f4f6; color: #6b7280; }
+
+  .footer { margin-top: 32px; text-align: center; font-size: 0.75rem; color: var(--muted); }
+
+  @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; align-items: stretch; }
+  }
+</style>
 </head>
 <body>
-  <div class="shell">
-    <section class="hero" id="top">
-      <h1>PSID Crisis Module Dashboard</h1>
-      <p>
-        Unified dashboard and report for the Katrina-integrated crisis module. Interactive charts, validated figures, methodology, data tables, and stakeholder deliverables are all consolidated on this single page.
-      </p>
-      <div class="kpis">
-        <div class="kpi"><div class="kpi-label">Total questions</div><div class="kpi-value" id="kpi-total">0</div></div>
-        <div class="kpi"><div class="kpi-label">Selected questions</div><div class="kpi-value" id="kpi-selected">0</div></div>
-        <div class="kpi"><div class="kpi-label">Selected minutes</div><div class="kpi-value" id="kpi-minutes">0</div></div>
-        <div class="kpi"><div class="kpi-label">Average Ri</div><div class="kpi-value" id="kpi-avg-ri">0</div></div>
-        <div class="kpi"><div class="kpi-label">Max Ri</div><div class="kpi-value" id="kpi-max-ri">0</div></div>
-      </div>
-      <div class="section-nav">
-        <a href="#executive-summary"><span class="nav-label">Summary</span><span class="nav-value">Executive overview</span></a>
-        <a href="#methodology"><span class="nav-label">Method</span><span class="nav-value">Formulae &amp; constants</span></a>
-        <a href="#interactive-charts"><span class="nav-label">Charts</span><span class="nav-value">Interactive exploration</span></a>
-        <a href="#report-figures"><span class="nav-label">Figures</span><span class="nav-value">Five visual outputs</span></a>
-        <a href="#data-tables"><span class="nav-label">Tables</span><span class="nav-value">Selection &amp; timing</span></a>
-        <a href="#recommendations"><span class="nav-label">Insights</span><span class="nav-value">Interpretation &amp; next steps</span></a>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Linked Deliverables</h2>
-      <p class="subnote">Open the refreshed stakeholder-facing outputs directly from here. The master page combines the generic and crisis-specific questionnaire demos in one place.</p>
-      <div class="deliverables">
-        <a class="deliverable-card" href="PSID_Module_Questionnaire_Master.html">
-          <span class="deliverable-type">Master HTML</span>
-          <h3>Combined Questionnaire Viewer</h3>
-          <p>Single page showing both the generic foundation demo and the crisis-specific combined demo side by side.</p>
-        </a>
-        <a class="deliverable-card" href="PSID_Generic_Module_Questionnaire.html">
-          <span class="deliverable-type">Generic Demo</span>
-          <h3>Expanded Generic Questionnaire</h3>
-          <p>Longer, presentation-ready version of the generic module that still preserves the 7-question scored core.</p>
-        </a>
-        <a class="deliverable-card" href="PSID_Crisis_Specific_Questionnaire_Demo.html">
-          <span class="deliverable-type">Specific Demo</span>
-          <h3>Crisis-Specific Combined Demo</h3>
-          <p>Generic lead-in plus the active pandemic and disaster toggle, with alternate financial and war template banks.</p>
-        </a>
-        <a class="deliverable-card" href="PSID_NLP_Optimization_Report_Final.html">
-          <span class="deliverable-type">Report</span>
-          <h3>Final Web Report</h3>
-          <p>Formatted public report with notebook-backed figures, methodology tables, formula definitions, and validated timing benchmarks.</p>
-        </a>
-      </div>
-    </section>
-
-    <section class="panel" id="executive-summary">
-      <h2>Executive Summary</h2>
-      <p>
-        The final ranked workflow uses the Katrina-integrated output as the single source of truth for report tables, figure generation, dashboard data, and stakeholder-facing questionnaire artifacts. The selected module keeps the always-on Generic Core intentionally short, then spends the remaining budget on the higher-value crisis-specific add-on, which is now dominated by Pandemic / Disaster content because the Katrina bank materially improved housing, trauma, displacement, and government-aid coverage.
-      </p>
-      <div class="badge-row">
-        <span class="badge blue">Generic Core: 7 questions</span>
-        <span class="badge orange">Financial Crisis add-on: 1 question</span>
-        <span class="badge red">Pandemic / Disaster add-on: 20 questions</span>
-        <span class="badge green">Time cap met: 29.17 / 30 minutes</span>
-      </div>
-      <div class="insight-grid">
-        <article class="insight-card">
-          <h3>Corpus expansion changed the instrument</h3>
-          <p>Katrina integration pushed the final module beyond purely economic exposure. The selected set now shows strong representation for trauma and health, housing and shelter, and government aid alongside employment and financial coping.</p>
-        </article>
-        <article class="insight-card">
-          <h3>Selection remains analytically disciplined</h3>
-          <p>The ranked selection still trims a 68.95-minute corpus into a 29.17-minute deployment benchmark by privileging questions with stronger utility and lower burden. That is the core value of the optimization workflow.</p>
-        </article>
-        <article class="insight-card">
-          <h3>Deliverables are now synchronized</h3>
-          <p>The notebook refresh cell, generated figures, dashboard bundle, HTML questionnaires, and this page all reflect the same final ranked-question file instead of drifting across separate manual exports.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel" id="methodology">
-      <h2>Method Summary and Formula Definitions</h2>
-      <p>Questions are ranked with a utility-to-burden ratio that balances analytical value against respondent effort. Utility is driven by taxonomy-weighted crisis keywords. Burden penalizes longer wording and question complexity so that high-value, shorter questions can rise to the top.</p>
-      <div class="formula-grid">
-        <article class="formula-card">
-          <h3>Ranking score</h3>
-          <div class="equation">R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></div>
-          <p><strong>R<sub>i</sub></strong> is the final ranking score for question <strong>i</strong>. Higher values indicate better information return per unit of burden.</p>
-        </article>
-        <article class="formula-card">
-          <h3>Utility definition</h3>
-          <div class="equation">U<sub>i</sub> = &Sigma; w<sub>k</sub></div>
-          <p><strong>U<sub>i</sub></strong> sums taxonomy impact weights for the crisis-relevant keywords extracted from the question text. More consequential constructs receive larger weights.</p>
-        </article>
-        <article class="formula-card">
-          <h3>Burden definition</h3>
-          <div class="equation"><small>B<sub>i</sub> = max(&alpha;N<sub>i</sub> + &beta;C<sub>i</sub>, 0.1)</small></div>
-          <p><strong>B<sub>i</sub></strong> scales with question length <strong>N<sub>i</sub></strong> and structural complexity <strong>C<sub>i</sub></strong>, with a minimum floor so the ratio remains stable.</p>
-        </article>
-      </div>
-      <div class="table-grid">
-        <article class="table-card">
-          <header>
-            <h3>Pipeline constants</h3>
-            <p>Configured parameters used by the maintained notebook and artifact generator.</p>
-          </header>
-          <table>
-            <thead><tr><th>Constant</th><th class="num">Value</th><th>Purpose</th></tr></thead>
-            <tbody>
-              <tr><td>ALPHA</td><td class="num">0.10</td><td>Word-count burden coefficient</td></tr>
-              <tr><td>BETA</td><td class="num">0.20</td><td>Complexity burden coefficient</td></tr>
-              <tr><td>SECS_PER_WORD</td><td class="num">7</td><td>Duration estimate for mixed-mode completion</td></tr>
-              <tr><td>MAX_SECONDS</td><td class="num">1800</td><td>Hard 30-minute ceiling</td></tr>
-            </tbody>
-          </table>
-        </article>
-        <article class="table-card">
-          <header>
-            <h3>Operational interpretation</h3>
-            <p>What the optimization objective means in field terms.</p>
-          </header>
-          <table>
-            <thead><tr><th>Term</th><th>Definition</th></tr></thead>
-            <tbody>
-              <tr><td>Generic Core</td><td>Always-on questions that remain useful across crisis types.</td></tr>
-              <tr><td>Toggle subset</td><td>Event-specific bank activated for financial shocks or pandemic and disaster events.</td></tr>
-              <tr><td>Selected for module</td><td>Final decision flag stored in the ranked CSV and reused by all downstream artifacts.</td></tr>
-              <tr><td>Time budget</td><td>Total deployment duration constrained to stay below 30 minutes.</td></tr>
-            </tbody>
-          </table>
-        </article>
-      </div>
-    </section>
-
-    <div class="section-divider" id="interactive-charts">Interactive Exploration</div>
-
-    <section class="panel">
-      <h2>Filters</h2>
-      <div class="filters">
-        <div class="field">
-          <label for="sourceFilter">Source</label>
-          <select id="sourceFilter"><option value="All">All sources</option></select>
-        </div>
-        <div class="field">
-          <label for="toggleFilter">Toggle category</label>
-          <select id="toggleFilter"><option value="All">All toggles</option></select>
-        </div>
-        <div class="field">
-          <label for="selectedFilter">Selection status</label>
-          <select id="selectedFilter">
-            <option value="All">All rows</option>
-            <option value="Selected">Selected only</option>
-            <option value="Not selected">Not selected</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="searchFilter">Question search</label>
-          <input id="searchFilter" type="search" placeholder="Search question text">
-        </div>
-      </div>
-    </section>
-
-    <section class="grid-two">
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Utility vs Burden</h2>
-          <button class="expand-btn" data-chart="scatter">⛶ Expand</button>
-        </div>
-        <p class="subnote">Bubble radius tracks Ri. Selected questions are highlighted with a darker outline.</p>
-        <div class="chart-wrap">
-          <canvas id="scatterChart"></canvas>
-          <button class="chart-hitarea" type="button" data-chart="scatter" aria-label="Expand Utility vs Burden chart">
-            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
-          </button>
-        </div>
-        <div class="legend">
-          <span class="legend-item"><span class="legend-swatch swatch-blue"></span> Generic Core</span>
-          <span class="legend-item"><span class="legend-swatch swatch-orange"></span> Financial Crisis</span>
-          <span class="legend-item"><span class="legend-swatch swatch-red"></span> Pandemic / Disaster</span>
-          <span class="legend-item"><span class="legend-swatch swatch-green"></span> Selected outline</span>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Top Ranked Questions</h2>
-          <button class="expand-btn" data-chart="top">⛶ Expand</button>
-        </div>
-        <p class="subnote">The filtered top 12 questions ordered by Ri.</p>
-        <div class="chart-tall">
-          <canvas id="topChart"></canvas>
-          <button class="chart-hitarea" type="button" data-chart="top" aria-label="Expand Top Ranked Questions chart">
-            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <section class="grid-two">
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Source by Toggle Category</h2>
-          <button class="expand-btn" data-chart="toggle">⛶ Expand</button>
-        </div>
-        <p class="subnote">Stacked counts by source, based on the currently filtered rows.</p>
-        <div class="chart-wrap">
-          <canvas id="toggleChart"></canvas>
-          <button class="chart-hitarea" type="button" data-chart="toggle" aria-label="Expand Source by Toggle Category chart">
-            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
-          </button>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Construct Frequency</h2>
-          <button class="expand-btn" data-chart="construct">⛶ Expand</button>
-        </div>
-        <p class="subnote">Exploded construct counts from the taxonomy-derived construct assignments.</p>
-        <div class="chart-wrap">
-          <canvas id="constructChart"></canvas>
-          <button class="chart-hitarea" type="button" data-chart="construct" aria-label="Expand Construct Frequency chart">
-            <span class="chart-hitarea-label">⛶ Click graph to enlarge</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <div class="section-divider" id="report-figures">Report Figures</div>
-
-    <section class="panel">
-      <h2>Figures Regenerated From the Final Ranked Dataset</h2>
-      <p class="subnote">These figures are the same artifact outputs referenced by the refreshed notebook. They show the question ranking profile, module composition, construct spread, and time-budget implications of the final selected benchmark. Click any figure to enlarge.</p>
-      <div class="figure-grid">
-        <article class="figure-card">
-          <div class="figure-media">
-            <img src="fig_top_ranked_questions.png" alt="Top-ranked selected questions">
-            <button class="figure-hitarea" type="button" aria-label="Expand Figure 1: Top-ranked selected questions"></button>
-          </div>
-          <div class="figure-copy">
-            <h3>Figure 1. Top-ranked selected questions</h3>
-            <p>The highest-ranked retained questions are still led by financial hardship, earnings loss, work interruption, and other compact but analytically rich crisis signals.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <div class="figure-media">
-            <img src="fig_toggle_comparison.png" alt="Toggle comparison across the selected module">
-            <button class="figure-hitarea" type="button" aria-label="Expand Figure 2: Toggle comparison across the selected module"></button>
-          </div>
-          <div class="figure-copy">
-            <h3>Figure 2. Toggle comparison across the selected module</h3>
-            <p>The final benchmark is dominated by Pandemic / Disaster content because the Katrina bank contributes many high-value housing, trauma, displacement, and aid questions.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <div class="figure-media">
-            <img src="fig_utility_vs_burden.png" alt="Utility versus burden profile">
-            <button class="figure-hitarea" type="button" aria-label="Expand Figure 3: Utility versus burden profile"></button>
-          </div>
-          <div class="figure-copy">
-            <h3>Figure 3. Utility versus burden profile</h3>
-            <p>Selected questions cluster in the more favorable region where higher utility can still be achieved without disproportionate burden.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <div class="figure-media">
-            <img src="fig_construct_heatmap.png" alt="Construct heatmap for the selected module">
-            <button class="figure-hitarea" type="button" aria-label="Expand Figure 4: Construct heatmap for the selected module"></button>
-          </div>
-          <div class="figure-copy">
-            <h3>Figure 4. Construct heatmap for the selected module</h3>
-            <p>The final module now covers a broader crisis spectrum, with trauma and health, housing, and government aid clearly visible alongside labor-market disruption.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <div class="figure-media">
-            <img src="fig_time_budget.png" alt="Time budget breakdown">
-            <button class="figure-hitarea" type="button" aria-label="Expand Figure 5: Time budget breakdown"></button>
-          </div>
-          <div class="figure-copy">
-            <h3>Figure 5. Time budget breakdown</h3>
-            <p>The module is intentionally tight. Most of the deployment time is spent on the Pandemic / Disaster bank, while the Generic Core remains short and reusable.</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <div class="section-divider" id="data-tables">Selection Outcome Tables</div>
-
-    <section class="panel">
-      <h2>Selection Outcome and Supporting Tables</h2>
-      <p class="subnote">The tables below summarize the validated notebook outputs used to justify the final module structure and to show how the selected set differs from the full integrated corpus.</p>
-      <div class="table-grid">
-        <article class="table-card">
-          <header>
-            <h3>Source contribution</h3>
-            <p>Question counts by source before and after final selection.</p>
-          </header>
-          <table>
-            <thead><tr><th>Source</th><th class="num">Total</th><th class="num">Selected</th></tr></thead>
-            <tbody>
-              <tr><td>Hurricane Katrina 2007</td><td class="num">37</td><td class="num">13</td></tr>
-              <tr><td>COVID-19</td><td class="num">8</td><td class="num">8</td></tr>
-              <tr><td>Govt Shutdown Income</td><td class="num">3</td><td class="num">3</td></tr>
-              <tr><td>Understanding Society</td><td class="num">3</td><td class="num">3</td></tr>
-              <tr><td>Govt Shutdown Crisis</td><td class="num">1</td><td class="num">1</td></tr>
-              <tr><td><strong>Total</strong></td><td class="num"><strong>52</strong></td><td class="num"><strong>28</strong></td></tr>
-            </tbody>
-          </table>
-        </article>
-        <article class="table-card">
-          <header>
-            <h3>Toggle distribution</h3>
-            <p>Selected module composition by routing category.</p>
-          </header>
-          <table>
-            <thead><tr><th>Toggle category</th><th class="num">Total</th><th class="num">Selected</th></tr></thead>
-            <tbody>
-              <tr><td>Toggle: Pandemic / Disaster</td><td class="num">44</td><td class="num">20</td></tr>
-              <tr><td>Generic Core</td><td class="num">7</td><td class="num">7</td></tr>
-              <tr><td>Toggle: Financial Crisis</td><td class="num">1</td><td class="num">1</td></tr>
-            </tbody>
-          </table>
-        </article>
-        <article class="table-card">
-          <header>
-            <h3>Construct coverage</h3>
-            <p>Construct counts inside the selected final module.</p>
-          </header>
-          <table>
-            <thead><tr><th>Construct</th><th class="num">Selected count</th></tr></thead>
-            <tbody>
-              <tr><td>Trauma / Health</td><td class="num">13</td></tr>
-              <tr><td>Employment</td><td class="num">7</td></tr>
-              <tr><td>Government Aid</td><td class="num">5</td></tr>
-              <tr><td>Housing / Shelter</td><td class="num">5</td></tr>
-              <tr><td>Economic / Income</td><td class="num">4</td></tr>
-              <tr><td>Financial Coping</td><td class="num">3</td></tr>
-              <tr><td>Demographics</td><td class="num">3</td></tr>
-            </tbody>
-          </table>
-        </article>
-        <article class="table-card">
-          <header>
-            <h3>Time budget breakdown</h3>
-            <p>Validated deployment time by active module component.</p>
-          </header>
-          <table>
-            <thead><tr><th>Module component</th><th class="num">Questions</th><th class="num">Minutes</th></tr></thead>
-            <tbody>
-              <tr><td>Generic Core</td><td class="num">7</td><td class="num">4.87</td></tr>
-              <tr><td>Toggle: Financial Crisis</td><td class="num">1</td><td class="num">1.17</td></tr>
-              <tr><td>Toggle: Pandemic / Disaster</td><td class="num">20</td><td class="num">23.13</td></tr>
-              <tr><td><strong>Total selected</strong></td><td class="num"><strong>28</strong></td><td class="num"><strong>29.17</strong></td></tr>
-            </tbody>
-          </table>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Question Table</h2>
-      <p class="subnote">The table reflects the active filters. Ri, utility, burden, and word count remain sortable visually by inspection.</p>
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Source</th>
-              <th>Toggle</th>
-              <th>Status</th>
-              <th class="num">Ui</th>
-              <th class="num">Bi</th>
-              <th class="num">Ri</th>
-              <th class="num">Words</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <div class="section-divider" id="recommendations">Interpretation &amp; Recommendations</div>
-
-    <section class="panel">
-      <h2>Interpretation and Recommendations</h2>
-      <div class="rec-grid">
-        <article class="rec-card">
-          <h3>Interpretation</h3>
-          <p>Three conclusions remain stable after the final refresh. First, the Generic Core is intentionally small and should stay that way. Second, Katrina materially changes the value of the Pandemic / Disaster toggle by adding high-value physical-shock content. Third, the 29.17-minute final benchmark should be treated as the upper deployment bound rather than something to expand casually.</p>
-        </article>
-        <article class="rec-card">
-          <h3>Recommendations</h3>
-          <ul>
-            <li>Keep the ranked 28-question analytic module as the benchmark production artifact.</li>
-            <li>Use the HTML questionnaire demos and dashboard for stakeholder communication, not the raw markdown export.</li>
-            <li>Regenerate future figures and report tables only through the maintained notebook refresh path and artifact generator.</li>
-            <li>If shortening is required, review the longest Katrina-derived items first instead of trimming the Generic Core.</li>
-          </ul>
-        </article>
-        <article class="rec-card">
-          <h3>Workflow alignment</h3>
-          <p>This dashboard now consolidates everything from the standalone report: <code>generate_psid_artifacts.py</code> refreshes the figures, summary JSON, and dashboard bundle; the final notebook triggers the same path; and this page, the master questionnaire viewer, and the report all reference the same final production artifacts.</p>
-        </article>
-      </div>
-    </section>
-
-    <div class="footer">Prepared for Thomas Crossley, PSID Director. Dashboard data source: PSID_Ranked_Questions_Final.csv via generated local bundle psid_dashboard_data.js.</div>
+<div class="app">
+  <div class="header">
+    <h1>PSID Crisis Module Dashboard</h1>
+    <p>NLP-optimized question selection with Utility-Burden analysis across 52 candidate items</p>
   </div>
 
-  <!-- Chart fullscreen modal -->
-  <div class="chart-modal" id="chartModal">
-    <div class="chart-modal-inner">
-      <button class="chart-modal-close" aria-label="Close">&times;</button>
-      <div class="chart-modal-heading">
-        <h3 id="chartModalTitle">Expanded chart</h3>
-        <p id="chartModalDescription">Open a larger view to inspect labels, values, and axis detail.</p>
-      </div>
-      <canvas id="modalChart"></canvas>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <label>Source Filter</label>
+      <select id="sourceFilter">
+        <option value="all">All Sources</option>
+        <option value="COVID-19">COVID-19</option>
+        <option value="Hurricane Katrina 2007">Hurricane Katrina 2007</option>
+        <option value="Govt Shutdown Income">Govt Shutdown Income</option>
+        <option value="Govt Shutdown Crisis">Govt Shutdown Crisis</option>
+        <option value="Understanding Society">Understanding Society</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Construct</label>
+      <select id="constructFilter">
+        <option value="all">All Constructs</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Selection Status</label>
+      <select id="selectionFilter">
+        <option value="all">All Questions</option>
+        <option value="selected">Selected Only</option>
+        <option value="not_selected">Not Selected</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Toggle Categories</label>
+      <div class="toggle-row" id="toggleChips"></div>
     </div>
   </div>
 
-  <!-- Image lightbox -->
-  <div class="lightbox-overlay" id="lightbox">
-    <button class="lightbox-close" aria-label="Close">&times;</button>
-    <img id="lightbox-img" src="" alt="">
-    <div class="lightbox-caption" id="lightbox-caption"></div>
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi"><div class="value" id="kpiTotal">0</div><div class="label">Shown</div></div>
+    <div class="kpi"><div class="value" id="kpiSelected">0</div><div class="label">Selected</div></div>
+    <div class="kpi"><div class="value" id="kpiAvgRi">0</div><div class="label">Avg Ri</div></div>
+    <div class="kpi"><div class="value" id="kpiDuration">0</div><div class="label">Est. Minutes</div></div>
+    <div class="kpi"><div class="value" id="kpiBudget">0%</div><div class="label">Time Budget</div></div>
   </div>
 
-  <script>
-    const dashboard = window.PSID_DASHBOARD || { summary: {}, rows: [] };
-    const rows = dashboard.rows || [];
-    const summary = dashboard.summary || {};
+  <!-- Charts -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Top Questions by Utility-Burden Ratio (Ri)</h3>
+      <canvas id="chartRi"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Utility vs Burden Scatter</h3>
+      <canvas id="chartScatter"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Toggle Category Distribution</h3>
+      <canvas id="chartToggle"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Time Budget Allocation</h3>
+      <canvas id="chartTime"></canvas>
+    </div>
+  </div>
 
-    /* ── Chart.js global defaults for readability ── */
-    Chart.defaults.font.size = 13;
-    Chart.defaults.font.family = "'Avenir Next', 'Segoe UI', sans-serif";
-    Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold' };
-    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
-    Chart.defaults.plugins.legend.labels.font = { size: 12, weight: '600' };
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>Question Details</h3>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search questions...">
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="question_text">Question</th>
+            <th data-sort="source">Source</th>
+            <th data-sort="toggle_category">Toggle</th>
+            <th data-sort="Ri">Ri</th>
+            <th data-sort="Ui">Ui</th>
+            <th data-sort="Bi">Bi</th>
+            <th data-sort="selected">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
 
-    const sourceFilter = document.getElementById('sourceFilter');
-    const toggleFilter = document.getElementById('toggleFilter');
-    const selectedFilter = document.getElementById('selectedFilter');
-    const searchFilter = document.getElementById('searchFilter');
-    const tableBody = document.getElementById('tableBody');
+  <div class="footer">
+    PSID Generic Crisis Module &middot; NLP Optimization Pipeline &middot; Data from 4 historical survey instruments
+  </div>
+</div>
 
-    const palette = {
-      'Generic Core': '#2563eb',
-      'Toggle: Financial Crisis': '#d97706',
-      'Toggle: Pandemic / Disaster': '#dc2626'
-    };
+<script>
+// ── Embedded Data ──
+const DATA = [
+  {question_text:"Any financial difficulties",source:"COVID-19",toggle_category:"Generic Core",keywords:2,word_count:3,complexity:0,Ui:1.7,Bi:0.3,Ri:5.67,selected:true},
+  {question_text:"Lost earnings because of the pandemic",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:6,complexity:0,Ui:3.4,Bi:0.6,Ri:5.67,selected:true},
+  {question_text:"Stopped this work?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:3,word_count:3,complexity:0,Ui:1.4,Bi:0.3,Ri:4.67,selected:true},
+  {question_text:"Received stimulus payment",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:2,word_count:3,complexity:0,Ui:1.4,Bi:0.3,Ri:4.67,selected:true},
+  {question_text:"Stopped working at this business?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:3,word_count:5,complexity:0,Ui:2.25,Bi:0.5,Ri:4.50,selected:true},
+  {question_text:"Working in a job considered essential work?",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:9,complexity:0,Ui:3.6,Bi:0.9,Ri:4.00,selected:true},
+  {question_text:"How did you manage financial difficulties due to shutdown - sell belongings?",source:"Govt Shutdown Crisis",toggle_category:"Toggle: Financial Crisis",keywords:10,word_count:16,complexity:0,Ui:5.95,Bi:1.6,Ri:3.72,selected:true},
+  {question_text:"Only work from home",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:3,word_count:4,complexity:0,Ui:1.4,Bi:0.4,Ri:3.50,selected:true},
+  {question_text:"Stimulus payments",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:1,word_count:2,complexity:0,Ui:0.7,Bi:0.2,Ri:3.50,selected:true},
+  {question_text:"Paycheck protection",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:1,word_count:2,complexity:0,Ui:0.7,Bi:0.2,Ri:3.50,selected:true},
+  {question_text:"Did you evacuate from your home before Katrina or Rita hit?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:11,complexity:1.5,Ui:4.45,Bi:1.4,Ri:3.18,selected:true},
+  {question_text:"Were there any wages or salaries from this job?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:7,word_count:10,complexity:0.5,Ui:3.0,Bi:1.1,Ri:2.73,selected:true},
+  {question_text:"Did you experience major flooding in your home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:12,complexity:2.5,Ui:4.55,Bi:1.7,Ri:2.68,selected:true},
+  {question_text:"How severe was the property damage to your home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:2.5,Ui:4.55,Bi:1.8,Ri:2.53,selected:true},
+  {question_text:"Laid off or furloughed because of the pandemic",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:8,complexity:1.5,Ui:2.55,Bi:1.1,Ri:2.32,selected:true},
+  {question_text:"Bothered by repeated disturbing memories of the hurricane?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:3.5,Ui:5.45,Bi:2.5,Ri:2.18,selected:true},
+  {question_text:"Bothered by repeated disturbing dreams about the hurricane?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.0,Ui:4.5,Bi:2.1,Ri:2.14,selected:true},
+  {question_text:"Did you lose your job because of the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:10,complexity:2.5,Ui:3.2,Bi:1.5,Ri:2.13,selected:true},
+  {question_text:"How much financial help did you receive from FEMA?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:9,complexity:1.0,Ui:2.3,Bi:1.1,Ri:2.09,selected:true},
+  {question_text:"Did you experience hurricane force winds at your location?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:2.5,Ui:3.6,Bi:1.8,Ri:2.00,selected:true},
+  {question_text:"Have you had trouble relaxing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:9,complexity:3.0,Ui:2.7,Bi:1.5,Ri:1.80,selected:true},
+  {question_text:"Have you been able to return to your original home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:10,complexity:0,Ui:1.7,Bi:1.0,Ri:1.70,selected:true},
+  {question_text:"How afraid were you that you might be killed or seriously injured?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:16,complexity:3.0,Ui:3.7,Bi:2.2,Ri:1.68,selected:true},
+  {question_text:"Calculate respondent's age",source:"Understanding Society",toggle_category:"Generic Core",keywords:1,word_count:3,complexity:0,Ui:0.5,Bi:0.3,Ri:1.67,selected:true},
+  {question_text:"Was your business damaged or destroyed?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:10,complexity:3.0,Ui:2.55,Bi:1.6,Ri:1.59,selected:true},
+  {question_text:"How long did you stay in temporary housing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:12,complexity:2.5,Ui:2.7,Bi:1.7,Ri:1.59,selected:true},
+  {question_text:"And are you... Male / Female",source:"Understanding Society",toggle_category:"Generic Core",keywords:5,word_count:7,complexity:2.0,Ui:1.35,Bi:1.1,Ri:1.23,selected:true},
+  {question_text:"Are you normally resident at this address?",source:"Understanding Society",toggle_category:"Generic Core",keywords:5,word_count:11,complexity:0.5,Ui:1.4,Bi:1.2,Ri:1.17,selected:true},
+  {question_text:"Was anyone in your immediate family killed?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
+  {question_text:"Were you displaced from the place you were living?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
+  {question_text:"Were you physically injured as a result of the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
+  {question_text:"Have you been worrying too much about different things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:3.0,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
+  {question_text:"Have you felt your heart pounding or racing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:12,complexity:3.5,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
+  {question_text:"Have you felt nervous anxious or on edge?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:12,complexity:3.5,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
+  {question_text:"Have you been unable to stop or control worrying?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:3.5,Ui:2.7,Bi:2.0,Ri:1.35,selected:false},
+  {question_text:"Bothered by trouble concentrating on things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:15,complexity:3.0,Ui:2.7,Bi:2.1,Ri:1.29,selected:false},
+  {question_text:"Bothered by feeling bad about yourself?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.0,Ui:2.7,Bi:2.1,Ri:1.29,selected:false},
+  {question_text:"Bothered by poor appetite or overeating?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.5,Ui:2.7,Bi:2.2,Ri:1.23,selected:false},
+  {question_text:"Have you felt emotionally distant or cut off from other people?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.5,Ui:2.7,Bi:2.2,Ri:1.23,selected:false},
+  {question_text:"Bothered by feeling down depressed or hopeless?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:16,complexity:3.5,Ui:2.7,Bi:2.3,Ri:1.17,selected:false},
+  {question_text:"How many days were you without electricity?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:11,complexity:2.5,Ui:1.8,Bi:1.6,Ri:1.13,selected:false},
+  {question_text:"Was your home damaged or destroyed by the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:10,complexity:3.0,Ui:1.8,Bi:1.6,Ri:1.13,selected:false},
+  {question_text:"Bothered by feeling tired or having little energy?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:17,complexity:3.5,Ui:2.7,Bi:2.4,Ri:1.13,selected:false},
+  {question_text:"Bothered by little interest or pleasure in doing things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:3.5,Ui:2.7,Bi:2.5,Ri:1.08,selected:false},
+  {question_text:"Overall how would you rate the impact on your family?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:10,word_count:14,complexity:1.5,Ui:1.8,Bi:1.7,Ri:1.06,selected:false},
+  {question_text:"How many days were you without running water?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:12,complexity:2.5,Ui:1.8,Bi:1.7,Ri:1.06,selected:false},
+  {question_text:"Bothered by moving or speaking slowly or being restless?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:4.0,Ui:2.7,Bi:2.6,Ri:1.04,selected:false},
+  {question_text:"Did you receive help from other government agencies or nonprofit organizations?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:11,complexity:0.5,Ui:1.2,Bi:1.2,Ri:1.00,selected:false},
+  {question_text:"Bothered by trouble falling or staying asleep or sleeping too much?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:11,word_count:20,complexity:4.0,Ui:2.7,Bi:2.8,Ri:0.96,selected:false},
+  {question_text:"Did you have to move to a different city or state?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:16,complexity:3.0,Ui:1.8,Bi:2.2,Ri:0.82,selected:false},
+  {question_text:"Did you receive any help from FEMA?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:11,complexity:1.0,Ui:0.7,Bi:1.3,Ri:0.54,selected:false}
+];
 
-    let scatterChart;
-    let topChart;
-    let toggleChart;
-    let constructChart;
+const SECS_PER_WORD = 7;
+const MAX_SECS = 1800;
 
-    function formatBadgeToggle(value) {
-      if (value === 'Generic Core') return '<span class="badge generic">Generic Core</span>';
-      if (value === 'Toggle: Financial Crisis') return '<span class="badge financial">Financial Crisis</span>';
-      return '<span class="badge disaster">Pandemic / Disaster</span>';
-    }
+// ── Dashboard Class ──
+class Dashboard {
+  constructor(data) {
+    this.raw = data;
+    this.filtered = data;
+    this.charts = {};
+    this.sortCol = 'Ri';
+    this.sortDir = -1;
+    this.activeToggles = new Set(['Generic Core', 'Toggle: Pandemic / Disaster', 'Toggle: Financial Crisis']);
+    this.init();
+  }
 
-    function formatBadgeSelected(value) {
-      return value
-        ? '<span class="badge selected">Selected</span>'
-        : '<span class="badge not-selected">Not selected</span>';
-    }
+  init() {
+    this.buildToggleChips();
+    this.buildConstructFilter();
+    this.bindEvents();
+    this.applyFilters();
+  }
 
-    function uniqueValues(key) {
-      return [...new Set(rows.map(row => row[key]))].sort();
-    }
-
-    function populateFilters() {
-      uniqueValues('source').forEach(source => {
-        sourceFilter.insertAdjacentHTML('beforeend', `<option value="${source}">${source}</option>`);
+  buildToggleChips() {
+    const cats = [...new Set(this.raw.map(d => d.toggle_category))];
+    const colors = {'Generic Core':'#2563eb','Toggle: Pandemic / Disaster':'#9d174d','Toggle: Financial Crisis':'#d97706'};
+    const container = document.getElementById('toggleChips');
+    cats.forEach(cat => {
+      const chip = document.createElement('div');
+      chip.className = 'toggle-chip active';
+      chip.dataset.cat = cat;
+      chip.innerHTML = `<span class="dot" style="background:${colors[cat]||'#6b7280'}"></span>${cat.replace('Toggle: ','')}`;
+      chip.addEventListener('click', () => {
+        if (this.activeToggles.has(cat)) { this.activeToggles.delete(cat); chip.classList.remove('active'); }
+        else { this.activeToggles.add(cat); chip.classList.add('active'); }
+        this.applyFilters();
       });
-      uniqueValues('toggle_category').forEach(toggle => {
-        toggleFilter.insertAdjacentHTML('beforeend', `<option value="${toggle}">${toggle}</option>`);
+      container.appendChild(chip);
+    });
+  }
+
+  buildConstructFilter() {
+    const sel = document.getElementById('constructFilter');
+    const constructs = ['Economic / Income','Employment','Financial Coping','Housing / Shelter','Government Aid','Trauma / Health','Demographics'];
+    constructs.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  }
+
+  bindEvents() {
+    document.getElementById('sourceFilter').addEventListener('change', () => this.applyFilters());
+    document.getElementById('constructFilter').addEventListener('change', () => this.applyFilters());
+    document.getElementById('selectionFilter').addEventListener('change', () => this.applyFilters());
+    document.getElementById('searchBox').addEventListener('input', () => this.applyFilters());
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (this.sortCol === col) this.sortDir *= -1;
+        else { this.sortCol = col; this.sortDir = col === 'Ri' || col === 'Ui' ? -1 : 1; }
+        this.renderTable();
       });
-    }
+    });
+  }
 
-    function applyFilters() {
-      const source = sourceFilter.value;
-      const toggle = toggleFilter.value;
-      const selected = selectedFilter.value;
-      const query = searchFilter.value.trim().toLowerCase();
+  applyFilters() {
+    const src = document.getElementById('sourceFilter').value;
+    const construct = document.getElementById('constructFilter').value;
+    const sel = document.getElementById('selectionFilter').value;
+    const q = document.getElementById('searchBox').value.toLowerCase();
 
-      return rows.filter(row => {
-        const sourceMatch = source === 'All' || row.source === source;
-        const toggleMatch = toggle === 'All' || row.toggle_category === toggle;
-        const selectedLabel = row.selected ? 'Selected' : 'Not selected';
-        const selectedMatch = selected === 'All' || selectedLabel === selected;
-        const searchMatch = !query || row.question_text.toLowerCase().includes(query);
-        return sourceMatch && toggleMatch && selectedMatch && searchMatch;
-      });
-    }
-
-    function updateKpis(filtered) {
-      const selectedRows = filtered.filter(row => row.selected);
-      const selectedMinutes = selectedRows.reduce((sum, row) => sum + (row.word_count * 7 / 60), 0);
-      const avgRi = filtered.length ? filtered.reduce((sum, row) => sum + row.Ri, 0) / filtered.length : 0;
-      const maxRi = filtered.length ? Math.max(...filtered.map(row => row.Ri)) : 0;
-
-      document.getElementById('kpi-total').textContent = filtered.length;
-      document.getElementById('kpi-selected').textContent = selectedRows.length;
-      document.getElementById('kpi-minutes').textContent = selectedMinutes.toFixed(1);
-      document.getElementById('kpi-avg-ri').textContent = avgRi.toFixed(2);
-      document.getElementById('kpi-max-ri').textContent = maxRi.toFixed(2);
-    }
-
-    function buildScatter(filtered) {
-      const grouped = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'].map(toggle => {
-        const points = filtered
-          .filter(row => row.toggle_category === toggle)
-          .map(row => ({
-            x: row.Bi,
-            y: row.Ui,
-            r: Math.max(5, row.Ri * 4.5),
-            borderWidth: row.selected ? 2 : 1,
-            borderColor: row.selected ? '#15803d' : 'rgba(15,23,42,0.25)',
-            question: row.question_text,
-            source: row.source,
-            ri: row.Ri,
-            ui: row.Ui,
-            bi: row.Bi
-          }));
-        return {
-          label: toggle,
-          data: points,
-          backgroundColor: palette[toggle],
-          borderColor: palette[toggle]
+    this.filtered = this.raw.filter(d => {
+      if (!this.activeToggles.has(d.toggle_category)) return false;
+      if (src !== 'all' && d.source !== src) return false;
+      if (sel === 'selected' && !d.selected) return false;
+      if (sel === 'not_selected' && d.selected) return false;
+      if (q && !d.question_text.toLowerCase().includes(q)) return false;
+      if (construct !== 'all') {
+        const txt = d.question_text.toLowerCase();
+        const map = {
+          'Economic / Income': ['earning','income','wage','salar','pay','financial'],
+          'Employment': ['work','job','employ','furlough','laid off','essential','business','stop'],
+          'Financial Coping': ['financial difficul','manage','cope','saving','debt','sell','belong'],
+          'Housing / Shelter': ['home','hous','evacuate','flood','damage','destroy','displace','address','resident'],
+          'Government Aid': ['fema','stimulus','government','paycheck protection','agencies'],
+          'Trauma / Health': ['afraid','injur','kill','bother','disturb','dream','memor','nervous','relax','worry','depress','sleep','energy','pounding','edge','appetite','distant','hopeless','concentrat','restless'],
+          'Demographics': ['age','sex','male','female','calculate']
         };
-      });
-
-      if (scatterChart) scatterChart.destroy();
-      scatterChart = new Chart(document.getElementById('scatterChart'), {
-        type: 'bubble',
-        data: { datasets: grouped },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  const point = context.raw;
-                  return `${point.question} | ${point.source} | Ri ${point.ri.toFixed(2)} | Ui ${point.ui.toFixed(2)} | Bi ${point.bi.toFixed(2)}`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: { title: { display: true, text: 'Burden (Bi)', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } },
-            y: { title: { display: true, text: 'Utility (Ui)', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } }
-          }
-        }
-      });
-    }
-
-    function buildTopChart(filtered) {
-      const top = [...filtered].sort((a, b) => b.Ri - a.Ri).slice(0, 12).reverse();
-      if (topChart) topChart.destroy();
-      topChart = new Chart(document.getElementById('topChart'), {
-        type: 'bar',
-        data: {
-          labels: top.map(row => row.question_text.length > 48 ? row.question_text.slice(0, 48) + '\u2026' : row.question_text),
-          datasets: [{
-            label: 'Ri',
-            data: top.map(row => row.Ri),
-            backgroundColor: top.map(row => palette[row.toggle_category] || '#64748b')
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: function (items) {
-                  var idx = items[0].dataIndex;
-                  return top[top.length - 1 - idx] ? top[top.length - 1 - idx].question_text : items[0].label;
-                },
-                label: function (context) {
-                  return 'Ri: ' + context.parsed.x.toFixed(2);
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              title: { display: true, text: 'Ri score', font: { size: 13, weight: 'bold' } },
-              ticks: { font: { size: 12 } }
-            },
-            y: {
-              ticks: { font: { size: 11 }, autoSkip: false }
-            }
-          }
-        }
-      });
-    }
-
-    function buildToggleChart(filtered) {
-      const sources = [...new Set(filtered.map(row => row.source))];
-      const toggles = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'];
-      const datasets = toggles.map(toggle => ({
-        label: toggle,
-        data: sources.map(source => filtered.filter(row => row.source === source && row.toggle_category === toggle).length),
-        backgroundColor: palette[toggle]
-      }));
-
-      if (toggleChart) toggleChart.destroy();
-      toggleChart = new Chart(document.getElementById('toggleChart'), {
-        type: 'bar',
-        data: { labels: sources, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } },
-          scales: {
-            x: { stacked: true, ticks: { font: { size: 11 } } },
-            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Questions', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } }
-          }
-        }
-      });
-    }
-
-    function buildConstructChart(filtered) {
-      const counts = {};
-      filtered.forEach(row => {
-        (row.constructs || []).forEach(construct => {
-          counts[construct] = (counts[construct] || 0) + 1;
-        });
-      });
-      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-      if (constructChart) constructChart.destroy();
-      constructChart = new Chart(document.getElementById('constructChart'), {
-        type: 'bar',
-        data: {
-          labels: sorted.map(item => item[0]),
-          datasets: [{
-            label: 'Frequency',
-            data: sorted.map(item => item[1]),
-            backgroundColor: '#0f766e'
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { beginAtZero: true, title: { display: true, text: 'Occurrences', font: { size: 13, weight: 'bold' } }, ticks: { font: { size: 12 } } },
-            y: { ticks: { font: { size: 12 }, autoSkip: false } }
-          }
-        }
-      });
-    }
-
-    function buildTable(filtered) {
-      const ordered = [...filtered].sort((a, b) => b.Ri - a.Ri).slice(0, 20);
-      tableBody.innerHTML = ordered.map(row => `
-        <tr>
-          <td>${row.question_text}</td>
-          <td>${row.source}</td>
-          <td>${formatBadgeToggle(row.toggle_category)}</td>
-          <td>${formatBadgeSelected(row.selected)}</td>
-          <td class="num">${row.Ui.toFixed(2)}</td>
-          <td class="num">${row.Bi.toFixed(2)}</td>
-          <td class="num">${row.Ri.toFixed(2)}</td>
-          <td class="num">${row.word_count}</td>
-        </tr>
-      `).join('');
-    }
-
-    function refresh() {
-      const filtered = applyFilters();
-      updateKpis(filtered);
-      buildScatter(filtered);
-      buildTopChart(filtered);
-      buildToggleChart(filtered);
-      buildConstructChart(filtered);
-      buildTable(filtered);
-    }
-
-    [sourceFilter, toggleFilter, selectedFilter, searchFilter].forEach(el => {
-      el.addEventListener('input', refresh);
-      el.addEventListener('change', refresh);
+        const keys = map[construct] || [];
+        if (!keys.some(k => txt.includes(k))) return false;
+      }
+      return true;
     });
 
-    populateFilters();
-    updateKpis(rows);
-    refresh();
+    this.renderKPIs();
+    this.renderCharts();
+    this.renderTable();
+  }
 
-    /* ── Fullscreen chart expand ── */
-    (function () {
-      var modal = document.getElementById('chartModal');
-      var modalCanvas = document.getElementById('modalChart');
-      var modalClose = modal.querySelector('.chart-modal-close');
-      var modalTitle = document.getElementById('chartModalTitle');
-      var modalDescription = document.getElementById('chartModalDescription');
-      var modalChart = null;
+  renderKPIs() {
+    const f = this.filtered;
+    const sel = f.filter(d => d.selected);
+    const avgRi = f.length ? (f.reduce((s,d) => s + d.Ri, 0) / f.length).toFixed(2) : '0';
+    const totalWords = sel.reduce((s,d) => s + d.word_count, 0);
+    const mins = ((totalWords * SECS_PER_WORD) / 60).toFixed(1);
+    const pct = Math.round((totalWords * SECS_PER_WORD / MAX_SECS) * 100);
 
-      var chartMeta = {
-        scatter: {
-          title: 'Utility vs Burden',
-          description: 'Bubble radius tracks Ri, with selected questions outlined for easier inspection.'
-        },
-        top: {
-          title: 'Top Ranked Questions',
-          description: 'Full-size horizontal ranking chart with readable labels and precise Ri values.'
-        },
-        toggle: {
-          title: 'Source by Toggle Category',
-          description: 'Stacked source counts for the active filter state.'
-        },
-        construct: {
-          title: 'Construct Frequency',
-          description: 'Expanded view of taxonomy-derived construct counts across the filtered set.'
+    document.getElementById('kpiTotal').textContent = f.length;
+    document.getElementById('kpiSelected').textContent = sel.length;
+    document.getElementById('kpiAvgRi').textContent = avgRi;
+    document.getElementById('kpiDuration').textContent = mins;
+    document.getElementById('kpiBudget').textContent = pct + '%';
+    document.getElementById('kpiBudget').style.color = pct > 95 ? 'var(--red)' : pct > 80 ? 'var(--amber)' : 'var(--green)';
+  }
+
+  renderCharts() {
+    this.renderRiChart();
+    this.renderScatter();
+    this.renderToggleChart();
+    this.renderTimeChart();
+  }
+
+  renderRiChart() {
+    const top = [...this.filtered].sort((a,b) => b.Ri - a.Ri).slice(0, 12);
+    const cfg = {
+      type: 'bar',
+      data: {
+        labels: top.map(d => d.question_text.length > 35 ? d.question_text.substring(0,35)+'...' : d.question_text),
+        datasets: [{
+          data: top.map(d => d.Ri),
+          backgroundColor: top.map(d => d.selected ? '#2563eb' : '#d1d5db'),
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Ri Score' }, grid: { color: '#f0f0f0' } },
+          y: { ticks: { font: { size: 10 } }, grid: { display: false } }
         }
-      };
-
-      var chartBuilders = {
-        scatter: function (f) { return buildScatterFull(f, modalCanvas); },
-        top: function (f) { return buildTopFull(f, modalCanvas); },
-        toggle: function (f) { return buildToggleFull(f, modalCanvas); },
-        construct: function (f) { return buildConstructFull(f, modalCanvas); }
-      };
-
-      function buildScatterFull(filtered, canvas) {
-        var grouped = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'].map(function (toggle) {
-          var points = filtered.filter(function (row) { return row.toggle_category === toggle; }).map(function (row) {
-            return { x: row.Bi, y: row.Ui, r: Math.max(6, row.Ri * 5), borderWidth: row.selected ? 3 : 1, borderColor: row.selected ? '#15803d' : 'rgba(15,23,42,0.25)', question: row.question_text, source: row.source, ri: row.Ri, ui: row.Ui, bi: row.Bi };
-          });
-          return { label: toggle, data: points, backgroundColor: palette[toggle], borderColor: palette[toggle] };
-        });
-        return new Chart(canvas, {
-          type: 'bubble', data: { datasets: grouped },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } }, tooltip: { titleFont: { size: 14 }, bodyFont: { size: 13 }, callbacks: { label: function (ctx) { var p = ctx.raw; return p.question + ' | ' + p.source + ' | Ri ' + p.ri.toFixed(2); } } } },
-            scales: { x: { title: { display: true, text: 'Burden (Bi)', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { title: { display: true, text: 'Utility (Ui)', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } } }
-          }
-        });
       }
+    };
+    if (this.charts.ri) { this.charts.ri.destroy(); }
+    this.charts.ri = new Chart(document.getElementById('chartRi'), cfg);
+  }
 
-      function buildTopFull(filtered, canvas) {
-        var top = filtered.slice().sort(function (a, b) { return b.Ri - a.Ri; }).slice(0, 15).reverse();
-        return new Chart(canvas, {
-          type: 'bar',
-          data: { labels: top.map(function (r) { return r.question_text; }), datasets: [{ label: 'Ri', data: top.map(function (r) { return r.Ri; }), backgroundColor: top.map(function (r) { return palette[r.toggle_category] || '#64748b'; }) }] },
-          options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { titleFont: { size: 14 }, bodyFont: { size: 13 } } },
-            scales: { x: { title: { display: true, text: 'Ri score', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { ticks: { font: { size: 12 }, autoSkip: false } } }
-          }
-        });
+  renderScatter() {
+    const colors = {'Generic Core':'#2563eb','Toggle: Pandemic / Disaster':'#9d174d','Toggle: Financial Crisis':'#d97706'};
+    const datasets = {};
+    this.filtered.forEach(d => {
+      if (!datasets[d.toggle_category]) datasets[d.toggle_category] = { label: d.toggle_category.replace('Toggle: ',''), data: [], backgroundColor: colors[d.toggle_category] || '#6b7280', pointRadius: 5 };
+      datasets[d.toggle_category].data.push({ x: d.Bi, y: d.Ui, label: d.question_text });
+    });
+    const cfg = {
+      type: 'scatter',
+      data: { datasets: Object.values(datasets) },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } },
+          tooltip: { callbacks: { label: ctx => ctx.raw.label ? ctx.raw.label.substring(0,50) + ` (Ui:${ctx.raw.y}, Bi:${ctx.raw.x})` : '' } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Burden (Bi)' }, grid: { color: '#f0f0f0' } },
+          y: { title: { display: true, text: 'Utility (Ui)' }, grid: { color: '#f0f0f0' } }
+        }
       }
+    };
+    if (this.charts.scatter) { this.charts.scatter.destroy(); }
+    this.charts.scatter = new Chart(document.getElementById('chartScatter'), cfg);
+  }
 
-      function buildToggleFull(filtered, canvas) {
-        var sources = [].concat(new Set(filtered.map(function (r) { return r.source; }))).filter(function (v, i, a) { return a.indexOf(v) === i; });
-        var toggles = ['Generic Core', 'Toggle: Financial Crisis', 'Toggle: Pandemic / Disaster'];
-        var datasets = toggles.map(function (toggle) {
-          return { label: toggle, data: sources.map(function (source) { return filtered.filter(function (r) { return r.source === source && r.toggle_category === toggle; }).length; }), backgroundColor: palette[toggle] };
-        });
-        return new Chart(canvas, {
-          type: 'bar', data: { labels: sources, datasets: datasets },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } } },
-            scales: { x: { stacked: true, ticks: { font: { size: 13 } } }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Questions', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } } }
-          }
-        });
+  renderToggleChart() {
+    const counts = {};
+    this.filtered.forEach(d => {
+      const key = d.toggle_category.replace('Toggle: ','');
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    const labels = Object.keys(counts);
+    const colors = {'Generic Core':'#2563eb','Pandemic / Disaster':'#9d174d','Financial Crisis':'#d97706'};
+    const cfg = {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data: labels.map(l => counts[l]), backgroundColor: labels.map(l => colors[l] || '#6b7280'), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
       }
+    };
+    if (this.charts.toggle) { this.charts.toggle.destroy(); }
+    this.charts.toggle = new Chart(document.getElementById('chartToggle'), cfg);
+  }
 
-      function buildConstructFull(filtered, canvas) {
-        var counts = {};
-        filtered.forEach(function (row) { (row.constructs || []).forEach(function (c) { counts[c] = (counts[c] || 0) + 1; }); });
-        var sorted = Object.entries(counts).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12);
-        return new Chart(canvas, {
-          type: 'bar',
-          data: { labels: sorted.map(function (i) { return i[0]; }), datasets: [{ label: 'Frequency', data: sorted.map(function (i) { return i[1]; }), backgroundColor: '#0f766e' }] },
-          options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { beginAtZero: true, title: { display: true, text: 'Occurrences', font: { size: 15, weight: 'bold' } }, ticks: { font: { size: 13 } } }, y: { ticks: { font: { size: 13 }, autoSkip: false } } }
-          }
-        });
+  renderTimeChart() {
+    const sel = this.filtered.filter(d => d.selected);
+    const cats = {};
+    sel.forEach(d => {
+      const key = d.toggle_category.replace('Toggle: ','');
+      cats[key] = (cats[key] || 0) + d.word_count * SECS_PER_WORD;
+    });
+    const used = Object.values(cats).reduce((a,b) => a+b, 0);
+    const remaining = Math.max(0, MAX_SECS - used);
+    const labels = [...Object.keys(cats), 'Remaining'];
+    const values = [...Object.values(cats).map(v => (v/60).toFixed(1)), (remaining/60).toFixed(1)];
+    const colors = {'Generic Core':'#2563eb','Pandemic / Disaster':'#9d174d','Financial Crisis':'#d97706','Remaining':'#e5e7eb'};
+
+    const cfg = {
+      type: 'bar',
+      data: {
+        labels: ['Time Budget (30 min)'],
+        datasets: labels.map((l, i) => ({
+          label: l,
+          data: [parseFloat(values[i])],
+          backgroundColor: colors[l] || '#6b7280',
+          borderRadius: i === 0 ? { topLeft: 4, bottomLeft: 4 } : i === labels.length-1 ? { topRight: 4, bottomRight: 4 } : 0,
+        }))
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, title: { display: true, text: 'Minutes' }, max: 30, grid: { color: '#f0f0f0' } },
+          y: { stacked: true, display: false }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw} min` } }
+        }
       }
+    };
+    if (this.charts.time) { this.charts.time.destroy(); }
+    this.charts.time = new Chart(document.getElementById('chartTime'), cfg);
+  }
 
-      function openChartModal(key) {
-        var meta = chartMeta[key] || {
-          title: 'Expanded chart',
-          description: 'Open a larger view to inspect labels, values, and axis detail.'
-        };
+  renderTable() {
+    const sorted = [...this.filtered].sort((a,b) => {
+      let va = a[this.sortCol], vb = b[this.sortCol];
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      if (typeof va === 'boolean') { va = va ? 1 : 0; vb = vb ? 1 : 0; }
+      return va < vb ? -this.sortDir : va > vb ? this.sortDir : 0;
+    });
 
-        modalTitle.textContent = meta.title;
-        modalDescription.textContent = meta.description;
+    const toggleBadge = cat => {
+      if (cat === 'Generic Core') return `<span class="badge badge-core">Core</span>`;
+      if (cat.includes('Pandemic')) return `<span class="badge badge-pandemic">Pandemic/Disaster</span>`;
+      if (cat.includes('Financial')) return `<span class="badge badge-financial">Financial</span>`;
+      return `<span class="badge">${cat}</span>`;
+    };
 
-        if (modalChart) { modalChart.destroy(); modalChart = null; }
-        modal.classList.add('active');
-        var filtered = applyFilters();
-        requestAnimationFrame(function () {
-          modalChart = chartBuilders[key](filtered);
-        });
-      }
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = sorted.map(d => `
+      <tr>
+        <td style="max-width:340px">${d.question_text}</td>
+        <td style="white-space:nowrap">${d.source}</td>
+        <td>${toggleBadge(d.toggle_category)}</td>
+        <td><strong>${d.Ri.toFixed(2)}</strong></td>
+        <td>${d.Ui.toFixed(2)}</td>
+        <td>${d.Bi.toFixed(2)}</td>
+        <td>${d.selected ? '<span class="badge badge-selected">Selected</span>' : '<span class="badge badge-not">Not selected</span>'}</td>
+      </tr>
+    `).join('');
+  }
+}
 
-      document.querySelectorAll('.expand-btn, .chart-hitarea').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var key = btn.getAttribute('data-chart');
-          openChartModal(key);
-        });
-      });
-
-      function closeModal() {
-        modal.classList.remove('active');
-        if (modalChart) { modalChart.destroy(); modalChart = null; }
-      }
-
-      modalClose.addEventListener('click', closeModal);
-      modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('active')) closeModal(); });
-    })();
-
-    /* ── Image lightbox for figure cards and preview cards ── */
-    (function () {
-      var overlay = document.getElementById('lightbox');
-      var lbImg = document.getElementById('lightbox-img');
-      var lbCaption = document.getElementById('lightbox-caption');
-
-      document.querySelectorAll('.figure-card img, .figure-hitarea, .report-preview-card img').forEach(function (target) {
-        target.addEventListener('click', function () {
-          var img = target.tagName === 'IMG' ? target : target.parentElement.querySelector('img');
-          lbImg.src = img.src;
-          lbImg.alt = img.alt;
-          var card = img.closest('.figure-card') || img.closest('.report-preview-card');
-          var heading = card ? card.querySelector('h3') : null;
-          lbCaption.textContent = heading ? heading.textContent : img.alt;
-          overlay.classList.add('active');
-        });
-      });
-
-      overlay.addEventListener('click', function (e) {
-        if (e.target === lbImg) return;
-        overlay.classList.remove('active');
-      });
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && overlay.classList.contains('active')) overlay.classList.remove('active');
-      });
-    })();
-  </script>
+// Launch
+new Dashboard(DATA);
+</script>
 </body>
 </html>
