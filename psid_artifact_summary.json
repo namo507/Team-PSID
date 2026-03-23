@@ -37,5 +37,9 @@
     "Demographics": 3
   },
   "avg_ri": 2.079,
-  "max_ri": 5.667
+  "max_ri": 5.667,
+  "avg_pi": 2.452,
+  "max_pi": 7.809,
+  "recommended_generic_count": 6,
+  "recommended_specific_count": 8
 }

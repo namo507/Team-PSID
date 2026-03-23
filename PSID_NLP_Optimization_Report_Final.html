@@ -541,6 +541,7 @@
       <div class="quick-nav">
         <a class="quick-link" href="#summary"><span class="label">Summary</span><span class="value">Validated headline metrics</span></a>
         <a class="quick-link" href="#method"><span class="label">Method</span><span class="value">Formulae and constants</span></a>
+        <a class="quick-link" href="#recommendations"><span class="label">Recommendations</span><span class="value">Deployable question wording</span></a>
         <a class="quick-link" href="#tables"><span class="label">Tables</span><span class="value">Selection and timing structure</span></a>
         <a class="quick-link" href="#figures"><span class="label">Figures</span><span class="value">Five refreshed visual outputs</span></a>
       </div>
@@ -577,12 +578,22 @@
         <div class="kpi-value">5.667</div>
         <div class="kpi-note">Highest-scoring question retained in the module.</div>
       </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Average P<sub>i</sub></div>
+        <div class="kpi-value">2.452</div>
+        <div class="kpi-note">Mean enhanced priority after rarity, portability, and redundancy adjustment.</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-label">Maximum P<sub>i</sub></div>
+        <div class="kpi-value">7.809</div>
+        <div class="kpi-note">Highest enhanced-priority item in the final integrated corpus.</div>
+      </article>
     </section>
 
     <section class="panel">
       <h2>Executive Summary</h2>
       <p>
-        The final ranked workflow now uses the Katrina-integrated output as the single source of truth for report tables, figure generation, dashboard data, and stakeholder-facing questionnaire artifacts. The selected module keeps the always-on Generic Core intentionally short, then spends the remaining budget on the higher-value crisis-specific add-on, which is now dominated by Pandemic / Disaster content because the Katrina bank materially improved housing, trauma, displacement, and government-aid coverage.
+        The final ranked workflow now uses the Katrina-integrated output as the single source of truth for report tables, figure generation, dashboard data, and stakeholder-facing questionnaire artifacts. The selected module keeps the always-on Generic Core intentionally short, then spends the remaining budget on the higher-value crisis-specific add-on, which is now dominated by Pandemic / Disaster content because the Katrina bank materially improved housing, trauma, displacement, and government-aid coverage. The updated workflow still keeps keyword ranking at the core, but now adds a second enhanced priority layer so repetitive or overly obvious items are less likely to dominate deployable recommendations.
       </p>
       <div class="badge-row">
         <span class="badge blue">Generic Core: 7 questions</span>
@@ -604,6 +615,12 @@
           </p>
         </article>
         <article class="insight-card">
+          <h3>Generic core wording is more usable</h3>
+          <p>
+            The enhanced scoring layer now supports deployable question wording, which shifts the generic core away from relying too heavily on obvious demographic items and toward financial strain, work interruption, assistance, housing instability, and wellbeing signals.
+          </p>
+        </article>
+        <article class="insight-card">
           <h3>Deliverables are now synchronized</h3>
           <p>
             The notebook refresh cell, generated figures, dashboard bundle, HTML questionnaires, and this web report all reflect the same final ranked-question file instead of drifting across separate manual exports.
@@ -615,7 +632,7 @@
     <section class="panel" id="method">
       <h2>Method Summary and Formula Definitions</h2>
       <p>
-        Questions are ranked with a utility-to-burden ratio that balances analytical value against respondent effort. Utility is driven by taxonomy-weighted crisis keywords. Burden penalizes longer wording and question complexity so that high-value, shorter questions can rise to the top.
+        Questions are ranked with a utility-to-burden ratio that balances analytical value against respondent effort. Utility is driven by taxonomy-weighted crisis keywords. Burden penalizes longer wording and question complexity so that high-value, shorter questions can rise to the top. A second enhanced priority score is then used for artifact generation and recommendation design so that lexical rarity, construct richness, portability, and redundancy can influence which candidate wordings surface most strongly.
       </p>
       <div class="formula-grid">
         <article class="formula-card">
@@ -623,6 +640,13 @@
           <div class="equation">R<sub>i</sub> = U<sub>i</sub> / B<sub>i</sub></div>
           <p>
             <strong>R<sub>i</sub></strong> is the final ranking score for question <strong>i</strong>. Higher values indicate better information return per unit of burden.
+          </p>
+        </article>
+        <article class="formula-card">
+          <h3>Enhanced priority</h3>
+          <div class="equation">P<sub>i</sub> = U<sub>i</sub><small>*</small> / adjusted B<sub>i</sub></div>
+          <p>
+            <strong>P<sub>i</sub></strong> keeps the keyword-ranked backbone but adds rarity, construct-priority, portability, and redundancy adjustments to improve deployability and reduce obvious repetition.
           </p>
         </article>
         <article class="formula-card">
@@ -704,8 +728,73 @@
                 <td>Final decision flag stored in the ranked CSV and reused by all downstream artifacts.</td>
               </tr>
               <tr>
+                <td>Recommended wording</td>
+                <td>Cleaned, more portable prompt text generated from the ranked item and used in the dashboard recommendation cards.</td>
+              </tr>
+              <tr>
                 <td>Time budget</td>
                 <td>Total deployment duration constrained to stay below 30 minutes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="recommendations">
+      <h2>Deployable Recommendation Layer</h2>
+      <p>
+        In addition to scoring questions, the maintained generator now writes deployable wording suggestions and documentation-backed recommendation sets into the ranked CSV and dashboard payload. This adds a practical design layer on top of the statistical ranking output.
+      </p>
+      <div class="table-grid">
+        <article class="table-card">
+          <header>
+            <h3>Recommendation counts</h3>
+            <p>Documentation-backed candidate prompts produced by the updated pipeline.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Recommendation type</th>
+                <th class="num">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generic-core recommendations</td>
+                <td class="num">6</td>
+              </tr>
+              <tr>
+                <td>Crisis-specific recommendations</td>
+                <td class="num">8</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="table-card">
+          <header>
+            <h3>What changed in practice</h3>
+            <p>How the enhanced layer changes the instrument design conversation.</p>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generic Core</td>
+                <td>Less dependence on obvious demographics, more emphasis on strain, work interruption, assistance, housing instability, and wellbeing.</td>
+              </tr>
+              <tr>
+                <td>Pandemic / Disaster</td>
+                <td>High-yield items are rewritten into portable forms rather than staying tied to one named historical event.</td>
+              </tr>
+              <tr>
+                <td>Dashboard review</td>
+                <td>Users can now compare baseline ranking, enhanced priority, constructs, and deployable wording in one surface.</td>
               </tr>
             </tbody>
           </table>

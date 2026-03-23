@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSID Crisis Module Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<script src="psid_dashboard_data.js"></script>
 <style>
   :root {
     --bg: #f8f9fb;
@@ -97,7 +98,8 @@
 
   .artifact-grid,
   .method-grid,
-  .note-grid {
+  .note-grid,
+  .recommendation-grid {
     display: grid;
     gap: 12px;
   }
@@ -176,6 +178,65 @@
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
 
+  .recommendation-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .recommendation-column {
+    display: grid;
+    gap: 12px;
+  }
+
+  .recommendation-column h3 {
+    font-size: 0.92rem;
+    color: var(--primary);
+  }
+
+  .recommendation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .recommendation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #eff4fb;
+    border: 1px solid #dbe4ef;
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .recommendation-card blockquote {
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    border-left: 3px solid var(--accent);
+    background: #f8fbff;
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+
+  .recommendation-card p,
+  .recommendation-card li {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .recommendation-card ul {
+    margin: 8px 0 0 18px;
+  }
+
   .note-card ul {
     margin-left: 18px;
   }
@@ -250,6 +311,7 @@
     <div class="section-nav">
       <a class="nav-link" href="#artifacts">Artifacts</a>
       <a class="nav-link" href="#method">Method</a>
+      <a class="nav-link" href="#recommendations">Recommendations</a>
       <a class="nav-link" href="#filters">Filters</a>
       <a class="nav-link" href="#charts">Charts</a>
       <a class="nav-link" href="#details">Question Details</a>
@@ -292,9 +354,14 @@
     </div>
     <div class="method-grid">
       <div class="method-card">
-        <h3>Priority score</h3>
+        <h3>Baseline ratio</h3>
         <div class="formula">Rᵢ = Uᵢ / Bᵢ</div>
-        <p>Rᵢ is the main ranking signal. Higher values mean the item returns more useful crisis information per unit of burden.</p>
+        <p>Rᵢ remains the core keyword-ranking signal. Higher values mean the item returns more useful crisis information per unit of burden.</p>
+      </div>
+      <div class="method-card">
+        <h3>Enhanced priority</h3>
+        <div class="formula">Pᵢ = Uᵢ* / adjusted Bᵢ</div>
+        <p>Pᵢ adds rarity, construct richness, portability, and redundancy penalties so obviously generic or repetitive items do not dominate the shortlist.</p>
       </div>
       <div class="method-card">
         <h3>Utility</h3>
@@ -318,7 +385,24 @@
       </div>
       <div class="note-card">
         <h3>What to look for</h3>
-        <p>Higher Rᵢ, moderate burden, and selected status usually indicate the clearest candidates for a compact production module.</p>
+        <p>Higher Pᵢ, moderate burden, and strong construct coverage usually indicate the clearest candidates for a compact production module.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="recommendations">
+    <div class="section-head">
+      <h2>Deployable Question Recommendations</h2>
+      <p>These candidate wordings are synthesized from the ranking output and the added documentation so the generic core is less demographic-heavy and the crisis toggles stay field-ready.</p>
+    </div>
+    <div class="recommendation-grid">
+      <div class="recommendation-column">
+        <h3>Generic Core</h3>
+        <div id="genericRecommendations"></div>
+      </div>
+      <div class="recommendation-column">
+        <h3>Crisis-Specific Toggles</h3>
+        <div id="specificRecommendations"></div>
       </div>
     </div>
   </section>
@@ -329,11 +413,6 @@
       <label>Source Filter</label>
       <select id="sourceFilter" title="Filter questions by source">
         <option value="all">All Sources</option>
-        <option value="COVID-19">COVID-19</option>
-        <option value="Hurricane Katrina 2007">Hurricane Katrina 2007</option>
-        <option value="Govt Shutdown Income">Govt Shutdown Income</option>
-        <option value="Govt Shutdown Crisis">Govt Shutdown Crisis</option>
-        <option value="Understanding Society">Understanding Society</option>
       </select>
     </div>
     <div class="control-group">
@@ -360,6 +439,7 @@
   <div class="kpis">
     <div class="kpi"><div class="value" id="kpiTotal">0</div><div class="label">Shown</div></div>
     <div class="kpi"><div class="value" id="kpiSelected">0</div><div class="label">Selected</div></div>
+    <div class="kpi"><div class="value" id="kpiAvgPi">0</div><div class="label">Avg Pi</div></div>
     <div class="kpi"><div class="value" id="kpiAvgRi">0</div><div class="label">Avg Ri</div></div>
     <div class="kpi"><div class="value" id="kpiDuration">0</div><div class="label">Est. Minutes</div></div>
     <div class="kpi"><div class="value" id="kpiBudget">0%</div><div class="label">Time Budget</div></div>
@@ -372,16 +452,16 @@
   </div>
   <div class="chart-grid">
     <div class="chart-card">
-      <h3>Top Questions by Utility-Burden Ratio (Ri)</h3>
-      <canvas id="chartRi"></canvas>
+      <h3>Top Questions by Enhanced Priority (Pi)</h3>
+      <canvas id="chartPi"></canvas>
     </div>
     <div class="chart-card">
-      <h3>Utility vs Burden Scatter</h3>
+      <h3>Augmented Utility vs Burden</h3>
       <canvas id="chartScatter"></canvas>
     </div>
     <div class="chart-card">
-      <h3>Toggle Category Distribution</h3>
-      <canvas id="chartToggle"></canvas>
+      <h3>Selected Construct Coverage</h3>
+      <canvas id="chartConstruct"></canvas>
     </div>
     <div class="chart-card">
       <h3>Time Budget Allocation</h3>
@@ -404,11 +484,12 @@
         <thead>
           <tr>
             <th data-sort="question_text">Question</th>
+            <th data-sort="recommended_wording">Deployable Wording</th>
             <th data-sort="source">Source</th>
             <th data-sort="toggle_category">Toggle</th>
+            <th data-sort="Pi">Pi</th>
             <th data-sort="Ri">Ri</th>
-            <th data-sort="Ui">Ui</th>
-            <th data-sort="Bi">Bi</th>
+            <th data-sort="constructs">Constructs</th>
             <th data-sort="selected">Status</th>
           </tr>
         </thead>
@@ -423,81 +504,42 @@
 </div>
 
 <script>
-// ── Embedded Data ──
-const DATA = [
-  {question_text:"Any financial difficulties",source:"COVID-19",toggle_category:"Generic Core",keywords:2,word_count:3,complexity:0,Ui:1.7,Bi:0.3,Ri:5.67,selected:true},
-  {question_text:"Lost earnings because of the pandemic",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:6,complexity:0,Ui:3.4,Bi:0.6,Ri:5.67,selected:true},
-  {question_text:"Stopped this work?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:3,word_count:3,complexity:0,Ui:1.4,Bi:0.3,Ri:4.67,selected:true},
-  {question_text:"Received stimulus payment",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:2,word_count:3,complexity:0,Ui:1.4,Bi:0.3,Ri:4.67,selected:true},
-  {question_text:"Stopped working at this business?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:3,word_count:5,complexity:0,Ui:2.25,Bi:0.5,Ri:4.50,selected:true},
-  {question_text:"Working in a job considered essential work?",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:9,complexity:0,Ui:3.6,Bi:0.9,Ri:4.00,selected:true},
-  {question_text:"How did you manage financial difficulties due to shutdown - sell belongings?",source:"Govt Shutdown Crisis",toggle_category:"Toggle: Financial Crisis",keywords:10,word_count:16,complexity:0,Ui:5.95,Bi:1.6,Ri:3.72,selected:true},
-  {question_text:"Only work from home",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:3,word_count:4,complexity:0,Ui:1.4,Bi:0.4,Ri:3.50,selected:true},
-  {question_text:"Stimulus payments",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:1,word_count:2,complexity:0,Ui:0.7,Bi:0.2,Ri:3.50,selected:true},
-  {question_text:"Paycheck protection",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:1,word_count:2,complexity:0,Ui:0.7,Bi:0.2,Ri:3.50,selected:true},
-  {question_text:"Did you evacuate from your home before Katrina or Rita hit?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:11,complexity:1.5,Ui:4.45,Bi:1.4,Ri:3.18,selected:true},
-  {question_text:"Were there any wages or salaries from this job?",source:"Govt Shutdown Income",toggle_category:"Generic Core",keywords:7,word_count:10,complexity:0.5,Ui:3.0,Bi:1.1,Ri:2.73,selected:true},
-  {question_text:"Did you experience major flooding in your home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:12,complexity:2.5,Ui:4.55,Bi:1.7,Ri:2.68,selected:true},
-  {question_text:"How severe was the property damage to your home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:2.5,Ui:4.55,Bi:1.8,Ri:2.53,selected:true},
-  {question_text:"Laid off or furloughed because of the pandemic",source:"COVID-19",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:8,complexity:1.5,Ui:2.55,Bi:1.1,Ri:2.32,selected:true},
-  {question_text:"Bothered by repeated disturbing memories of the hurricane?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:3.5,Ui:5.45,Bi:2.5,Ri:2.18,selected:true},
-  {question_text:"Bothered by repeated disturbing dreams about the hurricane?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.0,Ui:4.5,Bi:2.1,Ri:2.14,selected:true},
-  {question_text:"Did you lose your job because of the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:10,complexity:2.5,Ui:3.2,Bi:1.5,Ri:2.13,selected:true},
-  {question_text:"How much financial help did you receive from FEMA?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:9,complexity:1.0,Ui:2.3,Bi:1.1,Ri:2.09,selected:true},
-  {question_text:"Did you experience hurricane force winds at your location?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:2.5,Ui:3.6,Bi:1.8,Ri:2.00,selected:true},
-  {question_text:"Have you had trouble relaxing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:9,complexity:3.0,Ui:2.7,Bi:1.5,Ri:1.80,selected:true},
-  {question_text:"Have you been able to return to your original home?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:10,complexity:0,Ui:1.7,Bi:1.0,Ri:1.70,selected:true},
-  {question_text:"How afraid were you that you might be killed or seriously injured?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:16,complexity:3.0,Ui:3.7,Bi:2.2,Ri:1.68,selected:true},
-  {question_text:"Calculate respondent's age",source:"Understanding Society",toggle_category:"Generic Core",keywords:1,word_count:3,complexity:0,Ui:0.5,Bi:0.3,Ri:1.67,selected:true},
-  {question_text:"Was your business damaged or destroyed?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:10,complexity:3.0,Ui:2.55,Bi:1.6,Ri:1.59,selected:true},
-  {question_text:"How long did you stay in temporary housing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:12,complexity:2.5,Ui:2.7,Bi:1.7,Ri:1.59,selected:true},
-  {question_text:"And are you... Male / Female",source:"Understanding Society",toggle_category:"Generic Core",keywords:5,word_count:7,complexity:2.0,Ui:1.35,Bi:1.1,Ri:1.23,selected:true},
-  {question_text:"Are you normally resident at this address?",source:"Understanding Society",toggle_category:"Generic Core",keywords:5,word_count:11,complexity:0.5,Ui:1.4,Bi:1.2,Ri:1.17,selected:true},
-  {question_text:"Was anyone in your immediate family killed?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
-  {question_text:"Were you displaced from the place you were living?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
-  {question_text:"Were you physically injured as a result of the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:14,complexity:2.5,Ui:2.75,Bi:1.9,Ri:1.45,selected:false},
-  {question_text:"Have you been worrying too much about different things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:3.0,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
-  {question_text:"Have you felt your heart pounding or racing?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:12,complexity:3.5,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
-  {question_text:"Have you felt nervous anxious or on edge?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:12,complexity:3.5,Ui:2.7,Bi:1.9,Ri:1.42,selected:false},
-  {question_text:"Have you been unable to stop or control worrying?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:13,complexity:3.5,Ui:2.7,Bi:2.0,Ri:1.35,selected:false},
-  {question_text:"Bothered by trouble concentrating on things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:15,complexity:3.0,Ui:2.7,Bi:2.1,Ri:1.29,selected:false},
-  {question_text:"Bothered by feeling bad about yourself?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.0,Ui:2.7,Bi:2.1,Ri:1.29,selected:false},
-  {question_text:"Bothered by poor appetite or overeating?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.5,Ui:2.7,Bi:2.2,Ri:1.23,selected:false},
-  {question_text:"Have you felt emotionally distant or cut off from other people?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:15,complexity:3.5,Ui:2.7,Bi:2.2,Ri:1.23,selected:false},
-  {question_text:"Bothered by feeling down depressed or hopeless?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:16,complexity:3.5,Ui:2.7,Bi:2.3,Ri:1.17,selected:false},
-  {question_text:"How many days were you without electricity?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:11,complexity:2.5,Ui:1.8,Bi:1.6,Ri:1.13,selected:false},
-  {question_text:"Was your home damaged or destroyed by the disaster?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:4,word_count:10,complexity:3.0,Ui:1.8,Bi:1.6,Ri:1.13,selected:false},
-  {question_text:"Bothered by feeling tired or having little energy?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:8,word_count:17,complexity:3.5,Ui:2.7,Bi:2.4,Ri:1.13,selected:false},
-  {question_text:"Bothered by little interest or pleasure in doing things?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:3.5,Ui:2.7,Bi:2.5,Ri:1.08,selected:false},
-  {question_text:"Overall how would you rate the impact on your family?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:10,word_count:14,complexity:1.5,Ui:1.8,Bi:1.7,Ri:1.06,selected:false},
-  {question_text:"How many days were you without running water?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:12,complexity:2.5,Ui:1.8,Bi:1.7,Ri:1.06,selected:false},
-  {question_text:"Bothered by moving or speaking slowly or being restless?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:9,word_count:18,complexity:4.0,Ui:2.7,Bi:2.6,Ri:1.04,selected:false},
-  {question_text:"Did you receive help from other government agencies or nonprofit organizations?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:6,word_count:11,complexity:0.5,Ui:1.2,Bi:1.2,Ri:1.00,selected:false},
-  {question_text:"Bothered by trouble falling or staying asleep or sleeping too much?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:11,word_count:20,complexity:4.0,Ui:2.7,Bi:2.8,Ri:0.96,selected:false},
-  {question_text:"Did you have to move to a different city or state?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:7,word_count:16,complexity:3.0,Ui:1.8,Bi:2.2,Ri:0.82,selected:false},
-  {question_text:"Did you receive any help from FEMA?",source:"Hurricane Katrina 2007",toggle_category:"Toggle: Pandemic / Disaster",keywords:5,word_count:11,complexity:1.0,Ui:0.7,Bi:1.3,Ri:0.54,selected:false}
-];
-
 const SECS_PER_WORD = 7;
 const MAX_SECS = 1800;
+const DASHBOARD_PAYLOAD = window.PSID_DASHBOARD || { summary: {}, rows: [], recommendations: { generic: [], specific: [] } };
 
 // ── Dashboard Class ──
 class Dashboard {
-  constructor(data) {
-    this.raw = data;
-    this.filtered = data;
+  constructor(payload) {
+    this.summary = payload.summary || {};
+    this.recommendations = payload.recommendations || { generic: [], specific: [] };
+    this.raw = payload.rows || [];
+    this.filtered = this.raw;
     this.charts = {};
-    this.sortCol = 'Ri';
+    this.sortCol = 'Pi';
     this.sortDir = -1;
-    this.activeToggles = new Set(['Generic Core', 'Toggle: Pandemic / Disaster', 'Toggle: Financial Crisis']);
+    this.activeToggles = new Set(this.raw.map(d => d.toggle_category));
     this.init();
   }
 
   init() {
+    this.buildSourceFilter();
     this.buildToggleChips();
     this.buildConstructFilter();
+    this.renderRecommendations();
     this.bindEvents();
     this.applyFilters();
+  }
+
+  buildSourceFilter() {
+    const sel = document.getElementById('sourceFilter');
+    const sources = [...new Set(this.raw.map(d => d.source))].sort();
+    sources.forEach(source => {
+      const opt = document.createElement('option');
+      opt.value = source;
+      opt.textContent = source;
+      sel.appendChild(opt);
+    });
   }
 
   buildToggleChips() {
@@ -520,7 +562,7 @@ class Dashboard {
 
   buildConstructFilter() {
     const sel = document.getElementById('constructFilter');
-    const constructs = ['Economic / Income','Employment','Financial Coping','Housing / Shelter','Government Aid','Trauma / Health','Demographics'];
+    const constructs = [...new Set(this.raw.flatMap(d => d.constructs || []))].sort();
     constructs.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c; opt.textContent = c;
@@ -537,7 +579,7 @@ class Dashboard {
       th.addEventListener('click', () => {
         const col = th.dataset.sort;
         if (this.sortCol === col) this.sortDir *= -1;
-        else { this.sortCol = col; this.sortDir = col === 'Ri' || col === 'Ui' ? -1 : 1; }
+        else { this.sortCol = col; this.sortDir = ['Pi', 'Ri', 'Ui', 'augmented_utility'].includes(col) ? -1 : 1; }
         this.renderTable();
       });
     });
@@ -554,20 +596,10 @@ class Dashboard {
       if (src !== 'all' && d.source !== src) return false;
       if (sel === 'selected' && !d.selected) return false;
       if (sel === 'not_selected' && d.selected) return false;
-      if (q && !d.question_text.toLowerCase().includes(q)) return false;
+      const haystack = [d.question_text, d.recommended_wording, ...(d.constructs || [])].join(' ').toLowerCase();
+      if (q && !haystack.includes(q)) return false;
       if (construct !== 'all') {
-        const txt = d.question_text.toLowerCase();
-        const map = {
-          'Economic / Income': ['earning','income','wage','salar','pay','financial'],
-          'Employment': ['work','job','employ','furlough','laid off','essential','business','stop'],
-          'Financial Coping': ['financial difficul','manage','cope','saving','debt','sell','belong'],
-          'Housing / Shelter': ['home','hous','evacuate','flood','damage','destroy','displace','address','resident'],
-          'Government Aid': ['fema','stimulus','government','paycheck protection','agencies'],
-          'Trauma / Health': ['afraid','injur','kill','bother','disturb','dream','memor','nervous','relax','worry','depress','sleep','energy','pounding','edge','appetite','distant','hopeless','concentrat','restless'],
-          'Demographics': ['age','sex','male','female','calculate']
-        };
-        const keys = map[construct] || [];
-        if (!keys.some(k => txt.includes(k))) return false;
+        if (!(d.constructs || []).includes(construct)) return false;
       }
       return true;
     });
@@ -580,6 +612,7 @@ class Dashboard {
   renderKPIs() {
     const f = this.filtered;
     const sel = f.filter(d => d.selected);
+    const avgPi = f.length ? (f.reduce((s,d) => s + d.Pi, 0) / f.length).toFixed(2) : '0';
     const avgRi = f.length ? (f.reduce((s,d) => s + d.Ri, 0) / f.length).toFixed(2) : '0';
     const totalWords = sel.reduce((s,d) => s + d.word_count, 0);
     const mins = ((totalWords * SECS_PER_WORD) / 60).toFixed(1);
@@ -587,6 +620,7 @@ class Dashboard {
 
     document.getElementById('kpiTotal').textContent = f.length;
     document.getElementById('kpiSelected').textContent = sel.length;
+  document.getElementById('kpiAvgPi').textContent = avgPi;
     document.getElementById('kpiAvgRi').textContent = avgRi;
     document.getElementById('kpiDuration').textContent = mins;
     document.getElementById('kpiBudget').textContent = pct + '%';
@@ -594,20 +628,20 @@ class Dashboard {
   }
 
   renderCharts() {
-    this.renderRiChart();
+    this.renderPiChart();
     this.renderScatter();
-    this.renderToggleChart();
+    this.renderConstructChart();
     this.renderTimeChart();
   }
 
-  renderRiChart() {
-    const top = [...this.filtered].sort((a,b) => b.Ri - a.Ri).slice(0, 12);
+  renderPiChart() {
+    const top = [...this.filtered].sort((a,b) => b.Pi - a.Pi).slice(0, 12);
     const cfg = {
       type: 'bar',
       data: {
         labels: top.map(d => d.question_text.length > 35 ? d.question_text.substring(0,35)+'...' : d.question_text),
         datasets: [{
-          data: top.map(d => d.Ri),
+          data: top.map(d => d.Pi),
           backgroundColor: top.map(d => d.selected ? '#2563eb' : '#d1d5db'),
           borderRadius: 4,
         }]
@@ -618,13 +652,13 @@ class Dashboard {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { title: { display: true, text: 'Ri Score' }, grid: { color: '#f0f0f0' } },
+          x: { title: { display: true, text: 'Pi Score' }, grid: { color: '#f0f0f0' } },
           y: { ticks: { font: { size: 10 } }, grid: { display: false } }
         }
       }
     };
-    if (this.charts.ri) { this.charts.ri.destroy(); }
-    this.charts.ri = new Chart(document.getElementById('chartRi'), cfg);
+    if (this.charts.pi) { this.charts.pi.destroy(); }
+    this.charts.pi = new Chart(document.getElementById('chartPi'), cfg);
   }
 
   renderScatter() {
@@ -632,7 +666,7 @@ class Dashboard {
     const datasets = {};
     this.filtered.forEach(d => {
       if (!datasets[d.toggle_category]) datasets[d.toggle_category] = { label: d.toggle_category.replace('Toggle: ',''), data: [], backgroundColor: colors[d.toggle_category] || '#6b7280', pointRadius: 5 };
-      datasets[d.toggle_category].data.push({ x: d.Bi, y: d.Ui, label: d.question_text });
+      datasets[d.toggle_category].data.push({ x: d.Bi, y: d.augmented_utility, label: d.question_text, pi: d.Pi });
     });
     const cfg = {
       type: 'scatter',
@@ -641,11 +675,11 @@ class Dashboard {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } },
-          tooltip: { callbacks: { label: ctx => ctx.raw.label ? ctx.raw.label.substring(0,50) + ` (Ui:${ctx.raw.y}, Bi:${ctx.raw.x})` : '' } }
+          tooltip: { callbacks: { label: ctx => ctx.raw.label ? ctx.raw.label.substring(0,50) + ` (U*:${ctx.raw.y.toFixed(2)}, Bi:${ctx.raw.x.toFixed(2)}, Pi:${ctx.raw.pi.toFixed(2)})` : '' } }
         },
         scales: {
           x: { title: { display: true, text: 'Burden (Bi)' }, grid: { color: '#f0f0f0' } },
-          y: { title: { display: true, text: 'Utility (Ui)' }, grid: { color: '#f0f0f0' } }
+          y: { title: { display: true, text: 'Augmented Utility (U*)' }, grid: { color: '#f0f0f0' } }
         }
       }
     };
@@ -653,28 +687,32 @@ class Dashboard {
     this.charts.scatter = new Chart(document.getElementById('chartScatter'), cfg);
   }
 
-  renderToggleChart() {
+  renderConstructChart() {
     const counts = {};
-    this.filtered.forEach(d => {
-      const key = d.toggle_category.replace('Toggle: ','');
-      counts[key] = (counts[key] || 0) + 1;
+    this.filtered.filter(d => d.selected).forEach(d => {
+      (d.constructs || []).forEach(construct => {
+        counts[construct] = (counts[construct] || 0) + 1;
+      });
     });
-    const labels = Object.keys(counts);
-    const colors = {'Generic Core':'#2563eb','Pandemic / Disaster':'#9d174d','Financial Crisis':'#d97706'};
+    const labels = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 8);
+    const palette = ['#1e3a5f', '#2563eb', '#0f766e', '#d97706', '#9d174d', '#64748b', '#0ea5e9', '#16a34a'];
     const cfg = {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels,
-        datasets: [{ data: labels.map(l => counts[l]), backgroundColor: labels.map(l => colors[l] || '#6b7280'), borderWidth: 0 }]
+        datasets: [{ data: labels.map(l => counts[l]), backgroundColor: labels.map((_, index) => palette[index % palette.length]), borderRadius: 4 }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        cutout: '55%',
-        plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { title: { display: true, text: 'Selected questions' }, grid: { color: '#f0f0f0' } }
+        }
       }
     };
-    if (this.charts.toggle) { this.charts.toggle.destroy(); }
-    this.charts.toggle = new Chart(document.getElementById('chartToggle'), cfg);
+    if (this.charts.construct) { this.charts.construct.destroy(); }
+    this.charts.construct = new Chart(document.getElementById('chartConstruct'), cfg);
   }
 
   renderTimeChart() {
@@ -721,6 +759,7 @@ class Dashboard {
   renderTable() {
     const sorted = [...this.filtered].sort((a,b) => {
       let va = a[this.sortCol], vb = b[this.sortCol];
+      if (Array.isArray(va)) { va = va.join(', '); vb = vb.join(', '); }
       if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
       if (typeof va === 'boolean') { va = va ? 1 : 0; vb = vb ? 1 : 0; }
       return va < vb ? -this.sortDir : va > vb ? this.sortDir : 0;
@@ -737,19 +776,45 @@ class Dashboard {
     tbody.innerHTML = sorted.map(d => `
       <tr>
         <td style="max-width:340px">${d.question_text}</td>
+        <td style="max-width:340px">${d.recommended_wording || ''}</td>
         <td style="white-space:nowrap">${d.source}</td>
         <td>${toggleBadge(d.toggle_category)}</td>
+        <td><strong>${d.Pi.toFixed(2)}</strong></td>
         <td><strong>${d.Ri.toFixed(2)}</strong></td>
-        <td>${d.Ui.toFixed(2)}</td>
-        <td>${d.Bi.toFixed(2)}</td>
+        <td>${(d.constructs || []).join(', ')}</td>
         <td>${d.selected ? '<span class="badge badge-selected">Selected</span>' : '<span class="badge badge-not">Not selected</span>'}</td>
       </tr>
+    `).join('');
+  }
+
+  renderRecommendations() {
+    this.renderRecommendationColumn('genericRecommendations', this.recommendations.generic || []);
+    this.renderRecommendationColumn('specificRecommendations', this.recommendations.specific || []);
+  }
+
+  renderRecommendationColumn(containerId, items) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = items.map(item => `
+      <div class="recommendation-card">
+        <h3>${item.title}</h3>
+        <div class="recommendation-meta">
+          <span class="meta-pill">${item.module}</span>
+          <span class="meta-pill">Support Pi ${item.support_score ? item.support_score.toFixed(2) : 'n/a'}</span>
+        </div>
+        <blockquote>${item.question}</blockquote>
+        <p>${item.why_it_matters}</p>
+        <div class="recommendation-meta">
+          ${(item.constructs || []).map(construct => `<span class="meta-pill">${construct}</span>`).join('')}
+        </div>
+        <p>Evidence sources: ${(item.supporting_sources || []).join(', ') || 'No direct source match'}</p>
+        ${(item.supporting_examples || []).length ? `<ul>${item.supporting_examples.map(example => `<li>${example}</li>`).join('')}</ul>` : ''}
+      </div>
     `).join('');
   }
 }
 
 // Launch
-new Dashboard(DATA);
+new Dashboard(DASHBOARD_PAYLOAD);
 </script>
 </body>
 </html>
