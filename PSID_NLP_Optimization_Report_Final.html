@@ -6,25 +6,24 @@
   <title>PSID NLP Optimization Report</title>
   <style>
     :root {
-      --ink: #14263b;
-      --muted: #5c6f83;
-      --line: #d8e2ea;
-      --surface: rgba(255, 255, 255, 0.94);
+      --bg: #f8f9fb;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --surface: #ffffff;
       --surface-strong: #ffffff;
-      --page: radial-gradient(circle at top left, rgba(251, 191, 36, 0.2), transparent 28%),
-              radial-gradient(circle at right top, rgba(14, 116, 144, 0.14), transparent 32%),
-              linear-gradient(160deg, #f4f7f9, #f8fbfe 45%, #eef4f8);
-      --navy: #113b66;
+      --page: #f8f9fb;
+      --navy: #1e3a5f;
       --blue: #2563eb;
       --teal: #0f766e;
-      --orange: #c76a11;
-      --brick: #b42318;
-      --green: #157347;
-      --shadow-lg: 0 24px 48px rgba(20, 38, 59, 0.12);
-      --shadow-md: 0 16px 32px rgba(20, 38, 59, 0.08);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 18px;
+      --orange: #d97706;
+      --brick: #dc2626;
+      --green: #059669;
+      --shadow-lg: none;
+      --shadow-md: none;
+      --radius-xl: 12px;
+      --radius-lg: 10px;
+      --radius-md: 10px;
     }
 
     * {
@@ -38,11 +37,11 @@
     }
 
     body {
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--page);
       color: var(--ink);
       line-height: 1.55;
-      padding: 24px;
+      padding: 24px 20px 48px;
     }
 
     a {
@@ -50,52 +49,45 @@
     }
 
     .shell {
-      max-width: 1440px;
+      max-width: 1120px;
       margin: 0 auto;
     }
 
     .hero {
-      position: relative;
-      overflow: hidden;
       border-radius: var(--radius-xl);
-      padding: 34px 34px 28px;
-      color: #fff;
-      background: linear-gradient(135deg, #17395f 0%, #205989 46%, #a04b11 100%);
+      padding: 24px;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
       box-shadow: var(--shadow-lg);
       margin-bottom: 20px;
     }
 
     .hero::after {
-      content: "";
-      position: absolute;
-      inset: auto -80px -100px auto;
-      width: 280px;
-      height: 280px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 66%);
-      pointer-events: none;
+      content: none;
     }
 
     .eyebrow {
       display: inline-flex;
-      font-size: 0.76rem;
-      font-weight: 800;
+      font-size: 0.72rem;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 12px;
-      color: rgba(255, 255, 255, 0.82);
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      color: var(--blue);
     }
 
     .hero h1 {
-      font-size: clamp(2rem, 3vw, 3rem);
-      line-height: 1.08;
-      max-width: 980px;
-      margin-bottom: 10px;
+      font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+      line-height: 1.15;
+      max-width: 860px;
+      margin-bottom: 8px;
+      color: var(--navy);
     }
 
     .hero p {
-      max-width: 920px;
-      color: rgba(255, 255, 255, 0.9);
+      max-width: 860px;
+      color: var(--muted);
     }
 
     .hero-actions,
@@ -106,19 +98,20 @@
     }
 
     .hero-actions {
-      margin-top: 20px;
+      margin-top: 16px;
     }
 
     .button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0 18px;
+      min-height: 38px;
+      padding: 0 14px;
       border-radius: 999px;
       text-decoration: none;
-      font-weight: 800;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
     }
 
     .button:hover {
@@ -127,63 +120,61 @@
 
     .button.primary {
       color: #fff;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 14px 28px rgba(17, 59, 102, 0.18);
+      background: var(--navy);
+      border: 1px solid var(--navy);
     }
 
     .button.secondary {
-      color: #fff;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
     }
 
     .button.panel-primary {
-      background: #113b66;
+      background: var(--navy);
       color: #fff;
-      border: 1px solid transparent;
-      box-shadow: 0 10px 22px rgba(17, 59, 102, 0.16);
+      border: 1px solid var(--navy);
     }
 
     .button.panel-secondary {
-      color: #113b66;
-      border: 1px solid #c9d6e3;
-      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      background: var(--surface);
     }
 
     .quick-nav {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     .quick-link {
-      display: block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       text-decoration: none;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: var(--surface);
+      border: 1px solid var(--line);
       border-radius: var(--radius-md);
-      padding: 14px 15px;
-      color: #fff;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
+      padding: 8px 12px;
+      color: var(--ink);
     }
 
     .quick-link span {
-      display: block;
+      display: inline;
     }
 
     .quick-link .label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.74;
-      margin-bottom: 4px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-right: 6px;
     }
 
     .quick-link .value {
-      font-weight: 800;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--navy);
     }
 
     .kpi-grid,
@@ -265,7 +256,7 @@
 
     .insight-card {
       padding: 18px;
-      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      background: var(--surface);
     }
 
     .insight-card h3 {
@@ -287,9 +278,9 @@
       align-items: center;
       min-height: 52px;
       padding: 10px 14px;
-      border-radius: 16px;
-      background: #f4f7fb;
-      border: 1px solid #d8e2ea;
+      border-radius: 8px;
+      background: #eff4fb;
+      border: 1px solid #dbe4ef;
       font-size: 1.22rem;
       font-weight: 800;
       margin: 12px 0;
@@ -312,7 +303,7 @@
     .table-card header {
       padding: 18px 18px 12px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 252, 0.92));
+      background: #fbfcfd;
     }
 
     .table-card header h3 {
@@ -327,7 +318,7 @@
     }
 
     thead {
-      background: #103c6a;
+      background: var(--navy);
       color: #fff;
     }
 
@@ -355,7 +346,7 @@
 
     .figure-card {
       overflow: hidden;
-      background: linear-gradient(180deg, #ffffff, #f9fbfd);
+      background: var(--surface);
     }
 
     .figure-card img {
@@ -502,13 +493,20 @@
       background: rgba(0, 0, 0, 0.35);
     }
 
+    .button.secondary:hover,
+    .button.panel-secondary:hover,
+    .quick-link:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
     @media (max-width: 768px) {
       body {
-        padding: 14px;
+        padding: 16px;
       }
 
       .hero {
-        padding: 24px 18px 22px;
+        padding: 20px;
       }
 
       .panel,
@@ -521,6 +519,15 @@
 
       .button {
         width: 100%;
+      }
+
+      .quick-nav {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .quick-link {
+        justify-content: flex-start;
       }
     }
   </style>
@@ -536,6 +543,8 @@
       <div class="hero-actions">
         <a class="button primary" href="PSID_Crisis_Module_Dashboard.html">Open Dashboard</a>
         <a class="button primary" href="PSID_Module_Questionnaire_Master.html">Open Questionnaire Viewer</a>
+        <a class="button secondary" href="PSID_Generic_Module_Questionnaire.html">Generic Demo</a>
+        <a class="button secondary" href="PSID_Crisis_Specific_Questionnaire_Demo.html">Crisis-Specific Demo</a>
         <a class="button secondary" href="PSID_NLP_Optimization_Report_Final.docx.md">View Source Note</a>
       </div>
       <div class="quick-nav">

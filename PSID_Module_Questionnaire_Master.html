@@ -6,23 +6,22 @@
   <title>PSID Questionnaire Master Viewer</title>
   <style>
     :root {
-      --ink: #10243a;
-      --muted: #5f7287;
-      --line: #d7dee6;
-      --surface: rgba(255, 255, 255, 0.92);
-      --surface-strong: rgba(255, 255, 255, 0.98);
-      --page: radial-gradient(circle at top left, rgba(254, 240, 138, 0.45), transparent 26%),
-              radial-gradient(circle at right top, rgba(147, 197, 253, 0.35), transparent 30%),
-              linear-gradient(160deg, #f5f7f2, #f8fbfe 44%, #eef4f8);
-      --navy: #143b63;
-      --copper: #b45309;
-      --brick: #b91c1c;
+      --bg: #f8f9fb;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --surface: #ffffff;
+      --surface-strong: #ffffff;
+      --page: #f8f9fb;
+      --navy: #1e3a5f;
+      --accent: #2563eb;
+      --brick: #dc2626;
       --sky: #0f766e;
-      --shadow-lg: 0 24px 48px rgba(16, 36, 58, 0.12);
-      --shadow-md: 0 12px 28px rgba(16, 36, 58, 0.08);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 18px;
+      --shadow-lg: none;
+      --shadow-md: none;
+      --radius-xl: 12px;
+      --radius-lg: 10px;
+      --radius-md: 10px;
     }
 
     * {
@@ -32,49 +31,75 @@
     }
 
     body {
-      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--page);
       color: var(--ink);
       line-height: 1.5;
-      padding: 24px;
+      padding: 24px 20px 48px;
     }
 
     .shell {
-      max-width: 1520px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
-    .hero {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, #17395d 0%, #25517f 40%, #9a3412 100%);
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .nav-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .nav-link.primary {
+      background: var(--navy);
       color: #fff;
+      border-color: var(--navy);
+    }
+
+    .hero {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
       border-radius: var(--radius-xl);
-      padding: 34px 34px 28px;
+      padding: 24px;
       box-shadow: var(--shadow-lg);
       margin-bottom: 18px;
     }
 
     .hero::after {
-      content: "";
-      position: absolute;
-      inset: auto -80px -100px auto;
-      width: 280px;
-      height: 280px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.24), transparent 66%);
-      pointer-events: none;
+      content: none;
     }
 
     .hero h1 {
-      font-size: clamp(2rem, 3vw, 2.8rem);
-      letter-spacing: 0.01em;
+      font-size: clamp(1.5rem, 2.3vw, 2.1rem);
       margin-bottom: 8px;
+      color: var(--navy);
     }
 
     .hero p {
-      max-width: 940px;
-      color: rgba(255, 255, 255, 0.9);
+      max-width: 860px;
+      color: var(--muted);
     }
 
     .hero-grid {
@@ -85,12 +110,10 @@
     }
 
     .hero-card {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: #fbfcfd;
+      border: 1px solid var(--line);
       border-radius: var(--radius-md);
       padding: 14px 15px;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
     }
 
     .hero-card .label {
@@ -100,6 +123,7 @@
       letter-spacing: 0.08em;
       opacity: 0.78;
       margin-bottom: 5px;
+      color: var(--muted);
     }
 
     .hero-card .value {
@@ -131,9 +155,9 @@
     .eyebrow {
       font-size: 0.74rem;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--copper);
-      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      font-weight: 700;
       margin-bottom: 10px;
     }
 
@@ -158,9 +182,9 @@
 
     .tab-button {
       width: 100%;
-      border: 1px solid #ccd6e0;
+      border: 1px solid var(--line);
       background: var(--surface-strong);
-      border-radius: 16px;
+      border-radius: 10px;
       padding: 14px 14px 13px;
       text-align: left;
       cursor: pointer;
@@ -170,15 +194,14 @@
     .tab-button:hover,
     .tab-button:focus-visible {
       transform: translateY(-1px);
-      border-color: #8da3b7;
-      box-shadow: 0 10px 24px rgba(16, 36, 58, 0.08);
+      border-color: var(--accent);
       outline: none;
     }
 
     .tab-button[aria-selected="true"] {
-      border-color: transparent;
-      background: linear-gradient(135deg, #fff7ed, #ffffff 44%, #eff6ff);
-      box-shadow: inset 0 0 0 2px rgba(20, 59, 99, 0.18), 0 14px 28px rgba(16, 36, 58, 0.1);
+      border-color: var(--accent);
+      background: #f8fbff;
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
     }
 
     .tab-title {
@@ -227,9 +250,10 @@
       min-height: 44px;
       border-radius: 999px;
       text-decoration: none;
-      font-weight: 800;
+      font-size: 0.82rem;
+      font-weight: 600;
       border: 1px solid transparent;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
     }
 
     .action:hover {
@@ -239,13 +263,18 @@
     .action.primary {
       background: var(--navy);
       color: #fff;
-      box-shadow: 0 10px 22px rgba(20, 59, 99, 0.22);
+      border-color: var(--navy);
     }
 
     .action.secondary {
-      background: #fff;
+      background: var(--surface);
       color: var(--ink);
-      border-color: #ccd6e0;
+      border-color: var(--line);
+    }
+
+    .action.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .viewer {
@@ -255,7 +284,7 @@
     .viewer-head {
       padding: 20px 22px 16px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 252, 0.94));
+      background: #fbfcfd;
     }
 
     .viewer-meta {
@@ -264,14 +293,14 @@
       gap: 12px;
       padding: 16px 22px;
       border-bottom: 1px solid var(--line);
-      background: rgba(251, 252, 254, 0.86);
+      background: #fbfcfd;
     }
 
     .meta-card {
-      border: 1px solid #dde5ed;
-      border-radius: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
       padding: 12px 14px;
-      background: rgba(255, 255, 255, 0.86);
+      background: var(--surface);
     }
 
     .meta-card .label {
@@ -303,9 +332,9 @@
     iframe {
       display: block;
       width: 100%;
-      height: 1280px;
-      border: 1px solid #d7dee6;
-      border-radius: 18px;
+      height: 1520px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
       background: #fff;
     }
 
@@ -324,8 +353,8 @@
     }
 
     .print-card {
-      border: 1px solid #d7dee6;
-      border-radius: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
       padding: 14px;
     }
 
@@ -349,7 +378,7 @@
       }
 
       iframe {
-        height: 980px;
+        height: 1100px;
       }
     }
 
@@ -359,11 +388,16 @@
       }
 
       .hero {
-        padding: 24px 20px 20px;
+        padding: 20px;
       }
 
       .viewer-meta,
       .print-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-nav {
+        display: grid;
         grid-template-columns: 1fr;
       }
     }
@@ -405,6 +439,12 @@
 </head>
 <body>
   <div class="shell">
+    <div class="page-nav">
+      <a class="nav-link primary" href="PSID_Crisis_Module_Dashboard.html">Dashboard</a>
+      <a class="nav-link" href="PSID_NLP_Optimization_Report_Final.html">Final Report</a>
+      <a class="nav-link" href="PSID_Generic_Module_Questionnaire.html">Generic Demo</a>
+      <a class="nav-link" href="PSID_Crisis_Specific_Questionnaire_Demo.html">Crisis-Specific Demo</a>
+    </div>
     <section class="hero">
       <h1>PSID Questionnaire Master Viewer</h1>
       <p>
