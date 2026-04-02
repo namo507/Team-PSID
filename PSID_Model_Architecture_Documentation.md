@@ -24,16 +24,16 @@ The final workflow does not just rank questions by keyword relevance. It uses a 
 
 The current validated final outputs are:
 
-| Metric                 | Value |
-|------------------------|------:|
-| Total ranked questions |    52 |
-| Selected questions     |    28 |
-| Selected minutes       | 29.17 |
-| Full corpus minutes    | 68.95 |
-| Average Ri             | 2.079 |
-| Maximum Ri             | 5.667 |
-| Average Pi             | 2.452 |
-| Maximum Pi             | 7.809 |
+| Metric | Value | Calculation / rule |
+| --- | ---: | --- |
+| Total ranked questions | 52 | `rows = len(df) = 52` |
+| Selected questions | 28 | `selected_rows = len(df[df["selected"]]) = 28` |
+| Selected minutes | 29.17 | `selected_minutes = sum(word_count * 7 / 60 for selected rows) = 29.17` |
+| Full corpus minutes | 68.95 | `all_minutes = sum(word_count * 7 / 60 for all 52 rows) = 68.95` |
+| Average Ri | 2.079 | `avg_ri = mean(Ri across all rows) = 2.079` |
+| Maximum Ri | 5.667 | `max_ri = max(Ri across all rows) = 5.667` |
+| Average Pi | 2.452 | `avg_pi = mean(Pi across all rows) = 2.452` |
+| Maximum Pi | 7.809 | `max_pi = max(Pi across all rows) = 7.809` |
 
 ## 2. The Main Files And What They Do
 
@@ -173,19 +173,32 @@ It still starts with utility and burden, but it also asks:
 
 That is why `Pi` is the better score for final selection and recommendation design.
 
+### How the scaled terms are calculated
+
+The enhanced model uses min-max scaling for several intermediate fields. In the current scored dataset, the ranges are:
+
+| Scaled field | Min input | Max input | Calculation / rule |
+| --- | ---: | ---: | --- |
+| `idf_scaled` | 2.7805 | 4.2771 | `(idf_strength - 2.7805) / (4.2771 - 2.7805)` |
+| `redundancy_scaled` | 0.0000 | 1.0000 | `(redundancy_penalty - 0.0) / (1.0 - 0.0)` |
+| `construct_scaled` | 2.1457 | 17.8633 | `(construct_bonus - 2.1457) / (17.8633 - 2.1457)` |
+| `richness_scaled` | 1 | 2 | `(construct_count - 1) / (2 - 1)` |
+
 ## 7. The Construct-Priority Weights
 
 The workflow defines the following construct weights in `CONSTRUCT_PRIORITY`:
 
-| Construct         | Weight |
-|-------------------|-------:|
-| Trauma / Health   |   0.58 |
-| Housing / Shelter |   0.55 |
-| Government Aid    |   0.48 |
-| Financial Coping  |   0.45 |
-| Employment        |   0.42 |
-| Economic / Income |   0.40 |
-| Demographics      |   0.14 |
+These weights are fixed design constants inside the code. They are not learned from the data. The calculation column shows the exact rule by which each value enters the scoring workflow.
+
+| Construct | Weight | Calculation / rule |
+| --- | ---: | --- |
+| Trauma / Health | 0.58 | Direct constant assignment: `CONSTRUCT_PRIORITY["Trauma / Health"] = 0.58`; if this is the only construct on a question, then `priority = 0.58`. |
+| Housing / Shelter | 0.55 | Direct constant assignment: `CONSTRUCT_PRIORITY["Housing / Shelter"] = 0.55`; used inside `priority = mean(weights for included constructs)`. |
+| Government Aid | 0.48 | Direct constant assignment: `CONSTRUCT_PRIORITY["Government Aid"] = 0.48`; used inside `priority = mean(weights for included constructs)`. |
+| Financial Coping | 0.45 | Direct constant assignment: `CONSTRUCT_PRIORITY["Financial Coping"] = 0.45`; used inside `priority = mean(weights for included constructs)`. |
+| Employment | 0.42 | Direct constant assignment: `CONSTRUCT_PRIORITY["Employment"] = 0.42`; used inside `priority = mean(weights for included constructs)`. |
+| Economic / Income | 0.40 | Direct constant assignment: `CONSTRUCT_PRIORITY["Economic / Income"] = 0.40`; used inside `priority = mean(weights for included constructs)`. |
+| Demographics | 0.14 | Direct constant assignment: `CONSTRUCT_PRIORITY["Demographics"] = 0.14`; used inside `priority = mean(weights for included constructs)`. |
 
 ### Why these weights matter
 
@@ -251,12 +264,12 @@ The portability bonus rewards wording that can be reused across crises.
 
 The current logic is:
 
-``` text
-Generic Core and no source-specific term -> 0.16
-Generic Core and source-specific term -> 0.03
-Toggle item and no source-specific term -> 0.08
-Toggle item and source-specific term -> 0.02
-```
+| Scenario | Bonus | Calculation / rule |
+| --- | ---: | --- |
+| Generic Core and no source-specific term | 0.16 | If `toggle_category == "Generic Core"` and `_contains_source_specific_term(question_text) == False`, return `0.16`. |
+| Generic Core and source-specific term | 0.03 | If `toggle_category == "Generic Core"` and `_contains_source_specific_term(question_text) == True`, return `0.03`. |
+| Toggle item and no source-specific term | 0.08 | If `toggle_category != "Generic Core"` and `_contains_source_specific_term(question_text) == False`, return `0.08`. |
+| Toggle item and source-specific term | 0.02 | If `toggle_category != "Generic Core"` and `_contains_source_specific_term(question_text) == True`, return `0.02`. |
 
 ### Why this matters
 
@@ -293,18 +306,24 @@ Recommended wording:
 
 > Have you experienced any financial difficulties because of the crisis?
 
-Values:
+Values and calculations:
 
--   `Ui = 1.7`
--   `Bi = 0.3`
--   `Ri = 5.667`
--   `idf_scaled = 0.665`
--   `construct_scaled = 1.000`
--   `richness_scaled = 0.000`
--   `portability_bonus = 0.16`
--   `redundancy_scaled = 0.418`
--   `augmented_utility = 2.742`
--   `Pi = 7.187`
+| Metric | Value | Calculation / rule |
+| --- | ---: | --- |
+| `Ui` | 1.700 | `0.85 + 0.85 = 1.70` from tagged keywords `any financial difficulties` and `financial difficulties` |
+| `Bi` | 0.300 | `0.10 * 3 + 0.20 * 0.0 = 0.30` |
+| `Ri` | 5.667 | `1.70 / 0.30 = 5.667` |
+| `idf_strength` | 3.776 | `average_idf(question_text) = 3.7758`, then rounded to `3.776` |
+| `idf_scaled` | 0.665 | `(3.7758 - 2.7805) / (4.2771 - 2.7805) = 0.665` |
+| `construct_bonus` | 17.863 | `17.333 + 0.450 + 0.08 * 1 = 17.863` |
+| `construct_scaled` | 1.000 | `(17.8633 - 2.1457) / (17.8633 - 2.1457) = 1.000` |
+| `construct_count` | 1 | `len(set(["Financial Coping"])) = 1` |
+| `richness_scaled` | 0.000 | `(1 - 1) / (2 - 1) = 0.000` |
+| `portability_bonus` | 0.160 | `Generic Core` and no source-specific term, so the rule returns `0.16` |
+| `redundancy_penalty` | 0.418 | `max cosine similarity to another question = 0.4179`, then rounded to `0.418` |
+| `redundancy_scaled` | 0.418 | `(0.4179 - 0.0) / (1.0 - 0.0) = 0.418` |
+| `augmented_utility` | 2.742 | `1.70 * (1 + 0.32*0.665 + 0.24*1.000 + 0.12*0.000 + 0.16) = 2.742` |
+| `Pi` | 7.187 | `2.742 / [0.30 * (1 + 0.65*0.418)] = 7.187` |
 
 #### Ri calculation
 
@@ -354,18 +373,24 @@ Recommended wording:
 
 > Did you lose earnings because of the pandemic?
 
-Values:
+Values and calculations:
 
--   `Ui = 3.4`
--   `Bi = 0.6`
--   `Ri = 5.667`
--   `idf_scaled = 0.946`
--   `construct_scaled = 0.366`
--   `richness_scaled = 1.000`
--   `portability_bonus = 0.02`
--   `redundancy_scaled = 0.170`
--   `augmented_utility = 5.203`
--   `Pi = 7.809`
+| Metric | Value | Calculation / rule |
+| --- | ---: | --- |
+| `Ui` | 3.400 | `0.80 + 0.80 + 0.90 + 0.90 = 3.40` from tagged keywords `earnings`, `lost earnings`, `pandemic`, and `the pandemic` |
+| `Bi` | 0.600 | `0.10 * 6 + 0.20 * 0.0 = 0.60` |
+| `Ri` | 5.667 | `3.40 / 0.60 = 5.667` |
+| `idf_strength` | 4.196 | `average_idf(question_text) = 4.1961`, then rounded to `4.196` |
+| `idf_scaled` | 0.946 | `(4.1961 - 2.7805) / (4.2771 - 2.7805) = 0.946` |
+| `construct_bonus` | 7.893 | `7.243 + 0.490 + 0.08 * 2 = 7.893` |
+| `construct_scaled` | 0.366 | `(7.8929 - 2.1457) / (17.8633 - 2.1457) = 0.366` |
+| `construct_count` | 2 | `len(set(["Economic / Income", "Trauma / Health"])) = 2` |
+| `richness_scaled` | 1.000 | `(2 - 1) / (2 - 1) = 1.000` |
+| `portability_bonus` | 0.020 | Toggle item with a source-specific term, so the rule returns `0.02` |
+| `redundancy_penalty` | 0.170 | `max cosine similarity to another question = 0.1700`, then rounded to `0.170` |
+| `redundancy_scaled` | 0.170 | `(0.1700 - 0.0) / (1.0 - 0.0) = 0.170` |
+| `augmented_utility` | 5.203 | `3.40 * (1 + 0.32*0.946 + 0.24*0.366 + 0.12*1.000 + 0.02) = 5.203` |
+| `Pi` | 7.809 | `5.203 / [0.60 * (1 + 0.65*0.170)] = 7.809` |
 
 #### Construct bonus breakdown
 
@@ -409,18 +434,24 @@ Recommended wording:
 
 > How did your household manage financial difficulties caused by the shutdown or crisis?
 
-Values:
+Values and calculations:
 
--   `Ui = 5.95`
--   `Bi = 1.6`
--   `Ri = 3.719`
--   `idf_scaled = 0.826`
--   `construct_scaled = 0.691`
--   `richness_scaled = 1.000`
--   `portability_bonus = 0.02`
--   `redundancy_scaled = 0.418`
--   `augmented_utility = 9.343`
--   `Pi = 4.592`
+| Metric | Value | Calculation / rule |
+| --- | ---: | --- |
+| `Ui` | 5.950 | `0.85 + 0.75 + 0.70 + 0.85 + 0.75 + 0.65 + 0.65 + 0.75 = 5.95` from the eight tagged keywords on this item |
+| `Bi` | 1.600 | `0.10 * 16 + 0.20 * 0.0 = 1.60` |
+| `Ri` | 3.719 | `5.95 / 1.60 = 3.719` |
+| `idf_strength` | 4.017 | `average_idf(question_text) = 4.0170`, then rounded to `4.017` |
+| `idf_scaled` | 0.826 | `(4.0170 - 2.7805) / (4.2771 - 2.7805) = 0.826` |
+| `construct_bonus` | 13.006 | `12.381 + 0.465 + 0.08 * 2 = 13.006` |
+| `construct_scaled` | 0.691 | `(13.0060 - 2.1457) / (17.8633 - 2.1457) = 0.691` |
+| `construct_count` | 2 | `len(set(["Financial Coping", "Government Aid"])) = 2` |
+| `richness_scaled` | 1.000 | `(2 - 1) / (2 - 1) = 1.000` |
+| `portability_bonus` | 0.020 | Toggle item with a source-specific term, so the rule returns `0.02` |
+| `redundancy_penalty` | 0.418 | `max cosine similarity to another question = 0.4179`, then rounded to `0.418` |
+| `redundancy_scaled` | 0.418 | `(0.4179 - 0.0) / (1.0 - 0.0) = 0.418` |
+| `augmented_utility` | 9.343 | `5.95 * (1 + 0.32*0.826 + 0.24*0.691 + 0.12*1.000 + 0.02) = 9.343` |
+| `Pi` | 4.592 | `9.343 / [1.60 * (1 + 0.65*0.418)] = 4.592` |
 
 #### Construct bonus breakdown
 
@@ -434,6 +465,18 @@ So:
 
 ``` text
 construct_bonus = 12.381 + 0.465 + 0.160 = 13.006
+```
+
+#### Pi calculation
+
+``` text
+augmented_utility = 5.95 * (1 + 0.32*0.826 + 0.24*0.691 + 0.12*1.000 + 0.02)
+                  = 5.95 * 1.5702
+                  = 9.343
+
+Pi = 9.343 / [1.6 * (1 + 0.65*0.418)]
+   = 9.343 / 2.0349
+   = 4.592
 ```
 
 Why its `Pi` is lower than the pandemic example even though `Ui` is high:
@@ -458,9 +501,11 @@ The model then scores those questions and selects the strongest final mix under 
 
 In the current benchmark:
 
--   `Generic Core`: 7 selected questions
--   `Toggle: Financial Crisis`: 1 selected question
--   `Toggle: Pandemic / Disaster`: 20 selected questions
+| Toggle category | Selected count | Calculation / rule |
+| --- | ---: | --- |
+| `Generic Core` | 7 | `count(selected rows where toggle_category == "Generic Core") = 7` |
+| `Toggle: Financial Crisis` | 1 | `count(selected rows where toggle_category == "Toggle: Financial Crisis") = 1` |
+| `Toggle: Pandemic / Disaster` | 20 | `count(selected rows where toggle_category == "Toggle: Pandemic / Disaster") = 20` |
 
 The reason the Pandemic / Disaster bank dominates is not arbitrary. It happens because the Katrina and COVID material contributes many strong housing, trauma, displacement, and aid questions with good information value.
 
