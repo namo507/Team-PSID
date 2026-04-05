@@ -1,0 +1,7 @@
+.DS_Store
+.~lock*
+*.tmp
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.vscode/

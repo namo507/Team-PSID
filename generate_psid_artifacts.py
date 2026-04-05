@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -11,30 +12,42 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from PSID_NLP_Crisis_Module_Structure import (
+    CSV_PATH as SOURCE_CSV_PATH,
+    GENERIC_LABEL,
+    RI_BINARY_THRESHOLD,
     SECS_PER_WORD,
+    SPECIFIC_LABEL,
+    assign_binary_categories,
+    compute_burden,
+    compute_complexity,
+    compute_utility,
+    compute_word_count,
     extract_constructs,
+    extract_keywords,
+    normalize_ranked_questions,
     parse_keywords,
+    select_for_time_budget,
     tag_keywords,
 )
 
 
 ROOT = Path(__file__).resolve().parent
-CSV_PATH = ROOT / "PSID_Ranked_Questions_Final.csv"
-SUMMARY_PATH = ROOT / "psid_artifact_summary.json"
-DASHBOARD_DATA_PATH = ROOT / "psid_dashboard_data.js"
+DATA_DIR = ROOT / "data"
+FIGURES_DIR = ROOT / "figures"
 
-FIG_TOP = ROOT / "fig_top_ranked_questions.png"
-FIG_TOGGLE = ROOT / "fig_toggle_comparison.png"
-FIG_UTILITY = ROOT / "fig_utility_vs_burden.png"
-FIG_HEATMAP = ROOT / "fig_construct_heatmap.png"
-FIG_TIME = ROOT / "fig_time_budget.png"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
-LEGACY_ALIASES = {
-    FIG_TOP: ROOT / "fig_top_ranked.png",
-    FIG_TOGGLE: ROOT / "fig_toggle_dist.png",
-    FIG_UTILITY: ROOT / "fig_utility_burden.png",
-    FIG_HEATMAP: ROOT / "fig_heatmap.png",
-}
+CSV_PATH = DATA_DIR / "PSID_Ranked_Questions_Final.csv"
+RAW_CSV_PATH = Path(SOURCE_CSV_PATH)
+SUMMARY_PATH = DATA_DIR / "psid_artifact_summary.json"
+DASHBOARD_DATA_PATH = DATA_DIR / "psid_dashboard_data.js"
+
+FIG_TOP = FIGURES_DIR / "fig_top_ranked_questions.png"
+FIG_TOGGLE = FIGURES_DIR / "fig_toggle_comparison.png"
+FIG_UTILITY = FIGURES_DIR / "fig_utility_vs_burden.png"
+FIG_HEATMAP = FIGURES_DIR / "fig_construct_heatmap.png"
+FIG_TIME = FIGURES_DIR / "fig_time_budget.png"
 
 CONSTRUCT_PRIORITY = {
     "Economic / Income": 0.40,
@@ -59,7 +72,7 @@ SOURCE_SPECIFIC_TERMS = {
 DOCUMENTATION_BACKED_QUESTIONS = [
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Financial strain flag",
         "question": "Have you experienced any financial difficulties because of the crisis?",
         "constructs": ["Financial Coping"],
@@ -68,7 +81,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Work interruption",
         "question": "Have you stopped this work because of the crisis?",
         "constructs": ["Employment"],
@@ -77,7 +90,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Income continuity",
         "question": "Were there any wages or salary payments from this job during the crisis period?",
         "constructs": ["Employment", "Economic / Income"],
@@ -86,7 +99,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Government assistance",
         "question": "Did you receive any government financial assistance because of the crisis?",
         "constructs": ["Government Aid"],
@@ -95,7 +108,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Housing instability",
         "question": "Did your household fall behind on rent, mortgage, utilities, or other major bills because of the crisis?",
         "constructs": ["Housing / Shelter", "Economic / Income"],
@@ -104,7 +117,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "generic",
-        "module": "Generic Core",
+        "module": GENERIC_LABEL,
         "title": "Wellbeing check",
         "question": "Since the crisis, how often have you felt worried, unable to relax, or unable to sleep well?",
         "constructs": ["Trauma / Health"],
@@ -113,7 +126,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Pandemic earnings loss",
         "question": "Did you lose earnings because of the pandemic?",
         "constructs": ["Economic / Income"],
@@ -122,7 +135,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Emergency payment receipt",
         "question": "Did you receive a stimulus payment or other emergency government support?",
         "constructs": ["Government Aid"],
@@ -131,7 +144,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Essential work exposure",
         "question": "Were you working in a job that was considered essential during the crisis?",
         "constructs": ["Employment"],
@@ -140,7 +153,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Evacuation",
         "question": "Did you evacuate from your home before the disaster hit?",
         "constructs": ["Housing / Shelter"],
@@ -149,7 +162,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Home damage severity",
         "question": "How severe was the damage to your home during the disaster?",
         "constructs": ["Housing / Shelter"],
@@ -158,7 +171,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Temporary housing",
         "question": "How long did you stay in temporary housing after the disaster?",
         "constructs": ["Housing / Shelter"],
@@ -167,7 +180,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Pandemic / Disaster",
+        "module": SPECIFIC_LABEL,
         "title": "Disaster distress",
         "question": "Since the disaster, how often have you had disturbing memories or dreams about what happened?",
         "constructs": ["Trauma / Health"],
@@ -176,7 +189,7 @@ DOCUMENTATION_BACKED_QUESTIONS = [
     },
     {
         "kind": "specific",
-        "module": "Financial Crisis",
+        "module": SPECIFIC_LABEL,
         "title": "Financial coping strategy",
         "question": "How did your household manage financial difficulties caused by the shutdown or crisis?",
         "constructs": ["Financial Coping"],
@@ -184,6 +197,49 @@ DOCUMENTATION_BACKED_QUESTIONS = [
         "why_it_matters": "Maintains the strongest scored shutdown item while making the wording cleaner and easier to field.",
     },
 ]
+
+VARIABLE_STOPWORDS = {
+    "a",
+    "all",
+    "am",
+    "an",
+    "and",
+    "any",
+    "are",
+    "at",
+    "because",
+    "before",
+    "by",
+    "did",
+    "do",
+    "does",
+    "from",
+    "had",
+    "has",
+    "have",
+    "how",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "since",
+    "that",
+    "the",
+    "there",
+    "this",
+    "to",
+    "was",
+    "were",
+    "what",
+    "when",
+    "which",
+    "who",
+    "why",
+    "you",
+    "your",
+}
 
 
 def _min_max_scale(values: pd.Series) -> pd.Series:
@@ -248,9 +304,80 @@ def suggest_deployable_wording(question_text: str, toggle_category: str) -> str:
     cleaned = cleaned.replace("the disaster and the disaster", "the disaster")
     cleaned = cleaned.replace("the disaster or the disaster", "the disaster")
     cleaned = " ".join(cleaned.split())
-    if toggle_category == "Generic Core" and not cleaned.endswith("?"):
+    if toggle_category == GENERIC_LABEL and not cleaned.endswith("?"):
         cleaned = cleaned.rstrip(". ") + "?"
     return cleaned
+
+
+def build_ranked_dataset() -> pd.DataFrame:
+    df = normalize_ranked_questions(pd.read_csv(RAW_CSV_PATH))
+
+    if "toggle_category" in df.columns:
+        df["historical_toggle_category"] = df["toggle_category"]
+    else:
+        df["historical_toggle_category"] = None
+
+    if "keywords" in df.columns and df["keywords"].apply(bool).any():
+        df["keyword_list"] = df["keywords"].apply(parse_keywords)
+    else:
+        df["keyword_list"] = df["question_text"].apply(extract_keywords)
+
+    df["tagged_keywords"] = df["keyword_list"].apply(tag_keywords)
+    df["constructs"] = df["tagged_keywords"].apply(extract_constructs)
+    df["n_keywords"] = df["keyword_list"].apply(len)
+
+    if "word_count" not in df.columns or df["word_count"].isna().any():
+        df["word_count"] = df["question_text"].apply(compute_word_count)
+    else:
+        df["word_count"] = df["word_count"].astype(float).round().astype(int)
+
+    if "complexity" not in df.columns or df["complexity"].isna().any():
+        df["complexity"] = df["question_text"].apply(compute_complexity)
+    else:
+        df["complexity"] = df["complexity"].astype(float)
+
+    df["Ui"] = df["tagged_keywords"].apply(compute_utility)
+    df["Bi"] = df.apply(
+        lambda row: compute_burden(int(row["word_count"]), float(row["complexity"])),
+        axis=1,
+    )
+    df["Ri"] = df["Ui"] / df["Bi"]
+    df = assign_binary_categories(df, score_col="Ri", threshold=RI_BINARY_THRESHOLD)
+    df = select_for_time_budget(
+        df,
+        score_col="Ri",
+        selected_col="selected_for_module",
+        toggle_col="toggle_category",
+        generic_label=GENERIC_LABEL,
+    )
+    df["selected"] = df["selected_for_module"].fillna(False).astype(bool)
+    df["minutes"] = df["word_count"] * SECS_PER_WORD / 60
+    df["selected_label"] = df["selected"].map({True: "Selected", False: "Not selected"})
+    df["keywords"] = df["keyword_list"]
+    df = compute_augmented_scores(df)
+    df["variable_name"] = build_variable_names(df)
+    return df
+
+
+def build_variable_names(df: pd.DataFrame) -> pd.Series:
+    used: dict[str, int] = {}
+    names: list[str] = []
+
+    for row in df.itertuples():
+        prefix = "GEN" if row.toggle_category == GENERIC_LABEL else "SPC"
+        basis = str(getattr(row, "recommended_wording", "") or row.question_text)
+        tokens = [
+            token.upper()
+            for token in re.findall(r"[A-Za-z0-9]+", basis)
+            if token.lower() not in VARIABLE_STOPWORDS
+        ]
+        core = "_".join(tokens[:4]) if tokens else "QUESTION"
+        base_name = f"{prefix}_{core}"[:40].rstrip("_")
+        count = used.get(base_name, 0) + 1
+        used[base_name] = count
+        names.append(base_name if count == 1 else f"{base_name}_{count}")
+
+    return pd.Series(names, index=df.index)
 
 
 def write_ranked_csv(df: pd.DataFrame) -> None:
@@ -260,10 +387,13 @@ def write_ranked_csv(df: pd.DataFrame) -> None:
     output["constructs"] = output["constructs"].apply(repr)
 
     ordered_columns = [
+        "variable_name",
         "question_text",
         "source",
         "module_type",
         "toggle_category",
+        "historical_toggle_category",
+        "ri_threshold_score",
         "keywords",
         "n_keywords",
         "word_count",
@@ -291,6 +421,7 @@ def write_ranked_csv(df: pd.DataFrame) -> None:
         "Ui",
         "Bi",
         "Ri",
+        "ri_threshold_score",
         "minutes",
         "Pi",
         "augmented_utility",
@@ -335,7 +466,7 @@ def compute_augmented_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     def portability_bonus(row: pd.Series) -> float:
         source_specific = _contains_source_specific_term(row["question_text"])
-        if row["toggle_category"] == "Generic Core":
+        if row["toggle_category"] == GENERIC_LABEL:
             return 0.16 if not source_specific else 0.03
         return 0.08 if not source_specific else 0.02
 
@@ -506,11 +637,6 @@ def _style_matplotlib() -> None:
     )
 
 
-def save_aliases() -> None:
-    for source, alias in LEGACY_ALIASES.items():
-        alias.write_bytes(source.read_bytes())
-
-
 def plot_top_ranked(df: pd.DataFrame) -> None:
     top = df.nlargest(15, "Ri").sort_values("Ri")
     labels = [
@@ -536,9 +662,8 @@ def plot_toggle_comparison(df: pd.DataFrame) -> None:
         index=df["source"].value_counts().index
     )
     palette = {
-        "Generic Core": "#2563eb",
-        "Toggle: Financial Crisis": "#d97706",
-        "Toggle: Pandemic / Disaster": "#dc2626",
+        GENERIC_LABEL: "#2563eb",
+        SPECIFIC_LABEL: "#dc2626",
     }
 
     fig, ax = plt.subplots(figsize=(12, 7))
@@ -548,10 +673,10 @@ def plot_toggle_comparison(df: pd.DataFrame) -> None:
         color=[palette.get(col, "#64748b") for col in counts.columns],
         ax=ax,
     )
-    ax.set_title("Question Distribution by Source and Toggle Category")
+    ax.set_title("Question Distribution by Source and Binary Category")
     ax.set_xlabel("Questions")
     ax.set_ylabel("")
-    ax.legend(title="Toggle category", frameon=False)
+    ax.legend(title="Category", frameon=False)
     fig.tight_layout()
     fig.savefig(FIG_TOGGLE, bbox_inches="tight")
     plt.close(fig)
@@ -559,9 +684,8 @@ def plot_toggle_comparison(df: pd.DataFrame) -> None:
 
 def plot_utility_vs_burden(df: pd.DataFrame) -> None:
     palette = {
-        "Generic Core": "#2563eb",
-        "Toggle: Financial Crisis": "#d97706",
-        "Toggle: Pandemic / Disaster": "#dc2626",
+        GENERIC_LABEL: "#2563eb",
+        SPECIFIC_LABEL: "#dc2626",
     }
     fig, ax = plt.subplots(figsize=(11, 7))
     sns.scatterplot(
@@ -610,9 +734,8 @@ def plot_time_budget(df: pd.DataFrame) -> None:
     )
     count_by_toggle = selected.groupby("toggle_category")["selected"].sum().to_dict()
     palette = {
-        "Generic Core": "#2563eb",
-        "Toggle: Financial Crisis": "#d97706",
-        "Toggle: Pandemic / Disaster": "#dc2626",
+        GENERIC_LABEL: "#2563eb",
+        SPECIFIC_LABEL: "#dc2626",
     }
 
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -625,7 +748,7 @@ def plot_time_budget(df: pd.DataFrame) -> None:
         count = count_by_toggle.get(toggle, 0)
         ax.text(minutes + 0.15, bar.get_y() + bar.get_height() / 2, f"{minutes:.1f} min | {count} q", va="center")
     ax.axvline(30, color="#111827", linestyle="--", linewidth=1.2, label="30-minute cap")
-    ax.set_title("Selected Time Budget by Toggle Category")
+    ax.set_title("Selected Time Budget by Binary Category")
     ax.set_xlabel("Minutes")
     ax.set_ylabel("")
     ax.legend(frameon=False)
@@ -636,16 +759,15 @@ def plot_time_budget(df: pd.DataFrame) -> None:
 
 def build_all() -> dict:
     _style_matplotlib()
-    df = load_dataset()
-    summary = build_summary(df)
+    df = build_ranked_dataset()
     write_ranked_csv(df)
+    summary = build_summary(df)
     write_dashboard_data(df, summary)
     plot_top_ranked(df)
     plot_toggle_comparison(df)
     plot_utility_vs_burden(df)
     plot_construct_heatmap(df)
     plot_time_budget(df)
-    save_aliases()
     return summary
 
 

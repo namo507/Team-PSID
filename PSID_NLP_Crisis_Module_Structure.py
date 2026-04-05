@@ -11,6 +11,7 @@ from __future__ import annotations
 import ast
 import re
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -36,8 +37,13 @@ BETA = 0.20
 SECS_PER_WORD = 7
 MAX_SECONDS = 30 * 60
 IDEAL_SECONDS = 15 * 60
+GENERIC_LABEL = "Generic"
+SPECIFIC_LABEL = "Specific"
+RI_BINARY_THRESHOLD = 0.70
 
-CSV_PATH = "/Users/namomac/Team-PSID/PSID_Ranked_Questions_Katrina_Integrated.csv"
+ROOT = Path(__file__).resolve().parent
+DATA_DIR = ROOT / "data"
+CSV_PATH = DATA_DIR / "PSID_Ranked_Questions_Katrina_Integrated.csv"
 
 COLUMN_RENAME_MAP = {
     "questiontext": "question_text",
@@ -228,6 +234,31 @@ def normalize_ranked_questions(df: pd.DataFrame) -> pd.DataFrame:
     if "toggle_category" in normalized.columns:
         normalized["toggle_category"] = normalized["toggle_category"].replace(TOGGLE_LABEL_MAP)
     return normalized
+
+
+def min_max_scale(values: pd.Series) -> pd.Series:
+    numeric = values.astype(float)
+    minimum = float(numeric.min())
+    maximum = float(numeric.max())
+    if maximum == minimum:
+        return pd.Series([0.0] * len(numeric), index=numeric.index)
+    return (numeric - minimum) / (maximum - minimum)
+
+
+def assign_binary_categories(
+    df: pd.DataFrame,
+    score_col: str = "Ri",
+    threshold: float = RI_BINARY_THRESHOLD,
+    output_col: str = "toggle_category",
+    score_output_col: str = "ri_threshold_score",
+) -> pd.DataFrame:
+    updated = df.copy()
+    scaled = min_max_scale(updated[score_col])
+    updated[score_output_col] = scaled
+    updated[output_col] = scaled.apply(
+        lambda value: GENERIC_LABEL if float(value) >= threshold else SPECIFIC_LABEL
+    )
+    return updated
 
 
 def extract_keywords(text: str) -> list[str]:
@@ -425,6 +456,7 @@ def select_for_time_budget(
     word_count_col: str = "word_count",
     selected_col: str = "selected_for_module",
     toggle_col: str = "toggle_category",
+    generic_label: str = GENERIC_LABEL,
 ) -> pd.DataFrame:
     def add_rows(candidate_df: pd.DataFrame, running_seconds: int) -> int:
         for index, row in candidate_df.sort_values(score_col, ascending=False).iterrows():
@@ -440,7 +472,7 @@ def select_for_time_budget(
     selected_indices: list[int] = []
 
     if toggle_col in df.columns:
-        generic_core_df = df[df[toggle_col] == "Generic Core"]
+        generic_core_df = df[df[toggle_col] == generic_label]
         cumulative_seconds = add_rows(generic_core_df, cumulative_seconds)
 
         remaining_df = df.drop(index=selected_indices)
@@ -459,12 +491,16 @@ __all__ = [
     "BETA",
     "CSV_PATH",
     "COLUMN_RENAME_MAP",
+    "GENERIC_LABEL",
     "IDEAL_SECONDS",
     "MAX_SECONDS",
+    "RI_BINARY_THRESHOLD",
     "SECS_PER_WORD",
+    "SPECIFIC_LABEL",
     "SOURCE_TO_CRISIS_ORIGIN",
     "TAXONOMY",
     "TOGGLE_LABEL_MAP",
+    "assign_binary_categories",
     "classify_toggle",
     "compute_burden",
     "compute_complexity",
@@ -472,6 +508,7 @@ __all__ = [
     "compute_word_count",
     "extract_constructs",
     "extract_keywords",
+    "min_max_scale",
     "normalize_ranked_questions",
     "parse_keywords",
     "select_for_time_budget",
