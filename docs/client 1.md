@@ -3,6 +3,9 @@
 Prepared for client review  
 Updated: April 2026
 
+Portable PDF source: `docs/latex/client_1_technical_codebook.tex`  
+Compiled report: `deliverables/Client_1_Technical_Codebook.pdf`
+
 ## 1. Purpose and Scope
 
 This document is the technical codebook for the refreshed PSID crisis-module workflow. It explains how the ranked question bank is rebuilt, how the final binary category model is assigned, how the shortlist is selected under the time cap, and how the final client package is produced.

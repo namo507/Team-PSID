@@ -3,6 +3,9 @@
 Prepared for client review  
 Updated: April 2026
 
+Portable PDF source: `docs/latex/client_2_deployable_questionnaire.tex`  
+Compiled report: `deliverables/Client_2_Deployable_Questionnaire.pdf`
+
 ## 1. Purpose
 
 This document is the Markdown version of the deployable questionnaire package. It translates the final scored question bank into a practical administration guide with the live question set, universe rules, timing estimates, and the ranking logic behind selection.
@@ -102,7 +105,7 @@ Example question: `GEN_LOSE_EARNINGS_PANDEMIC`
 
 | Field | Value | Calculation |
 | --- | ---: | --- |
-| Question text |  | `Did you lose earnings because of the pandemic?` |
+| Question text | Did you lose earnings because of the pandemic? | Portable generic framing item |
 | `Ui` | 3.400 | `0.80 + 0.80 + 0.90 + 0.90` |
 | `Bi` | 0.600 | `max(0.10 * 6 + 0.20 * 0.0, 0.1)` |
 | `Ri` | 5.667 | `3.40 / 0.60` |

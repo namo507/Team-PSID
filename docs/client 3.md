@@ -3,6 +3,9 @@
 Prepared for client review  
 Updated: April 2026
 
+Portable PDF source: `docs/latex/client_3_final_report.tex`  
+Compiled report: `deliverables/Client_3_Final_Report.pdf`
+
 ## 1. Executive Summary
 
 This final report explains the refreshed PSID crisis-module package in stakeholder terms. The package now uses a simpler category model, a cleaner deployable questionnaire, and a more defensible explanation of why some items survive the final shortlist.

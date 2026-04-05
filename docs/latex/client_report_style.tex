@@ -1,0 +1,142 @@
+\usepackage[margin=1in,headheight=18pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\graphicspath{{../../figures/}{../figures/}{figures/}}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{setspace}
+
+\definecolor{psidblue}{HTML}{1E3A5F}
+\definecolor{psidink}{HTML}{1F2937}
+\definecolor{psidmuted}{HTML}{4B5563}
+\definecolor{psidline}{HTML}{D1D5DB}
+\definecolor{psidpanel}{HTML}{F7FAFC}
+\definecolor{psidaccent}{HTML}{E8F1FB}
+\definecolor{psidgold}{HTML}{A16207}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=psidblue,
+  urlcolor=psidblue,
+  citecolor=psidblue,
+  pdftitle={PSID Client Report},
+  pdfauthor={GitHub Copilot}
+}
+
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\/\do\-}
+\makeatother
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{7pt}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\renewcommand{\arraystretch}{1.18}
+\setlist[itemize]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.6em, itemsep=0.25em, topsep=0.3em}
+\onehalfspacing
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newcommand{\reporttitle}{Client Report}
+\newcommand{\reportsubtitle}{PSID Crisis Module}
+\newcommand{\reportclient}{Client Deliverable}
+\newcommand{\reportversion}{April 2026}
+\newcommand{\varname}[1]{\nolinkurl{#1}}
+\newcommand{\filepath}[1]{\nolinkurl{#1}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\footnotesize \reporttitle}
+\fancyhead[R]{\sffamily\footnotesize \reportclient}
+\fancyfoot[L]{\sffamily\footnotesize Prepared for client review}
+\fancyfoot[R]{\sffamily\footnotesize \thepage}
+
+\titleformat{\section}{\Large\bfseries\sffamily\color{psidblue}}{\thesection}{0.75em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily\color{psidink}}{\thesubsection}{0.65em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\sffamily\color{psidink}}{\thesubsubsection}{0.5em}{}
+
+\newsavebox{\psidboxbox}
+\newenvironment{psidbox}[1]{%
+  \par\medskip
+  \begin{center}
+  \setlength{\fboxsep}{14pt}%
+  \begin{lrbox}{\psidboxbox}
+  \begin{minipage}{0.94\linewidth}
+  {\sffamily\bfseries\color{psidblue}#1}\par\medskip
+}{%
+  \end{minipage}
+  \end{lrbox}
+  \fcolorbox{psidline}{psidpanel}{\usebox{\psidboxbox}}
+  \end{center}
+  \par\medskip
+}
+
+\newcommand{\makecover}{%
+  \pagenumbering{gobble}
+  \begin{titlepage}
+  \thispagestyle{empty}
+  \vspace*{1.0cm}
+  {\color{psidblue}\rule{\textwidth}{1.5pt}}\par
+  \vspace{1.2cm}
+  {\sffamily\bfseries\Large \reportclient\par}
+  \vspace{0.5cm}
+  {\sffamily\bfseries\fontsize{28}{32}\selectfont \reporttitle\par}
+  \vspace{0.4cm}
+  {\sffamily\Large\color{psidmuted} \reportsubtitle\par}
+  \vfill
+  \begin{psidbox}{Document status}
+  Prepared for client review\\
+  Updated: \reportversion\\
+  Repository: Team-PSID
+  \end{psidbox}
+  \vfill
+  {\color{psidblue}\rule{\textwidth}{1.5pt}}\par
+  \end{titlepage}
+  \pagenumbering{roman}
+  \tableofcontents
+  \clearpage
+  \pagenumbering{arabic}
+}
+
+\newcommand{\psidfigure}[3][0.92]{%
+  \begin{figure}[H]
+  \centering
+  \fcolorbox{psidline}{white}{\includegraphics[width=#1\linewidth]{#2}}
+  \caption{#3}
+  \end{figure}
+}
+
+\tikzset{
+  flowstep/.style={
+    rectangle,
+    rounded corners=6pt,
+    draw=psidblue,
+    fill=psidpanel,
+    very thick,
+    align=center,
+    text width=4.2cm,
+    minimum height=1cm,
+    font=\sffamily\small
+  },
+  flowwide/.style={flowstep, text width=5.0cm},
+  flowresult/.style={flowstep, draw=psidgold!85!black, fill=psidaccent},
+  flowarrow/.style={-{Stealth[length=3mm]}, very thick, draw=psidblue}
+}

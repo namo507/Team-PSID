@@ -1,0 +1,303 @@
+\documentclass[12pt]{article}
+\input{client_report_style.tex}
+
+\renewcommand{\reporttitle}{Client 1: Technical Codebook}
+\renewcommand{\reportsubtitle}{Refreshed PSID crisis-module workflow, scoring logic, and artifact schema}
+\renewcommand{\reportclient}{Technical Deliverable}
+
+\begin{document}
+
+\makecover
+
+\section{Purpose and Scope}
+
+This technical codebook documents the refreshed PSID crisis-module workflow from the authoritative ranked source file through the final scored CSV, figures, spreadsheet, and PDF bundle. It is written to support analytic review, reproducibility, and downstream client sign-off.
+
+\begin{psidbox}{Production status}
+\begin{itemize}
+\item 52 ranked historical questions in the current corpus.
+\item 28 selected rows in the scored module.
+\item 3 \texttt{Generic} rows and 49 \texttt{Specific} rows after binary thresholding.
+\item 29.98 selected minutes across the scored module.
+\item 2 demographic traceability rows retained in the master review file but excluded from the deployable instrument.
+\end{itemize}
+\end{psidbox}
+
+\section{Headline Benchmark Summary}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.65\textwidth}{L{0.48\textwidth} R{0.13\textwidth}}
+\toprule
+Metric & Value \\
+\midrule
+Total ranked questions & 52 \\
+Selected questions & 28 \\
+Selected minutes & 29.98 \\
+Full corpus minutes & 68.60 \\
+Generic rows & 3 \\
+Specific rows & 49 \\
+Average $R_i$ & 2.201 \\
+Maximum $R_i$ & 5.667 \\
+Average $P_i$ & 2.561 \\
+Maximum $P_i$ & 7.860 \\
+\bottomrule
+\end{tabularx}
+\caption{Current benchmark summary used by the maintained client package.}
+\end{table}
+
+\section{Figures and Visual Diagnostics}
+
+\psidfigure{fig_top_ranked_questions.png}{Top-ranked questions from the refreshed corpus.}
+\psidfigure{fig_utility_vs_burden.png}{Utility-versus-burden view used to inspect signal efficiency.}
+\psidfigure{fig_construct_heatmap.png}{Construct coverage heatmap for the refreshed item bank.}
+
+\section{End-to-End Workflow Pipeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.52cm]
+\node[flowstep] (a) {\texttt{PSID\_Ranked\_Questions\_Katrina\_Integrated.csv}\\52 historical rows};
+\node[flowstep, below=of a] (b) {Normalize source columns\\and harmonize fields};
+\node[flowstep, below=of b] (c) {Parse keyword payloads\\and tag construct families};
+\node[flowstep, below=of c] (d) {Compute utility $U_i$\\and burden $B_i$};
+\node[flowstep, below=of d] (e) {Calculate baseline rank\\$R_i = U_i / B_i$};
+\node[flowstep, below=of e] (f) {Assign binary category\\using normalized threshold};
+\node[flowstep, below=of f] (g) {Compute augmented priority\\$P_i$ with rarity and redundancy terms};
+\node[flowstep, below=of g] (h) {Select rows under the\\30-minute budget};
+\node[flowresult, below=of h] (i) {\texttt{PSID\_Ranked\_Questions\_Final.csv}};
+\node[flowresult, below left=0.65cm and 2.85cm of i] (j) {Summary JSON\\and figures};
+\node[flowresult, below=1.45cm of i] (k) {Master questionnaire\\and deployable questionnaire};
+\node[flowresult, below right=0.65cm and 2.85cm of i] (l) {Codebook PDF\\and final report PDF};
+\draw[flowarrow] (a) -- (b);
+\draw[flowarrow] (b) -- (c);
+\draw[flowarrow] (c) -- (d);
+\draw[flowarrow] (d) -- (e);
+\draw[flowarrow] (e) -- (f);
+\draw[flowarrow] (f) -- (g);
+\draw[flowarrow] (g) -- (h);
+\draw[flowarrow] (h) -- (i);
+\draw[flowarrow] (i) -- (j);
+\draw[flowarrow] (i) -- (k);
+\draw[flowarrow] (i) -- (l);
+\end{tikzpicture}
+\caption{Production workflow from the raw integrated source to the maintained client package.}
+\end{figure}
+
+\section{Files and Roles}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.27\textwidth} L{0.22\textwidth} Y}
+\toprule
+File & Role & Why it matters \\
+\midrule
+\texttt{data/PSID\_Ranked\_Questions\_Katrina\_Integrated.csv} & Raw integrated source bank & Starting point for every production rebuild. \\
+\texttt{PSID\_NLP\_Crisis\_Module\_Structure.py} & Shared scoring helpers & Holds constants, keyword parsing, burden logic, threshold helpers, and selection utilities. \\
+\texttt{generate\_psid\_artifacts.py} & Production rebuild engine & Writes the final scored CSV, summary JSON, dashboard payload, and figures. \\
+\texttt{data/PSID\_Ranked\_Questions\_Final.csv} & Authoritative scored output & Main ranked table used by the notebook and client deliverables. \\
+\texttt{PSID\_NLP\_Crisis\_Module\_Final.ipynb} & Validation notebook & Recomputes the workflow and verifies the persisted artifact bundle. \\
+\texttt{generate\_client\_documents.py} & Client-package renderer & Builds the spreadsheet and PDFs from the scored CSV and summary JSON. \\
+\texttt{data/psid\_artifact\_summary.json} & Metric bundle & Stores benchmark counts and score summaries for the latest run. \\
+\bottomrule
+\end{tabularx}
+\caption{Files that drive the maintained workflow and client package.}
+\end{table}
+
+\section{Core Scoring Logic}
+
+\subsection{Utility, burden, and baseline rank}
+
+The baseline score is driven by question utility relative to response burden.
+
+\begin{psidbox}{Core formulae}
+\begin{align*}
+U_i &= \sum \text{keyword weights} \\
+B_i &= \max(0.10 \times \text{word\_count} + 0.20 \times \text{complexity}, 0.1) \\
+R_i &= \frac{U_i}{B_i}
+\end{align*}
+
+\begin{itemize}
+\item $U_i$ rewards crisis-relevant content signaled by tagged keywords.
+\item $B_i$ penalizes long or complex wording.
+\item $R_i$ ranks items that carry more signal per unit of burden.
+\end{itemize}
+\end{psidbox}
+
+\subsection{Binary category assignment}
+
+The client requirement was a binary rule based on $R_i$, but the raw score is not naturally bounded in $[0, 1]$. The production pipeline therefore applies the cutoff to a min-max normalized score.
+
+\begin{psidbox}{Operational threshold rule}
+\begin{align*}
+\text{ri\_threshold\_score} &= \frac{R_i - \min(R_i)}{\max(R_i) - \min(R_i)} \\
+\text{Generic} &\iff \text{ri\_threshold\_score} \geq 0.70 \\
+\text{Specific} &\iff \text{ri\_threshold\_score} < 0.70
+\end{align*}
+\end{psidbox}
+
+\subsection{Augmented priority score}
+
+The final prioritization score preserves $R_i$ while rewarding breadth and distinctiveness.
+
+\begin{psidbox}{Priority adjustment}
+\begin{align*}
+\text{augmented\_utility} &= U_i \times \bigl(1 + 0.32 \times \text{idf\_scaled} + 0.24 \times \text{construct\_scaled} \\
+&\qquad\qquad + 0.12 \times \text{richness\_scaled} + \text{portability\_bonus}\bigr) \\
+P_i &= \frac{\text{augmented\_utility}}{B_i \times (1 + 0.65 \times \text{redundancy\_scaled})}
+\end{align*}
+
+\begin{itemize}
+\item $P_i$ helps separate distinct, portable items from repetitive variants.
+\item The shortlist is still bounded by the time budget, not only by raw rank.
+\end{itemize}
+\end{psidbox}
+
+\section{Worked Calculation Example}
+
+Example question: \texttt{GEN\_LOSE\_EARNINGS\_PANDEMIC}\\
+Recommended wording: \emph{Did you lose earnings because of the pandemic?}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.18\textwidth} R{0.13\textwidth} Y}
+\toprule
+Field & Value & Calculation \\
+\midrule
+$U_i$ & 3.400 & $0.80 + 0.80 + 0.90 + 0.90$ \\
+word count & 6 & Counted from deployable wording \\
+complexity & 0.0 & Precomputed complexity field \\
+$B_i$ & 0.600 & $\max(0.10 \times 6 + 0.20 \times 0.0, 0.1)$ \\
+$R_i$ & 5.667 & $3.40 / 0.60$ \\
+threshold score & 1.000 & $(5.667 - 0.818) / (5.667 - 0.818)$ \\
+Final category & Generic & $1.000 \geq 0.70$ \\
+$P_i$ & 7.860 & Enhanced priority after rarity, construct, richness, and redundancy adjustments \\
+minutes & 0.70 & $(6 \times 7) / 60$ \\
+\bottomrule
+\end{tabularx}
+\caption{Worked example for one of the highest-value Generic items.}
+\end{table}
+
+\section{Threshold Diagnostics}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.72\textwidth}{L{0.50\textwidth} R{0.16\textwidth}}
+\toprule
+Threshold diagnostic & Value \\
+\midrule
+Minimum raw $R_i$ & 0.818 \\
+Maximum raw $R_i$ & 5.667 \\
+Rows with raw $R_i \geq 0.70$ & 52 of 52 \\
+Rows with normalized threshold score $\geq 0.70$ & 3 of 52 \\
+\bottomrule
+\end{tabularx}
+\caption{Why normalized thresholding is required for a meaningful binary split.}
+\end{table}
+
+\begin{psidbox}{Interpretation}
+Raw $R_i \geq 0.70$ would classify every row as \texttt{Generic}. Normalized thresholding preserves the requested cutoff while still creating a real binary split between portable high-signal items and context-dependent items.
+\end{psidbox}
+
+\section{Construct Coverage and Interaction Notes}
+
+\subsection{Selected construct coverage}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.58\textwidth}{L{0.38\textwidth} R{0.10\textwidth}}
+\toprule
+Construct & Selected questions \\
+\midrule
+Trauma / Health & 15 \\
+Employment & 7 \\
+Housing / Shelter & 6 \\
+Government Aid & 5 \\
+Economic / Income & 4 \\
+Financial Coping & 2 \\
+Demographics & 2 \\
+\bottomrule
+\end{tabularx}
+\caption{Construct coverage in the selected scored module.}
+\end{table}
+
+\subsection{Demographic interaction summary}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.78\textwidth}{L{0.34\textwidth} R{0.10\textwidth} R{0.12\textwidth} R{0.12\textwidth}}
+\toprule
+Group & Rows & Average $R_i$ & Average $P_i$ \\
+\midrule
+Demographics only & 3 & 1.354 & 2.189 \\
+Non-demographic crisis items & 49 & 2.253 & 2.584 \\
+\bottomrule
+\end{tabularx}
+\caption{Demographic-only rows versus direct crisis-impact rows.}
+\end{table}
+
+\begin{psidbox}{Interpretation}
+Demographic-only items remain useful for traceability and module framing, but they carry less direct crisis signal than employment, housing, aid, trauma, and economic disruption items. That is why the final deployable questionnaire excludes demographics even though the master review file retains them.
+\end{psidbox}
+
+\section{Output Schema}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.28\textwidth} Y}
+\toprule
+Field & Meaning \\
+\midrule
+\texttt{variable\_name} & Stable identifier used across the CSV, spreadsheet, and PDFs. \\
+\texttt{question\_text} & Historical source wording. \\
+\texttt{recommended\_wording} & Clean deployable wording. \\
+\texttt{source} & Historical module source. \\
+\texttt{toggle\_category} & Final binary category: \texttt{Generic} or \texttt{Specific}. \\
+\texttt{historical\_toggle\_category} & Legacy category kept for traceability. \\
+\texttt{U\_i}, \texttt{B\_i}, \texttt{R\_i} & Utility, burden, and baseline rank. \\
+\texttt{ri\_threshold\_score} & Normalized rank used for binary categorization. \\
+\texttt{P\_i} & Enhanced priority score. \\
+\texttt{selected\_for\_module} & Final selection flag under the time cap. \\
+\texttt{minutes} & Estimated administration time. \\
+\texttt{constructs} & Tagged construct families. \\
+\bottomrule
+\end{tabularx}
+\caption{Key fields preserved in the authoritative scored dataset.}
+\end{table}
+
+\section{Deliverables Produced From the Same Dataset}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{L{0.28\textwidth} L{0.18\textwidth} Y}
+\toprule
+Deliverable & Audience & Purpose \\
+\midrule
+\texttt{deliverables/Master\_Questionnaire.xlsx} & Internal review & Full 52-row review sheet with categories, wording, and scores. \\
+\texttt{deliverables/Deployable\_Questionnaire.pdf} & Survey deployment & Final question text without demographic rows. \\
+\texttt{deliverables/Codebook.pdf} & Technical review & Rendered technical codebook. \\
+\texttt{deliverables/Final\_Report.pdf} & Stakeholder review & Narrative summary of results and interpretation. \\
+\texttt{deliverables/Client\_1\_Technical\_Codebook.pdf} & Client circulation & LaTeX report version of this technical codebook. \\
+\bottomrule
+\end{tabularx}
+\caption{Client-facing and internal deliverables generated from the same scored dataset.}
+\end{table}
+
+\section{Refresh Procedure}
+
+Use this order whenever the client package is refreshed:
+
+\begin{enumerate}
+\item Rebuild scored artifacts via \texttt{build\_all()} in \texttt{generate\_psid\_artifacts.py}.
+\item Validate notebook outputs in \texttt{PSID\_NLP\_Crisis\_Module\_Final.ipynb}.
+\item Regenerate spreadsheet and PDFs through \texttt{generate\_client\_documents.py}.
+\item Rebuild the client-facing LaTeX reports through \texttt{docs/latex/build\_client\_reports.sh}.
+\item Confirm that metrics, figures, tables, and deliverable paths remain aligned.
+\end{enumerate}
+
+That sequence keeps the scored CSV, the notebook, the figures, the packaged PDFs, and the presentation-ready report files synchronized.
+
+\end{document}

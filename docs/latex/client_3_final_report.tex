@@ -1,0 +1,232 @@
+\documentclass[12pt]{article}
+\input{client_report_style.tex}
+
+\renewcommand{\reporttitle}{Client 3: Final Report}
+\renewcommand{\reportsubtitle}{Stakeholder-facing summary of the refreshed PSID crisis-module package}
+\renewcommand{\reportclient}{Stakeholder Deliverable}
+
+\begin{document}
+
+\makecover
+
+\section{Executive Summary}
+
+This final report explains the refreshed PSID crisis-module package in stakeholder terms. The package now uses a simpler category model, a cleaner deployable questionnaire, and a more defensible explanation of why some items survive the final shortlist.
+
+\begin{psidbox}{Headline takeaway}
+The current production run starts from 52 historical questions and produces a 28-question scored module. The client-facing category model has been simplified to two labels only: \texttt{Generic} and \texttt{Specific}. Financial items now compete inside the broader \texttt{Specific} bank alongside disaster and pandemic items rather than appearing as a stand-alone final category.
+\end{psidbox}
+
+\section{Headline Results}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.72\textwidth}{L{0.48\textwidth} R{0.14\textwidth}}
+\toprule
+Metric & Value \\
+\midrule
+Total ranked questions & 52 \\
+Selected scored questions & 28 \\
+Deployable questions & 26 \\
+Selected scored minutes & 29.98 \\
+Deployable minutes & 28.82 \\
+Generic rows & 3 \\
+Specific rows & 49 \\
+Average $R_i$ & 2.201 \\
+Maximum $R_i$ & 5.667 \\
+Average $P_i$ & 2.561 \\
+Maximum $P_i$ & 7.860 \\
+\bottomrule
+\end{tabularx}
+\caption{Top-line performance metrics for the refreshed package.}
+\end{table}
+
+\section{Figures and Visual Diagnostics}
+
+\psidfigure{fig_toggle_comparison.png}{Binary Generic versus Specific distribution.}
+\psidfigure{fig_time_budget.png}{Time-budget allocation across the selected module.}
+\psidfigure{fig_utility_vs_burden.png}{Utility-versus-burden relationship for the refreshed corpus.}
+\psidfigure{fig_top_ranked_questions.png}{Top-ranked items retained in the final package.}
+
+\section{Reporting Pipeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 0.9cm]
+\node[flowstep] (a) {Historical PSID\\crisis questions};
+\node[flowstep, right=of a] (b) {Scored and normalized\\question bank};
+\node[flowstep, right=of b] (c) {Binary Generic versus\\Specific split};
+\node[flowstep, right=of c] (d) {Time-budget\\selection};
+\node[flowresult, right=of d] (e) {Scored module\\28 questions};
+\node[flowresult, below=1.35cm of e] (f) {Deployable instrument\\26 questions};
+\node[flowresult, below left=1.35cm and 1.9cm of e] (g) {Codebook};
+\node[flowresult, below=1.35cm of d] (h) {Final report};
+\node[flowresult, below right=1.35cm and 1.9cm of e] (i) {Spreadsheet and\\PDF package};
+\draw[flowarrow] (a) -- (b);
+\draw[flowarrow] (b) -- (c);
+\draw[flowarrow] (c) -- (d);
+\draw[flowarrow] (d) -- (e);
+\draw[flowarrow] (e) -- (f);
+\draw[flowarrow] (e) -- (g);
+\draw[flowarrow] (e) -- (h);
+\draw[flowarrow] (e) -- (i);
+\end{tikzpicture}
+\caption{Reporting flow from historical question bank to the current client bundle.}
+\end{figure}
+
+\section{Methodology in Plain Language}
+
+\subsection{How ranking works}
+
+Each question receives a utility score for crisis relevance, a burden score for length and complexity, a baseline efficiency score $R_i$, and an augmented priority score $P_i$ that rewards distinctiveness and construct coverage.
+
+\begin{psidbox}{Main formulae}
+\begin{align*}
+R_i &= \frac{U_i}{B_i} \\
+B_i &= \max(0.10 \times \text{word\_count} + 0.20 \times \text{complexity}, 0.1) \\
+P_i &= \frac{\text{augmented\_utility}}{B_i \times (1 + 0.65 \times \text{redundancy\_scaled})}
+\end{align*}
+\end{psidbox}
+
+\subsection{How the binary category is assigned}
+
+The client requested a simple threshold on $R_i$, but raw $R_i$ already exceeds 0.70 for the entire refreshed corpus. The workflow therefore applies the cutoff to normalized $R_i$ instead.
+
+\begin{psidbox}{Operational thresholding}
+\begin{align*}
+\text{ri\_threshold\_score} &= \frac{R_i - \min(R_i)}{\max(R_i) - \min(R_i)} \\
+\text{Generic} &\iff \text{ri\_threshold\_score} \geq 0.70 \\
+\text{Specific} &\iff \text{ri\_threshold\_score} < 0.70
+\end{align*}
+\end{psidbox}
+
+\section{Threshold Diagnostics}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.74\textwidth}{L{0.50\textwidth} R{0.16\textwidth}}
+\toprule
+Diagnostic & Value \\
+\midrule
+Minimum raw $R_i$ & 0.818 \\
+Maximum raw $R_i$ & 5.667 \\
+Rows with raw $R_i \geq 0.70$ & 52 of 52 \\
+Rows with normalized threshold score $\geq 0.70$ & 3 of 52 \\
+\bottomrule
+\end{tabularx}
+\caption{Why the Generic bucket is intentionally small after normalization.}
+\end{table}
+
+This is why the current \texttt{Generic} bucket contains only the most portable high-signal items after normalization.
+
+\section{Selected Module Composition}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.16\textwidth} L{0.24\textwidth} R{0.10\textwidth} R{0.10\textwidth} R{0.10\textwidth} R{0.10\textwidth}}
+\toprule
+Final category & Source & Selected questions & Minutes & Average $R_i$ & Average $P_i$ \\
+\midrule
+Generic & COVID-19 & 3 & 1.40 & 5.333 & 7.125 \\
+Specific & Hurricane Katrina 2007 & 14 & 20.30 & 2.617 & 2.769 \\
+Specific & COVID-19 & 5 & 2.92 & 3.364 & 4.393 \\
+Specific & Govt Shutdown Income & 3 & 2.33 & 3.326 & 4.482 \\
+Specific & Govt Shutdown Crisis & 1 & 1.87 & 3.719 & 4.592 \\
+Specific & Understanding Society & 2 & 1.17 & 1.447 & 2.329 \\
+\bottomrule
+\end{tabularx}
+\caption{Composition of the current scored module by final category and historical source.}
+\end{table}
+
+\section{Why Financial Questions Do Not Dominate the Final Module}
+
+The earlier output looked more finance-heavy than the current one for two reasons. First, \texttt{Financial Crisis} used to appear as its own visible final label. Second, multiple finance-related items were close variants of one another, which made the previous structure look broader than it really was.
+
+\begin{psidbox}{Interpretation}
+\begin{itemize}
+\item Financial items now compete within \texttt{Specific} instead of standing alone as a final category.
+\item Redundancy penalties reduce the advantage of repeating near-identical income questions.
+\item Katrina disaster items contribute many strong direct-exposure and trauma items.
+\item The three highest-portability Generic items still capture crisis-related financial disruption without making finance the whole story.
+\end{itemize}
+\end{psidbox}
+
+\section{Demographic Note}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.72\textwidth}{L{0.36\textwidth} R{0.10\textwidth} R{0.12\textwidth} R{0.12\textwidth}}
+\toprule
+Group & Rows & Average $R_i$ & Average $P_i$ \\
+\midrule
+Demographics only & 3 & 1.354 & 2.189 \\
+Non-demographic crisis items & 49 & 2.253 & 2.584 \\
+\bottomrule
+\end{tabularx}
+\caption{Demographic rows versus direct crisis-impact rows.}
+\end{table}
+
+\begin{itemize}
+\item Demographic rows provide context and traceability.
+\item They are not as efficient as direct crisis-impact questions for the deployable instrument.
+\item That is why the final scored module can retain them while the deployable questionnaire removes them.
+\end{itemize}
+
+\section{Worked Example of a High-Value Generic Item}
+
+Example question: \texttt{GEN\_EXPERIENCED\_FINANCIAL\_DIFFICULTIES\_C}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.82\textwidth}{L{0.22\textwidth} R{0.12\textwidth} Y}
+\toprule
+Field & Value & Meaning \\
+\midrule
+$R_i$ & 5.667 & Very high baseline signal per unit of burden. \\
+$P_i$ & 7.187 & Strong augmented priority after distinctiveness adjustments. \\
+minutes & 0.35 & Short enough to include in the universal core. \\
+Final category & Generic & Portable across crisis types. \\
+\bottomrule
+\end{tabularx}
+\caption{Characteristics of a high-value Generic item.}
+\end{table}
+
+This is the kind of item the new \texttt{Generic} bucket is meant to preserve: short, portable, and strongly informative.
+
+\section{Deliverables for Client Use}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} Y}
+\toprule
+Deliverable & Use \\
+\midrule
+\texttt{docs/client 1.md} & Technical Markdown codebook with formulas, figures, schema, and workflow notes. \\
+\texttt{docs/client 2.md} & Markdown deployable questionnaire with live question tables and universe rules. \\
+\texttt{docs/client 3.md} & Markdown final report for stakeholder circulation. \\
+\texttt{deliverables/Master\_Questionnaire.xlsx} & Full internal review sheet with traceability fields. \\
+\texttt{deliverables/Deployable\_Questionnaire.pdf} & Final deployable PDF questionnaire. \\
+\texttt{deliverables/Codebook.pdf} & Rendered technical codebook PDF from the artifact pipeline. \\
+\texttt{deliverables/Final\_Report.pdf} & Rendered stakeholder-facing PDF from the artifact pipeline. \\
+\texttt{deliverables/Client\_1\_Technical\_Codebook.pdf} & LaTeX report version of the technical codebook. \\
+\texttt{deliverables/Client\_2\_Deployable\_Questionnaire.pdf} & LaTeX report version of the deployable questionnaire. \\
+\texttt{deliverables/Client\_3\_Final\_Report.pdf} & LaTeX report version of this stakeholder report. \\
+\bottomrule
+\end{tabularx}
+\caption{Client-facing outputs available after the LaTeX build.}
+\end{table}
+
+\section{Conclusion}
+
+The refreshed package is more disciplined than the earlier version in three ways:
+
+\begin{itemize}
+\item It keeps the category model easy to explain.
+\item It preserves the quantitative ranking logic instead of replacing it with ad hoc pruning.
+\item It cleanly separates technical documentation, deployable wording, and stakeholder reporting.
+\end{itemize}
+
+The result is a client package that is easier to defend analytically and easier to use operationally.
+
+\end{document}

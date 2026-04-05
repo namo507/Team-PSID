@@ -1,0 +1,281 @@
+\documentclass[12pt]{article}
+\input{client_report_style.tex}
+
+\renewcommand{\reporttitle}{Client 2: Deployable Questionnaire}
+\renewcommand{\reportsubtitle}{Administration-ready questionnaire guide with universe rules, timing, and row-level rationale}
+\renewcommand{\reportclient}{Operational Deliverable}
+
+\begin{document}
+
+\makecover
+
+\section{Purpose}
+
+This report is the PDF-ready version of the deployable questionnaire package. It translates the final scored question bank into a practical administration guide with live question tables, universe rules, timing estimates, and the ranking logic behind selection.
+
+\begin{psidbox}{Deployable scope}
+This deployable version excludes the two demographic traceability rows that remain in the master review file. The result is a 26-question instrument with an estimated administration time of 28.82 minutes.
+\end{psidbox}
+
+\section{Deployable Snapshot}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.72\textwidth}{L{0.48\textwidth} R{0.14\textwidth}}
+\toprule
+Metric & Value \\
+\midrule
+Deployable questions & 26 \\
+Estimated deployable minutes & 28.82 \\
+All-respondent generic questions & 3 \\
+Pandemic or public-health questions & 5 \\
+Shutdown or financial-disruption questions & 4 \\
+Disaster, displacement, or direct-exposure questions & 14 \\
+\bottomrule
+\end{tabularx}
+\caption{Deployable instrument summary after removing demographic-only rows.}
+\end{table}
+
+\section{Figures and Visual Diagnostics}
+
+\psidfigure{fig_time_budget.png}{Time-budget allocation across the selected scored module.}
+\psidfigure{fig_top_ranked_questions.png}{Top-ranked items retained in the refreshed package.}
+\psidfigure{fig_toggle_comparison.png}{Binary Generic versus Specific split used to route administration.}
+
+\section{Deployable Workflow Pipeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.65cm]
+\node[flowstep] (a) {\texttt{data/PSID\_Ranked\_Questions\_Final.csv}\\28 selected rows};
+\node[flowstep, below=of a] (b) {Remove demographic-only\\traceability rows};
+\node[flowstep, below=of b] (c) {26 deployable rows};
+\node[flowstep, below=of c] (d) {Map each row to an\\administration universe};
+\node[flowstep, below=of d] (e) {Apply cleaned deployable\\wording};
+\node[flowstep, below=of e] (f) {Group into Generic and\\crisis-specific sections};
+\node[flowresult, below left=0.75cm and 2.8cm of f] (g) {Render \texttt{Deployable\_Questionnaire.pdf}};
+\node[flowresult, below right=0.75cm and 2.8cm of f] (h) {Render this client\\report PDF};
+\draw[flowarrow] (a) -- (b);
+\draw[flowarrow] (b) -- (c);
+\draw[flowarrow] (c) -- (d);
+\draw[flowarrow] (d) -- (e);
+\draw[flowarrow] (e) -- (f);
+\draw[flowarrow] (f) -- (g);
+\draw[flowarrow] (f) -- (h);
+\end{tikzpicture}
+\caption{Operational path from the scored module to the deployable questionnaire package.}
+\end{figure}
+
+\section{Administration Rules}
+
+\subsection{Administration sequence}
+
+\begin{enumerate}
+\item Ask the three all-respondent Generic items.
+\item Identify the active crisis context.
+\item Activate one crisis-specific section based on that context.
+\item Skip all sections that do not match the active crisis.
+\end{enumerate}
+
+\subsection{Universe summary}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{L{0.34\textwidth} R{0.08\textwidth} R{0.10\textwidth} R{0.10\textwidth} R{0.10\textwidth}}
+\toprule
+Universe block & Rows & Minutes & Average $R_i$ & Average $P_i$ \\
+\midrule
+All respondents & 3 & 1.40 & 5.334 & 7.125 \\
+Pandemic or public-health emergency & 5 & 2.92 & 3.364 & 4.393 \\
+Shutdown, recession, or acute financial disruption & 4 & 4.20 & 3.424 & 4.509 \\
+Disaster, displacement, or direct exposure event & 14 & 20.30 & 2.617 & 2.768 \\
+\bottomrule
+\end{tabularx}
+\caption{Universe blocks used to route live administration.}
+\end{table}
+
+\subsection{Source contribution to the deployable instrument}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{0.64\textwidth}{L{0.34\textwidth} R{0.10\textwidth} R{0.10\textwidth}}
+\toprule
+Source & Rows & Minutes \\
+\midrule
+Hurricane Katrina 2007 & 14 & 20.30 \\
+COVID-19 & 8 & 4.32 \\
+Govt Shutdown Income & 3 & 2.33 \\
+Govt Shutdown Crisis & 1 & 1.87 \\
+\bottomrule
+\end{tabularx}
+\caption{Historical source contribution to the deployable questionnaire.}
+\end{table}
+
+\section{Formula Notes for Deployment}
+
+The deployable questionnaire still comes from the same scoring logic as the full codebook.
+
+\begin{psidbox}{Operational formulae}
+\begin{align*}
+\text{minutes} &= \frac{\text{word\_count} \times 7}{60} \\
+R_i &= \frac{U_i}{B_i} \\
+P_i &= \frac{\text{augmented\_utility}}{B_i \times (1 + 0.65 \times \text{redundancy\_scaled})}
+\end{align*}
+
+\begin{itemize}
+\item $R_i$ explains why a question is strong relative to burden.
+\item $P_i$ helps decide which similar questions survive the time-budget cut.
+\item Minutes is the operational field used for questionnaire assembly.
+\end{itemize}
+\end{psidbox}
+
+\section{Worked Example for a Deployable Generic Item}
+
+Example question: \varname{GEN_LOSE_EARNINGS_PANDEMIC}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.16\textwidth} Y}
+\toprule
+Field & Value & Calculation or interpretation \\
+\midrule
+Question text & Did you lose earnings because of the pandemic? & Universal framing item retained in the Generic core. \\
+$U_i$ & 3.400 & $0.80 + 0.80 + 0.90 + 0.90$ \\
+$B_i$ & 0.600 & $\max(0.10 \times 6 + 0.20 \times 0.0, 0.1)$ \\
+$R_i$ & 5.667 & $3.40 / 0.60$ \\
+$P_i$ & 7.860 & Enhanced priority after distinctiveness adjustments. \\
+minutes & 0.70 & $(6 \times 7) / 60$ \\
+Administration block & All respondents & Asked before any crisis-specific skip logic. \\
+\bottomrule
+\end{tabularx}
+\caption{Worked example showing how one Generic item remains short, portable, and analytically strong.}
+\end{table}
+
+\section{All-Respondent Generic Core}
+
+These questions create a portable core that can be asked before event-specific routing.
+
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
+\caption{All-respondent Generic core.}\\
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endfirsthead
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endhead
+\varname{GEN_EXPERIENCED_FINANCIAL_DIFFICULTIES_C} & COVID-19 & Have you experienced any financial difficulties because of the crisis? & 5.667 & 7.187 & 0.35 \\
+\varname{GEN_LOSE_EARNINGS_PANDEMIC} & COVID-19 & Did you lose earnings because of the pandemic? & 5.667 & 7.860 & 0.70 \\
+\varname{GEN_RECEIVE_STIMULUS_PAYMENT_OTHER} & COVID-19 & Did you receive a stimulus payment or other emergency government support? & 4.667 & 6.328 & 0.35 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Pandemic or Public-Health Emergency Block}
+
+Ask this section when the active crisis is a pandemic or other public-health emergency.
+
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
+\caption{Pandemic or public-health emergency block.}\\
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endfirsthead
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endhead
+\varname{SPC_WORK_ENTIRELY_HOME_DURING} & COVID-19 & Did you work entirely from home during the crisis? & 3.500 & 3.957 & 0.47 \\
+\varname{SPC_WORKING_JOB_CONSIDERED_ESSENTIAL} & COVID-19 & Were you working in a job that was considered essential during the crisis? & 4.000 & 5.223 & 1.05 \\
+\varname{SPC_RECEIVE_PAYCHECK_PROTECTION_OTHER} & COVID-19 & Did you receive paycheck protection or other emergency business support? & 3.500 & 5.212 & 0.23 \\
+\varname{SPC_RECEIVE_STIMULUS_PAYMENT_OTHER} & COVID-19 & Did you receive a stimulus payment or other emergency government support? & 3.500 & 4.466 & 0.23 \\
+\varname{SPC_LAID_OFF_FURLOUGHED_PANDEMIC} & COVID-19 & Were you laid off or furloughed because of the pandemic? & 2.318 & 3.106 & 0.93 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Shutdown, Recession, or Acute Financial Disruption Block}
+
+Ask this section when the active crisis is a shutdown, recession, or acute financial disruption.
+
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
+\caption{Shutdown, recession, or acute financial disruption block.}\\
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endfirsthead
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endhead
+\varname{SPC_STOPPED_WORK_CRISIS} & Govt Shutdown Income & Have you stopped this work because of the crisis? & 3.500 & 4.134 & 0.47 \\
+\varname{SPC_WAGES_SALARY_PAYMENTS_JOB} & Govt Shutdown Income & Were there any wages or salary payments from this job during the crisis period? & 2.727 & 4.134 & 1.17 \\
+\varname{SPC_HOUSEHOLD_MANAGE_FINANCIAL_DIFFICULT} & Govt Shutdown Crisis & How did your household manage financial difficulties caused by the shutdown or crisis? & 3.719 & 4.592 & 1.87 \\
+\varname{SPC_STOPPED_WORKING_BUSINESS_CRISIS} & Govt Shutdown Income & Have you stopped working at this business because of the crisis? & 3.750 & 5.177 & 0.70 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Disaster, Displacement, or Direct Exposure Block}
+
+Ask this section when the active crisis is a disaster, displacement, or direct exposure event.
+
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
+\caption{Disaster, displacement, or direct exposure block.}\\
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endfirsthead
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
+\endhead
+\varname{SPC_HOME_DAMAGED_DESTROYED_DISASTER} & Hurricane Katrina 2007 & Was your home damaged or destroyed by the disaster? & 2.650 & 2.266 & 1.17 \\
+\varname{SPC_BUSINESS_DAMAGED_DESTROYED_DISASTER} & Hurricane Katrina 2007 & Was your business damaged or destroyed by the disaster? & 3.300 & 2.962 & 1.17 \\
+\varname{SPC_ANYONE_IMMEDIATE_FAMILY_KILLED} & Hurricane Katrina 2007 & Was anyone in your immediate family killed as a result of the disaster? & 2.115 & 2.060 & 1.52 \\
+\varname{SPC_EXPERIENCE_HURRICANE_FORCE_WINDS} & Hurricane Katrina 2007 & Did you experience hurricane force winds at your location during the disaster? & 2.077 & 2.106 & 1.52 \\
+\varname{SPC_EXPERIENCE_MAJOR_FLOODING_HOME} & Hurricane Katrina 2007 & Did you experience major flooding in your home during the disaster? & 3.792 & 4.222 & 1.40 \\
+\varname{SPC_PHYSICALLY_INJURED_WAY_AS} & Hurricane Katrina 2007 & Were you physically injured in any way as a result of the disaster? & 2.846 & 2.804 & 1.52 \\
+\varname{SPC_SEVERE_DAMAGE_HOME_DURING} & Hurricane Katrina 2007 & How severe was the damage to your home during the disaster? & 2.769 & 3.169 & 1.52 \\
+\varname{SPC_AFRAID_DURING_DISASTER_MIGHT} & Hurricane Katrina 2007 & How afraid were you during the disaster that you might be seriously injured or killed? & 2.447 & 2.584 & 1.87 \\
+\varname{SPC_DISASTER_OFTEN_DISTURBING_MEMORIES} & Hurricane Katrina 2007 & Since the disaster, how often have you had disturbing memories or images about what happened? & 1.825 & 1.588 & 2.10 \\
+\varname{SPC_LONG_STAY_TEMPORARY_HOUSING} & Hurricane Katrina 2007 & How long did you stay in temporary housing after the disaster? & 2.455 & 3.090 & 1.28 \\
+\varname{SPC_EVACUATE_HOME_DISASTER_HIT} & Hurricane Katrina 2007 & Did you evacuate from your home before the disaster hit? & 3.227 & 3.530 & 1.28 \\
+\varname{SPC_DISASTER_CAUSE_LOSE_JOB} & Hurricane Katrina 2007 & Did the disaster cause you to lose your job? & 3.200 & 3.708 & 1.17 \\
+\varname{SPC_DISPLACED_PLACE_LIVING_DISASTER} & Hurricane Katrina 2007 & Were you displaced from the place you were living because of the disaster? & 2.115 & 2.643 & 1.52 \\
+\varname{SPC_RECEIVE_HELP_FEMA_FEDERAL} & Hurricane Katrina 2007 & Did you receive any help from FEMA Federal Emergency Management Agency? & 1.818 & 2.027 & 1.28 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Administration Notes}
+
+\begin{itemize}
+\item The deployable questionnaire intentionally keeps the three \texttt{Generic} questions first because they travel best across crisis contexts.
+\item The deployable file excludes demographic-only rows even though those rows still appear in the master review sheet.
+\item Some closely related support items appear in both the Generic and pandemic blocks because one version is meant for universal framing and the other is preserved as an event-specific probe.
+\item The disaster block is the longest because the Katrina source bank contributes the richest direct-exposure content.
+\end{itemize}
+
+\section{Recommended Use}
+
+Use this document when you need:
+
+\begin{enumerate}
+\item A presentation-ready PDF version of the deployable instrument.
+\item Skip logic by crisis universe.
+\item A row-level record of why each question survived the selection process.
+\end{enumerate}
+
+Use \texttt{deliverables/Master\_Questionnaire.xlsx} when you need the full 52-row traceability record instead of the cleaned deployable instrument. The compiled PDF output for this report is \texttt{deliverables/Client\_2\_Deployable\_Questionnaire.pdf}.
+
+\end{document}
