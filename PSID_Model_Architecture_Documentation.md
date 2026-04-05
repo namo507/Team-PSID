@@ -25,7 +25,7 @@ The final workflow does not just rank questions by keyword relevance. It uses a 
 The current validated final outputs are:
 
 | Metric | Value | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | Total ranked questions | 52 | `rows = len(df) = 52` |
 | Selected questions | 28 | `selected_rows = len(df[df["selected"]]) = 28` |
 | Selected minutes | 29.17 | `selected_minutes = sum(word_count * 7 / 60 for selected rows) = 29.17` |
@@ -178,7 +178,7 @@ That is why `Pi` is the better score for final selection and recommendation desi
 The enhanced model uses min-max scaling for several intermediate fields. In the current scored dataset, the ranges are:
 
 | Scaled field | Min input | Max input | Calculation / rule |
-| --- | ---: | ---: | --- |
+|-----------------|------------------:|------------------:|-----------------|
 | `idf_scaled` | 2.7805 | 4.2771 | `(idf_strength - 2.7805) / (4.2771 - 2.7805)` |
 | `redundancy_scaled` | 0.0000 | 1.0000 | `(redundancy_penalty - 0.0) / (1.0 - 0.0)` |
 | `construct_scaled` | 2.1457 | 17.8633 | `(construct_bonus - 2.1457) / (17.8633 - 2.1457)` |
@@ -191,7 +191,7 @@ The workflow defines the following construct weights in `CONSTRUCT_PRIORITY`:
 These weights are fixed design constants inside the code. They are not learned from the data. The calculation column shows the exact rule by which each value enters the scoring workflow.
 
 | Construct | Weight | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | Trauma / Health | 0.58 | Direct constant assignment: `CONSTRUCT_PRIORITY["Trauma / Health"] = 0.58`; if this is the only construct on a question, then `priority = 0.58`. |
 | Housing / Shelter | 0.55 | Direct constant assignment: `CONSTRUCT_PRIORITY["Housing / Shelter"] = 0.55`; used inside `priority = mean(weights for included constructs)`. |
 | Government Aid | 0.48 | Direct constant assignment: `CONSTRUCT_PRIORITY["Government Aid"] = 0.48`; used inside `priority = mean(weights for included constructs)`. |
@@ -265,7 +265,7 @@ The portability bonus rewards wording that can be reused across crises.
 The current logic is:
 
 | Scenario | Bonus | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | Generic Core and no source-specific term | 0.16 | If `toggle_category == "Generic Core"` and `_contains_source_specific_term(question_text) == False`, return `0.16`. |
 | Generic Core and source-specific term | 0.03 | If `toggle_category == "Generic Core"` and `_contains_source_specific_term(question_text) == True`, return `0.03`. |
 | Toggle item and no source-specific term | 0.08 | If `toggle_category != "Generic Core"` and `_contains_source_specific_term(question_text) == False`, return `0.08`. |
@@ -309,7 +309,7 @@ Recommended wording:
 Values and calculations:
 
 | Metric | Value | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | `Ui` | 1.700 | `0.85 + 0.85 = 1.70` from tagged keywords `any financial difficulties` and `financial difficulties` |
 | `Bi` | 0.300 | `0.10 * 3 + 0.20 * 0.0 = 0.30` |
 | `Ri` | 5.667 | `1.70 / 0.30 = 5.667` |
@@ -376,7 +376,7 @@ Recommended wording:
 Values and calculations:
 
 | Metric | Value | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | `Ui` | 3.400 | `0.80 + 0.80 + 0.90 + 0.90 = 3.40` from tagged keywords `earnings`, `lost earnings`, `pandemic`, and `the pandemic` |
 | `Bi` | 0.600 | `0.10 * 6 + 0.20 * 0.0 = 0.60` |
 | `Ri` | 5.667 | `3.40 / 0.60 = 5.667` |
@@ -437,7 +437,7 @@ Recommended wording:
 Values and calculations:
 
 | Metric | Value | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | `Ui` | 5.950 | `0.85 + 0.75 + 0.70 + 0.85 + 0.75 + 0.65 + 0.65 + 0.75 = 5.95` from the eight tagged keywords on this item |
 | `Bi` | 1.600 | `0.10 * 16 + 0.20 * 0.0 = 1.60` |
 | `Ri` | 3.719 | `5.95 / 1.60 = 3.719` |
@@ -502,7 +502,7 @@ The model then scores those questions and selects the strongest final mix under 
 In the current benchmark:
 
 | Toggle category | Selected count | Calculation / rule |
-| --- | ---: | --- |
+|----------------------|----------------------------:|----------------------|
 | `Generic Core` | 7 | `count(selected rows where toggle_category == "Generic Core") = 7` |
 | `Toggle: Financial Crisis` | 1 | `count(selected rows where toggle_category == "Toggle: Financial Crisis") = 1` |
 | `Toggle: Pandemic / Disaster` | 20 | `count(selected rows where toggle_category == "Toggle: Pandemic / Disaster") = 20` |
