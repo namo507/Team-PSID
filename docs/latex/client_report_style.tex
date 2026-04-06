@@ -1,4 +1,4 @@
-\usepackage[margin=1in,headheight=18pt]{geometry}
+\usepackage[margin=0.9in,headheight=16pt]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{graphicx}
@@ -16,6 +16,7 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{etoolbox}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage{setspace}
@@ -41,33 +42,56 @@
 \g@addto@macro\UrlBreaks{\do\_\do\/\do\-}
 \makeatother
 
+\captionsetup{
+  font=small,
+  labelfont={bf,sf,color=psidblue},
+  justification=raggedright,
+  singlelinecheck=false
+}
+\captionsetup[table]{position=top}
+
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{7pt}
+\setlength{\parskip}{5pt}
+\setlength{\tabcolsep}{3.5pt}
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{0pt}
-\renewcommand{\arraystretch}{1.18}
+\renewcommand{\arraystretch}{1.14}
 \setlist[itemize]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
 \setlist[enumerate]{leftmargin=1.6em, itemsep=0.25em, topsep=0.3em}
-\onehalfspacing
+\setstretch{1.08}
+\emergencystretch=1.5em
 
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Y}{>{\raggedright\arraybackslash\hspace{0pt}}X}
 
+\newcommand{\reportseries}{PSID Crisis Module Client Series}
 \newcommand{\reporttitle}{Client Report}
 \newcommand{\reportsubtitle}{PSID Crisis Module}
 \newcommand{\reportclient}{Client Deliverable}
 \newcommand{\reportversion}{April 2026}
+\newcommand{\reportstatus}{Prepared for client review}
+\newcommand{\reportabstract}{}
+\newcommand{\reportkeywords}{}
+\newcommand{\reportdoi}{\url{https://github.com/namo507/Team-PSID}}
 \newcommand{\varname}[1]{\nolinkurl{#1}}
 \newcommand{\filepath}[1]{\nolinkurl{#1}}
 
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\sffamily\footnotesize \reporttitle}
-\fancyhead[R]{\sffamily\footnotesize \reportclient}
-\fancyfoot[L]{\sffamily\footnotesize Prepared for client review}
-\fancyfoot[R]{\sffamily\footnotesize \thepage}
+\fancyhead[R]{\sffamily\footnotesize \thepage}
+\fancyfoot[L]{\sffamily\footnotesize \reportclient}
+\fancyfoot[R]{\sffamily\footnotesize Team-PSID}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyhead[L]{\sffamily\footnotesize \reporttitle}
+  \fancyhead[R]{\sffamily\footnotesize \thepage}
+  \fancyfoot[L]{\sffamily\footnotesize \reportclient}
+  \fancyfoot[R]{\sffamily\footnotesize Team-PSID}
+}
 
 \titleformat{\section}{\Large\bfseries\sffamily\color{psidblue}}{\thesection}{0.75em}{}
 \titleformat{\subsection}{\large\bfseries\sffamily\color{psidink}}{\thesubsection}{0.65em}{}
@@ -77,7 +101,7 @@
 \newenvironment{psidbox}[1]{%
   \par\medskip
   \begin{center}
-  \setlength{\fboxsep}{14pt}%
+  \setlength{\fboxsep}{12pt}%
   \begin{lrbox}{\psidboxbox}
   \begin{minipage}{0.94\linewidth}
   {\sffamily\bfseries\color{psidblue}#1}\par\medskip
@@ -90,30 +114,25 @@
 }
 
 \newcommand{\makecover}{%
-  \pagenumbering{gobble}
-  \begin{titlepage}
-  \thispagestyle{empty}
-  \vspace*{1.0cm}
-  {\color{psidblue}\rule{\textwidth}{1.5pt}}\par
-  \vspace{1.2cm}
-  {\sffamily\bfseries\Large \reportclient\par}
-  \vspace{0.5cm}
-  {\sffamily\bfseries\fontsize{28}{32}\selectfont \reporttitle\par}
-  \vspace{0.4cm}
-  {\sffamily\Large\color{psidmuted} \reportsubtitle\par}
-  \vfill
-  \begin{psidbox}{Document status}
-  Prepared for client review\\
-  Updated: \reportversion\\
-  Repository: Team-PSID
-  \end{psidbox}
-  \vfill
-  {\color{psidblue}\rule{\textwidth}{1.5pt}}\par
-  \end{titlepage}
-  \pagenumbering{roman}
-  \tableofcontents
-  \clearpage
   \pagenumbering{arabic}
+  \thispagestyle{plain}
+  {\sffamily\footnotesize\color{psidmuted}\reportseries\hfill \reportclient\par}
+  \vspace{0.35cm}
+  {\sffamily\bfseries\fontsize{22}{26}\selectfont \reporttitle\par}
+  \vspace{0.15cm}
+  {\sffamily\Large\color{psidmuted} \reportsubtitle\par}
+  \vspace{0.3cm}
+  {\footnotesize\color{psidmuted}\reportstatus\quad|\quad Updated: \reportversion\quad|\quad \reportdoi\par}
+  \vspace{0.35cm}
+  \begin{psidbox}{Abstract}
+  \reportabstract
+  \end{psidbox}
+  \ifstrempty{\reportkeywords}{}{%
+    {\sffamily\small\textbf{Keywords:} \reportkeywords\par}
+    \vspace{0.2cm}
+  }
+  {\color{psidline}\rule{\textwidth}{0.9pt}}\par
+  \vspace{0.45cm}
 }
 
 \newcommand{\psidfigure}[3][0.92]{%
@@ -132,11 +151,11 @@
     fill=psidpanel,
     very thick,
     align=center,
-    text width=4.2cm,
+    text width=3.6cm,
     minimum height=1cm,
     font=\sffamily\small
   },
-  flowwide/.style={flowstep, text width=5.0cm},
+  flowwide/.style={flowstep, text width=4.4cm},
   flowresult/.style={flowstep, draw=psidgold!85!black, fill=psidaccent},
   flowarrow/.style={-{Stealth[length=3mm]}, very thick, draw=psidblue}
 }

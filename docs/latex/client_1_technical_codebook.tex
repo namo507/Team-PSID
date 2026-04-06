@@ -4,6 +4,8 @@
 \renewcommand{\reporttitle}{Client 1: Technical Codebook}
 \renewcommand{\reportsubtitle}{Refreshed PSID crisis-module workflow, scoring logic, and artifact schema}
 \renewcommand{\reportclient}{Technical Deliverable}
+\renewcommand{\reportabstract}{This technical codebook documents the refreshed PSID crisis-module workflow from the ranked source bank to the scored CSV, figures, spreadsheet, and client PDFs. It explains the scoring formulas, the 28-row scored selection, the 26-question deployable instrument, and the optimization choices that now govern portability, redundancy control, and respondent-aware routing.}
+\renewcommand{\reportkeywords}{PSID crisis module | utility-burden optimization | technical codebook | deployable survey design}
 
 \begin{document}
 
@@ -27,23 +29,23 @@ This technical codebook documents the refreshed PSID crisis-module workflow from
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.10\textwidth} Y Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} R{0.10\textwidth} Y}
 \toprule
-Metric & Value & Calculation / rule & Why it is used and the assumption behind it \\
+Metric & Value & How the number is used \\
 \midrule
-Total ranked questions & 52 & $\operatorname{count}(\text{all rows}) = 52$ & Starting analytic universe; assumes the integrated source file is the authoritative corpus for each refresh. \\
-Selected scored questions & 28 & $\operatorname{count}(\texttt{selected\_for\_module}=\texttt{True}) = 28$ & Defines the scored review package under the fixed 30-minute module cap. \\
-Deployable questions & 26 & $28 - 2 = 26$ after removing selected demographic-only traceability rows & Produces the live instrument; assumes demographic context can be collected elsewhere or only when routing requires it. \\
-Selected scored minutes & 29.98 & $\sum \text{minutes over the 28 selected rows} = 29.98$ & Confirms the scored module stays within the client's review budget. \\
-Deployable minutes & 28.82 & $29.98 - 0.35 - 0.817 = 28.813 \approx 28.82$ & Paper-length estimate for the field instrument after age and sex/gender are removed from routine administration. \\
-Full corpus minutes & 68.60 & $\sum \text{minutes over all 52 rows} = 68.60$ & Shows why a selection layer is required; assumes every row would otherwise be asked. \\
-Generic rows & 3 & $\operatorname{count}(\text{ri\_threshold\_score} \geq 0.70) = 3$ after normalization & Keeps the universal portable core intentionally small; assumes the binary split should surface only the strongest cross-crisis items. \\
-Specific rows & 49 & $52 - 3 = 49$ & Keeps direct crisis-detail items in the context-sensitive bank. \\
-Average $R_i$ & 2.201 & $\operatorname{mean}(R_i) = 2.201$ & Benchmark statistic only; not itself a cutoff rule. \\
-Maximum $R_i$ & 5.667 & $\max(R_i) = 5.667$ & Upper bound for min-max normalization in the current refresh. \\
-Average $P_i$ & 2.561 & $\operatorname{mean}(P_i) = 2.561$ & Tracks distinctiveness-adjusted priority across the corpus. \\
-Maximum $P_i$ & 7.860 & $\max(P_i) = 7.860$ & Shows the ceiling after rarity, construct, portability, and redundancy adjustments. \\
+Total ranked questions & 52 & Count of all rows in the integrated source bank; defines the full analytic universe. \\
+Selected scored questions & 28 & Count of shortlisted rows under the 30-minute review budget. \\
+Deployable questions & 26 & Scored shortlist minus the two selected demographic-only traceability rows. \\
+Selected scored minutes & 29.98 & Summed minutes across the 28 scored rows; confirms the review package stays inside the budget. \\
+Deployable minutes & 28.82 & Summed minutes across the field instrument after age and sex/gender are removed from default administration. \\
+Full corpus minutes & 68.60 & Summed minutes across all 52 rows; shows why selection is needed. \\
+Generic rows & 3 & Count of rows above the normalized threshold; defines the portable universal core. \\
+Specific rows & 49 & Remaining rows in the context-sensitive bank. \\
+Average $R_i$ & 2.201 & Average baseline signal-per-burden score across the refreshed corpus. \\
+Maximum $R_i$ & 5.667 & Top baseline efficiency score and normalization ceiling in the current refresh. \\
+Average $P_i$ & 2.561 & Average distinctiveness-adjusted priority score across the refreshed corpus. \\
+Maximum $P_i$ & 7.860 & Top augmented priority score after portability and redundancy adjustments. \\
 \bottomrule
 \end{tabularx}
 \caption{Current benchmark summary used by the maintained client package.}
@@ -81,8 +83,9 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 
 \begin{figure}[H]
 \centering
+\resizebox{0.92\textwidth}{!}{%
 \begin{tikzpicture}[node distance=0.52cm]
-\node[flowstep] (a) {\texttt{PSID\_Ranked\_Questions\_Katrina\_Integrated.csv}\\52 historical rows};
+\node[flowstep] (a) {Integrated source CSV\\52 historical rows};
 \node[flowstep, below=of a] (b) {Normalize source columns\\and harmonize fields};
 \node[flowstep, below=of b] (c) {Parse keyword payloads\\and tag construct families};
 \node[flowstep, below=of c] (d) {Compute utility $U_i$\\and burden $B_i$};
@@ -90,7 +93,7 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 \node[flowstep, below=of e] (f) {Assign binary category\\using normalized threshold};
 \node[flowstep, below=of f] (g) {Compute augmented priority\\$P_i$ with rarity and redundancy terms};
 \node[flowstep, below=of g] (h) {Select rows under the\\30-minute budget};
-\node[flowresult, below=of h] (i) {\texttt{PSID\_Ranked\_Questions\_Final.csv}};
+\node[flowresult, below=of h] (i) {Final scored CSV\\28 selected rows};
 \node[flowresult, below left=0.65cm and 2.85cm of i] (j) {Summary JSON\\and figures};
 \node[flowresult, below=1.45cm of i] (k) {Master questionnaire\\and deployable questionnaire};
 \node[flowresult, below right=0.65cm and 2.85cm of i] (l) {Codebook PDF\\and final report PDF};
@@ -106,6 +109,7 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 \draw[flowarrow] (i) -- (k);
 \draw[flowarrow] (i) -- (l);
 \end{tikzpicture}
+}
 \caption{Production workflow from the raw integrated source to the maintained client package.}
 \end{figure}
 
@@ -113,16 +117,16 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.19\textwidth} Y Y Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.20\textwidth} Y Y}
 \toprule
-Dimension & Legacy architecture view & Current production view & Why the change matters \\
+Dimension & Legacy architecture view & Current production view and implication \\
 \midrule
-Client-facing categories & Legacy architecture used 7 Generic Core rows, 1 Financial Crisis row, and 20 Pandemic / Disaster rows inside the same 28-row shortlist & Current production uses 3 Generic and 25 Specific rows in the scored module, with 3 Generic and 23 crisis-specific rows in the deployable instrument & The client narrative is now binary and easier to defend; the universal core is intentionally narrower. \\
-Financial representation & Finance appeared as its own visible toggle label & Financial rows now compete inside Specific and are moderated by redundancy penalties & Near-duplicate earnings and aid items no longer create the impression of a separate finance-only module. \\
-Deployment target & The scored shortlist was closer to the field-facing view & The 28-row scored file is retained for auditability, while the 26-row deployable file is used for routine administration & Separates analytic traceability from operational burden. \\
-Optimization levers & Score plus legacy toggle structure & Score plus portability bonus, construct coverage, redundancy control, and documentation-backed wording replacements & The instrument is optimized for an always-on, cross-crisis deployment setting rather than only for archival structure. \\
-Routing refinement & Category labels described broad source-specific routing & Generic answers and crisis identification activate one relevant specific block instead of treating the full package as a single interview path & Respondent answers now reduce effective burden in live administration without overwriting the stored row scores. \\
+Client-facing categories & Legacy architecture exposed 7 Generic Core rows, 1 Financial Crisis row, and 20 Pandemic / Disaster rows inside the 28-row shortlist. & Current production uses 3 Generic and 25 Specific rows in the scored module, with 3 Generic and 23 crisis-specific rows in the deployable instrument. The binary story is simpler and the universal core is narrower. \\
+Financial representation & Finance appeared as its own visible toggle label. & Financial rows now compete inside Specific and are moderated by redundancy penalties, so near-duplicate earnings and aid items no longer create a separate finance-only bank. \\
+Deployment target & The scored shortlist was closer to the field-facing view. & The 28-row scored file is retained for auditability, while the 26-row deployable file is used for routine administration. This separates analytic traceability from operational burden. \\
+Optimization levers & The older view emphasized score plus legacy toggle structure. & The current workflow adds portability, construct coverage, redundancy control, and documentation-backed wording replacements to support an always-on, cross-crisis instrument. \\
+Routing refinement & Category labels described broad source-specific routing. & Generic answers and crisis identification now activate one relevant specific block, so respondent answers reduce effective burden without overwriting stored row scores. \\
 \bottomrule
 \end{tabularx}
 \caption{From the legacy multi-label architecture to the current production optimization strategy.}
@@ -132,15 +136,15 @@ Routing refinement & Category labels described broad source-specific routing & G
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.22\textwidth} Y Y Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.24\textwidth} Y Y}
 \toprule
-Refinement input & Quantitative effect & Why it is used & Working assumption \\
+Refinement input & Quantitative effect & Why it matters and the assumption behind it \\
 \midrule
-Universal Generic answers and crisis identification & Effective live path becomes the 3-item Generic core plus one specific block; for example pandemic path minutes are $1.40 + 2.92 = 4.32$ instead of all 26 deployable items & Cuts unnecessary burden and keeps the interview aligned to the active crisis context & One dominant crisis context is active in a given administration. \\
-Selected demographic answers & Removing \varname{SPC_AGE_YEARS} $(0.35)$ and \varname{SPC_DESCRIBE_SEX_GENDER} $(0.817)$ lowers the base deployable length by $1.167$ minutes & Preserves traceability without forcing low-yield context items into every interview & Demographic information can be captured elsewhere or only when routing requires it. \\
-Historical respondent distributions & Shutdown coping, stimulus uptake, and pandemic response patterns support keeping Government Aid and Financial Coping constructs salient in the selected bank & Grounds construct weights and wording choices in observed crisis behavior rather than only lexical similarity & Historical respondent patterns are informative for future crisis-module design. \\
-Feed-forward respondent state & Prior-wave status, identity, address, and eligibility can refine universes or wording windows, but do not overwrite stored $U_i$, $B_i$, $R_i$, or $P_i$ values & Distinguishes static ranking from live survey routing & Prior-wave metadata is available when the module is deployed longitudinally. \\
+Universal Generic answers and crisis identification & Effective live path becomes the 3-item Generic core plus one specific block; pandemic path is $1.40 + 2.92 = 4.32$ instead of the full 26-question paper instrument. & This cuts unnecessary burden and keeps the interview aligned to the active crisis context. It assumes one dominant crisis context is active in a given administration. \\
+Selected demographic answers & Removing \varname{SPC_AGE_YEARS} $(0.35)$ and \varname{SPC_DESCRIBE_SEX_GENDER} $(0.817)$ lowers the base deployable length by $1.167$ minutes. & This preserves traceability without forcing low-yield context items into every interview. It assumes demographic information can be collected elsewhere or only when routing requires it. \\
+Historical respondent distributions & Shutdown coping, stimulus uptake, and pandemic response patterns keep Government Aid and Financial Coping constructs salient in the selected bank. & This grounds construct weights and wording choices in observed crisis behavior rather than only lexical similarity. \\
+Feed-forward respondent state & Prior-wave status, identity, address, and eligibility can refine universes or wording windows without overwriting stored $U_i$, $B_i$, $R_i$, or $P_i$ values. & This separates static ranking from live survey routing and assumes prior-wave metadata is available when the module is deployed longitudinally. \\
 \bottomrule
 \end{tabularx}
 \caption{Respondent data influences deployment and construct emphasis even when the stored row scores remain fixed.}
@@ -153,17 +157,18 @@ The respondent-data evidence used for refinement is substantive rather than cosm
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\textwidth}{L{0.27\textwidth} L{0.22\textwidth} Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.29\textwidth} L{0.18\textwidth} Y}
 \toprule
 File & Role & Why it matters \\
 \midrule
-\texttt{data/PSID\_Ranked\_Questions\_Katrina\_Integrated.csv} & Raw integrated source bank & Starting point for every production rebuild. \\
-\texttt{PSID\_NLP\_Crisis\_Module\_Structure.py} & Shared scoring helpers & Holds constants, keyword parsing, burden logic, threshold helpers, and selection utilities. \\
-\texttt{generate\_psid\_artifacts.py} & Production rebuild engine & Writes the final scored CSV, summary JSON, dashboard payload, and figures. \\
-\texttt{data/PSID\_Ranked\_Questions\_Final.csv} & Authoritative scored output & Main ranked table used by the notebook and client deliverables. \\
-\texttt{PSID\_NLP\_Crisis\_Module\_Final.ipynb} & Validation notebook & Recomputes the workflow and verifies the persisted artifact bundle. \\
-\texttt{generate\_client\_documents.py} & Client-package renderer & Builds the spreadsheet and PDFs from the scored CSV and summary JSON. \\
-\texttt{data/psid\_artifact\_summary.json} & Metric bundle & Stores benchmark counts and score summaries for the latest run. \\
+\filepath{data/PSID_Ranked_Questions_Katrina_Integrated.csv} & Raw integrated source bank & Starting point for every production rebuild. \\
+\filepath{PSID_NLP_Crisis_Module_Structure.py} & Shared scoring helpers & Holds constants, keyword parsing, burden logic, threshold helpers, and selection utilities. \\
+\filepath{generate_psid_artifacts.py} & Production rebuild engine & Writes the final scored CSV, summary JSON, dashboard payload, and figures. \\
+\filepath{data/PSID_Ranked_Questions_Final.csv} & Authoritative scored output & Main ranked table used by the notebook and client deliverables. \\
+\filepath{PSID_NLP_Crisis_Module_Final.ipynb} & Validation notebook & Recomputes the workflow and verifies the persisted artifact bundle. \\
+\filepath{generate_client_documents.py} & Client-package renderer & Builds the spreadsheet and PDFs from the scored CSV and summary JSON. \\
+\filepath{data/psid_artifact_summary.json} & Metric bundle & Stores benchmark counts and score summaries for the latest run. \\
 \bottomrule
 \end{tabularx}
 \caption{Files that drive the maintained workflow and client package.}
@@ -222,20 +227,20 @@ P_i &= \frac{\text{augmented\_utility}}{B_i \times (1 + 0.65 \times \text{redund
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.16\textwidth} Y Y Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.18\textwidth} Y Y}
 \toprule
-Quantity & Calculation & Why it is used & Assumption \\
+Quantity & Rule & Why it matters \\
 \midrule
-$U_i$ & $\sum \text{keyword weights}$ & Captures substantive crisis relevance signaled by tagged constructs & Tagged keywords are a defensible proxy for item content. \\
-$B_i$ & $\max(0.10 \times \text{word\_count} + 0.20 \times \text{complexity}, 0.1)$ & Penalizes long or cognitively difficult wording & Administration burden grows approximately with length and complexity. \\
-$R_i$ & $U_i / B_i$ & Measures signal per unit of burden & High-value questions should be informative relative to the time they consume. \\
-\texttt{ri\_threshold\_score} & $(R_i - \min R_i)/(\max R_i - \min R_i)$ & Makes the client's $0.70$ threshold meaningful on an otherwise unbounded score & The current corpus minimum and maximum are authoritative for the refresh. \\
-augmented utility & $U_i \times (1 + 0.32\,\text{idf\_scaled} + 0.24\,\text{construct\_scaled} + 0.12\,\text{richness\_scaled} + \text{portability\_bonus})$ & Rewards rarity, coverage breadth, and wording portability before redundancy is applied & Distinct and portable content adds more deployment value than repeated variants. \\
-$P_i$ & $\text{augmented\_utility} / [B_i \times (1 + 0.65\,\text{redundancy\_scaled})]$ & Breaks ties among similar $R_i$ values by down-weighting repetitive items & Short modules should prefer distinct questions over clusters of near-duplicates. \\
-minutes & $(\text{word\_count} \times 7)/60$ & Operational time field used in the budget and instrument assembly & Oral administration takes about 7 seconds per word on average. \\
-selected rows & Time-budget filter after ranking & Defines the scored module for review and traceability & The 30-minute scored-module cap is fixed for the current package. \\
-deployable rows & Selected rows minus demographic-only traceability rows & Defines the field instrument & Demographic context is not part of the core crisis ask unless routing requires it. \\
+$U_i$ & Sum of matched keyword weights. & Captures crisis relevance; it assumes tagged keywords are a defensible proxy for item content. \\
+$B_i$ & Word-count and complexity penalty with a floor at $0.1$. & Encodes respondent burden; it assumes burden grows with length and cognitive complexity. \\
+$R_i$ & $U_i / B_i$. & Measures signal per unit of burden, so higher values indicate more efficient questions. \\
+\varname{ri_threshold_score} & Min-max normalization of $R_i$. & Makes the client's $0.70$ threshold meaningful on an otherwise unbounded score. \\
+Augmented utility & $U_i$ adjusted by rarity, construct breadth, richness, and portability. & Rewards distinct, portable coverage before redundancy is applied. \\
+$P_i$ & Augmented utility divided by burden and redundancy penalty. & Breaks ties among similar $R_i$ values by down-weighting repetitive items. \\
+minutes & $(\text{word\_count} \times 7)/60$. & Operational time field used in the budget and instrument assembly. \\
+Selected rows & Time-budget filter after ranking. & Defines the scored module for review and traceability. \\
+Deployable rows & Selected rows minus demographic-only traceability rows. & Defines the field instrument used in routine administration. \\
 \bottomrule
 \end{tabularx}
 \caption{Formula, purpose, and assumption guide for the main quantitative fields.}
@@ -334,22 +339,23 @@ Demographic-only items remain useful for traceability and module framing, but th
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\textwidth}{L{0.28\textwidth} Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} Y}
 \toprule
 Field & Meaning \\
 \midrule
-\texttt{variable\_name} & Stable identifier used across the CSV, spreadsheet, and PDFs. \\
-\texttt{question\_text} & Historical source wording. \\
-\texttt{recommended\_wording} & Clean deployable wording. \\
-\texttt{source} & Historical module source. \\
-\texttt{toggle\_category} & Final binary category: \texttt{Generic} or \texttt{Specific}. \\
-\texttt{historical\_toggle\_category} & Legacy category kept for traceability. \\
-\texttt{U\_i}, \texttt{B\_i}, \texttt{R\_i} & Utility, burden, and baseline rank. \\
-\texttt{ri\_threshold\_score} & Normalized rank used for binary categorization. \\
-\texttt{P\_i} & Enhanced priority score. \\
-\texttt{selected\_for\_module} & Final selection flag under the time cap. \\
-\texttt{minutes} & Estimated administration time. \\
-\texttt{constructs} & Tagged construct families. \\
+\varname{variable_name} & Stable identifier used across the CSV, spreadsheet, and PDFs. \\
+\varname{question_text} & Historical source wording. \\
+\varname{recommended_wording} & Clean deployable wording. \\
+\varname{source} & Historical module source. \\
+\varname{toggle_category} & Final binary category: Generic or Specific. \\
+\varname{historical_toggle_category} & Legacy category kept for traceability. \\
+\varname{Ui}, \varname{Bi}, \varname{Ri} & Utility, burden, and baseline rank. \\
+\varname{ri_threshold_score} & Normalized rank used for binary categorization. \\
+\varname{Pi} & Enhanced priority score. \\
+\varname{selected_for_module} & Final selection flag under the time cap. \\
+\varname{minutes} & Estimated administration time. \\
+\varname{constructs} & Tagged construct families. \\
 \bottomrule
 \end{tabularx}
 \caption{Key fields preserved in the authoritative scored dataset.}

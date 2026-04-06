@@ -4,6 +4,8 @@
 \renewcommand{\reporttitle}{Client 2: Deployable Questionnaire}
 \renewcommand{\reportsubtitle}{Administration-ready questionnaire guide with universe rules, timing, and row-level rationale}
 \renewcommand{\reportclient}{Operational Deliverable}
+\renewcommand{\reportabstract}{This operational report converts the scored PSID crisis-module output into a field-ready questionnaire with routing rules, timing estimates, and row-level rationale. It explains how the 28-row scored module becomes a 26-question deployable instrument, how respondent answers activate only one relevant crisis block, and how the final field package preserves analytic traceability while reducing burden.}
+\renewcommand{\reportkeywords}{deployable questionnaire | crisis routing | respondent burden | PSID module | field administration}
 
 \begin{document}
 
@@ -47,14 +49,15 @@ Disaster, displacement, or direct-exposure questions & 14 & Count of rows in the
 
 \begin{figure}[H]
 \centering
+\resizebox{0.88\textwidth}{!}{%
 \begin{tikzpicture}[node distance=0.65cm]
-\node[flowstep] (a) {\texttt{data/PSID\_Ranked\_Questions\_Final.csv}\\28 selected rows};
+\node[flowstep] (a) {Final scored CSV\\28 selected rows};
 \node[flowstep, below=of a] (b) {Remove demographic-only\\traceability rows};
 \node[flowstep, below=of b] (c) {26 deployable rows};
 \node[flowstep, below=of c] (d) {Map each row to an\\administration universe};
 \node[flowstep, below=of d] (e) {Apply cleaned deployable\\wording};
 \node[flowstep, below=of e] (f) {Group into Generic and\\crisis-specific sections};
-\node[flowresult, below left=0.75cm and 2.8cm of f] (g) {Render \texttt{Deployable\_Questionnaire.pdf}};
+\node[flowresult, below left=0.75cm and 2.8cm of f] (g) {Render deployable\\questionnaire PDF};
 \node[flowresult, below right=0.75cm and 2.8cm of f] (h) {Render this client\\report PDF};
 \draw[flowarrow] (a) -- (b);
 \draw[flowarrow] (b) -- (c);
@@ -64,6 +67,7 @@ Disaster, displacement, or direct-exposure questions & 14 & Count of rows in the
 \draw[flowarrow] (f) -- (g);
 \draw[flowarrow] (f) -- (h);
 \end{tikzpicture}
+}
 \caption{Operational path from the scored module to the deployable questionnaire package.}
 \end{figure}
 
@@ -226,90 +230,77 @@ Administration block & All respondents & Asked before any crisis-specific skip l
 
 These questions create a portable core that can be asked before event-specific routing.
 
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
-\caption{All-respondent Generic core.}\\
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}L{0.17\textwidth} L{0.13\textwidth} L{0.31\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}@{}}
 \toprule
 Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \midrule
-\endfirsthead
-\toprule
-Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
-\midrule
-\endhead
 \varname{GEN_EXPERIENCED_FINANCIAL_DIFFICULTIES_C} & COVID-19 & Have you experienced any financial difficulties because of the crisis? & 5.667 & 7.187 & 0.35 \\
 \varname{GEN_LOSE_EARNINGS_PANDEMIC} & COVID-19 & Did you lose earnings because of the pandemic? & 5.667 & 7.860 & 0.70 \\
 \varname{GEN_RECEIVE_STIMULUS_PAYMENT_OTHER} & COVID-19 & Did you receive a stimulus payment or other emergency government support? & 4.667 & 6.328 & 0.35 \\
 \bottomrule
-\end{longtable}
-\normalsize
+\end{tabularx}
+\caption{All-respondent Generic core.}
+\end{table}
 
 \section{Pandemic or Public-Health Emergency Block}
 
 Ask this section when the active crisis is a pandemic or other public-health emergency.
 
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
-\caption{Pandemic or public-health emergency block.}\\
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}L{0.17\textwidth} L{0.13\textwidth} L{0.31\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}@{}}
 \toprule
 Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \midrule
-\endfirsthead
-\toprule
-Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
-\midrule
-\endhead
 \varname{SPC_WORK_ENTIRELY_HOME_DURING} & COVID-19 & Did you work entirely from home during the crisis? & 3.500 & 3.957 & 0.47 \\
 \varname{SPC_WORKING_JOB_CONSIDERED_ESSENTIAL} & COVID-19 & Were you working in a job that was considered essential during the crisis? & 4.000 & 5.223 & 1.05 \\
 \varname{SPC_RECEIVE_PAYCHECK_PROTECTION_OTHER} & COVID-19 & Did you receive paycheck protection or other emergency business support? & 3.500 & 5.212 & 0.23 \\
 \varname{SPC_RECEIVE_STIMULUS_PAYMENT_OTHER} & COVID-19 & Did you receive a stimulus payment or other emergency government support? & 3.500 & 4.466 & 0.23 \\
 \varname{SPC_LAID_OFF_FURLOUGHED_PANDEMIC} & COVID-19 & Were you laid off or furloughed because of the pandemic? & 2.318 & 3.106 & 0.93 \\
 \bottomrule
-\end{longtable}
-\normalsize
+\end{tabularx}
+\caption{Pandemic or public-health emergency block.}
+\end{table}
 
 \section{Shutdown, Recession, or Acute Financial Disruption Block}
 
 Ask this section when the active crisis is a shutdown, recession, or acute financial disruption.
 
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
-\caption{Shutdown, recession, or acute financial disruption block.}\\
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}L{0.17\textwidth} L{0.13\textwidth} L{0.31\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}@{}}
 \toprule
 Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \midrule
-\endfirsthead
-\toprule
-Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
-\midrule
-\endhead
 \varname{SPC_STOPPED_WORK_CRISIS} & Govt Shutdown Income & Have you stopped this work because of the crisis? & 3.500 & 4.134 & 0.47 \\
 \varname{SPC_WAGES_SALARY_PAYMENTS_JOB} & Govt Shutdown Income & Were there any wages or salary payments from this job during the crisis period? & 2.727 & 4.134 & 1.17 \\
 \varname{SPC_HOUSEHOLD_MANAGE_FINANCIAL_DIFFICULT} & Govt Shutdown Crisis & How did your household manage financial difficulties caused by the shutdown or crisis? & 3.719 & 4.592 & 1.87 \\
 \varname{SPC_STOPPED_WORKING_BUSINESS_CRISIS} & Govt Shutdown Income & Have you stopped working at this business because of the crisis? & 3.750 & 5.177 & 0.70 \\
 \bottomrule
-\end{longtable}
-\normalsize
+\end{tabularx}
+\caption{Shutdown, recession, or acute financial disruption block.}
+\end{table}
 
 \section{Disaster, Displacement, or Direct Exposure Block}
 
 Ask this section when the active crisis is a disaster, displacement, or direct exposure event.
 
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{L{0.19\textwidth} L{0.14\textwidth} L{0.34\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}}
-\caption{Disaster, displacement, or direct exposure block.}\\
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}L{0.17\textwidth} L{0.13\textwidth} L{0.31\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}@{}}
 \toprule
 Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \midrule
-\endfirsthead
-\toprule
-Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
-\midrule
-\endhead
 \varname{SPC_HOME_DAMAGED_DESTROYED_DISASTER} & Hurricane Katrina 2007 & Was your home damaged or destroyed by the disaster? & 2.650 & 2.266 & 1.17 \\
 \varname{SPC_BUSINESS_DAMAGED_DESTROYED_DISASTER} & Hurricane Katrina 2007 & Was your business damaged or destroyed by the disaster? & 3.300 & 2.962 & 1.17 \\
 \varname{SPC_ANYONE_IMMEDIATE_FAMILY_KILLED} & Hurricane Katrina 2007 & Was anyone in your immediate family killed as a result of the disaster? & 2.115 & 2.060 & 1.52 \\
@@ -317,6 +308,19 @@ Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \varname{SPC_EXPERIENCE_MAJOR_FLOODING_HOME} & Hurricane Katrina 2007 & Did you experience major flooding in your home during the disaster? & 3.792 & 4.222 & 1.40 \\
 \varname{SPC_PHYSICALLY_INJURED_WAY_AS} & Hurricane Katrina 2007 & Were you physically injured in any way as a result of the disaster? & 2.846 & 2.804 & 1.52 \\
 \varname{SPC_SEVERE_DAMAGE_HOME_DURING} & Hurricane Katrina 2007 & How severe was the damage to your home during the disaster? & 2.769 & 3.169 & 1.52 \\
+\bottomrule
+\end{tabularx}
+\caption{Disaster, displacement, or direct exposure block: housing, damage, and direct physical exposure items.}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}L{0.17\textwidth} L{0.13\textwidth} L{0.31\textwidth} R{0.07\textwidth} R{0.07\textwidth} R{0.08\textwidth}@{}}
+\toprule
+Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
+\midrule
 \varname{SPC_AFRAID_DURING_DISASTER_MIGHT} & Hurricane Katrina 2007 & How afraid were you during the disaster that you might be seriously injured or killed? & 2.447 & 2.584 & 1.87 \\
 \varname{SPC_DISASTER_OFTEN_DISTURBING_MEMORIES} & Hurricane Katrina 2007 & Since the disaster, how often have you had disturbing memories or images about what happened? & 1.825 & 1.588 & 2.10 \\
 \varname{SPC_LONG_STAY_TEMPORARY_HOUSING} & Hurricane Katrina 2007 & How long did you stay in temporary housing after the disaster? & 2.455 & 3.090 & 1.28 \\
@@ -325,8 +329,9 @@ Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \varname{SPC_DISPLACED_PLACE_LIVING_DISASTER} & Hurricane Katrina 2007 & Were you displaced from the place you were living because of the disaster? & 2.115 & 2.643 & 1.52 \\
 \varname{SPC_RECEIVE_HELP_FEMA_FEDERAL} & Hurricane Katrina 2007 & Did you receive any help from FEMA Federal Emergency Management Agency? & 1.818 & 2.027 & 1.28 \\
 \bottomrule
-\end{longtable}
-\normalsize
+\end{tabularx}
+\caption{Disaster, displacement, or direct exposure block: trauma, displacement, employment, and aid items.}
+\end{table}
 
 \section{Administration Notes}
 

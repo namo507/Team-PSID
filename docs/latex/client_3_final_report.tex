@@ -4,6 +4,8 @@
 \renewcommand{\reporttitle}{Client 3: Final Report}
 \renewcommand{\reportsubtitle}{Stakeholder-facing summary of the refreshed PSID crisis-module package}
 \renewcommand{\reportclient}{Stakeholder Deliverable}
+\renewcommand{\reportabstract}{This stakeholder report summarizes the refreshed PSID crisis-module package, the logic behind the current Generic versus Specific design, and the way the final instrument balances utility, burden, and deployment clarity. It explains why the audited scored module contains 28 rows while the fielded questionnaire contains 26 questions, and it contrasts the older multi-label presentation with the current, cleaner optimization strategy.}
+\renewcommand{\reportkeywords}{stakeholder report | crisis measurement | questionnaire optimization | Generic versus Specific | PSID}
 
 \begin{document}
 
@@ -21,22 +23,22 @@ The current production run starts from 52 historical questions and produces a 28
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.10\textwidth} Y Y}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.26\textwidth} R{0.10\textwidth} Y}
 \toprule
-Metric & Value & Calculation / rule & Why it is used and the assumption behind it \\
+Metric & Value & How the number is used \\
 \midrule
-Total ranked questions & 52 & $\operatorname{count}(\text{all rows}) = 52$ & Starting universe for the refreshed package. \\
-Selected scored questions & 28 & $\operatorname{count}(\texttt{selected\_for\_module}=\texttt{True}) = 28$ & Defines the scored module retained for auditability and review. \\
-Deployable questions & 26 & $28 - 2 = 26$ after removing the selected demographic-only traceability rows & Defines the routine field instrument; assumes demographic context can be asked elsewhere or only when needed. \\
-Selected scored minutes & 29.98 & $\sum \text{minutes across the 28 selected rows} = 29.98$ & Confirms the analytic shortlist stays inside the 30-minute review budget. \\
-Deployable minutes & 28.82 & $29.98 - 0.35 - 0.817 = 28.813 \approx 28.82$ & Gives the paper-length upper bound for the deployable package. \\
-Generic rows & 3 & $\operatorname{count}(\text{ri\_threshold\_score} \geq 0.70) = 3$ after normalization & Keeps only the strongest portable questions in the universal core. \\
-Specific rows & 49 & $52 - 3 = 49$ & Preserves context-dependent detail inside one client-facing category. \\
-Average $R_i$ & 2.201 & $\operatorname{mean}(R_i) = 2.201$ & Benchmark statistic showing average signal efficiency. \\
-Maximum $R_i$ & 5.667 & $\max(R_i) = 5.667$ & Top efficiency value used in normalization. \\
-Average $P_i$ & 2.561 & $\operatorname{mean}(P_i) = 2.561$ & Benchmark for distinctiveness-adjusted priority. \\
-Maximum $P_i$ & 7.860 & $\max(P_i) = 7.860$ & Ceiling after rarity, construct, portability, and redundancy adjustments. \\
+Total ranked questions & 52 & Count of all rows in the refreshed corpus; defines the starting universe. \\
+Selected scored questions & 28 & Count of rows retained in the audited shortlist under the time budget. \\
+Deployable questions & 26 & Field instrument after the two selected demographic-only traceability rows are removed from routine administration. \\
+Selected scored minutes & 29.98 & Summed minutes across the 28-row scored module. \\
+Deployable minutes & 28.82 & Summed minutes across the 26-question deployable package. \\
+Generic rows & 3 & Count of rows in the narrow universal core after normalized thresholding. \\
+Specific rows & 49 & Remaining context-dependent rows in the refreshed corpus. \\
+Average $R_i$ & 2.201 & Average baseline signal-efficiency score across the corpus. \\
+Maximum $R_i$ & 5.667 & Top baseline efficiency score and normalization ceiling. \\
+Average $P_i$ & 2.561 & Average distinctiveness-adjusted priority across the corpus. \\
+Maximum $P_i$ & 7.860 & Highest augmented priority score after portability and redundancy adjustments. \\
 \bottomrule
 \end{tabularx}
 \caption{Top-line performance metrics for the refreshed package.}
@@ -183,8 +185,8 @@ This is why the current \texttt{Generic} bucket contains only the most portable 
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{L{0.16\textwidth} L{0.24\textwidth} R{0.10\textwidth} R{0.10\textwidth} R{0.10\textwidth} R{0.10\textwidth}}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{0.14\textwidth} L{0.22\textwidth} R{0.11\textwidth} R{0.09\textwidth} R{0.10\textwidth} R{0.10\textwidth}@{}}
 \toprule
 Final category & Source & Selected questions & Minutes & Average $R_i$ & Average $P_i$ \\
 \midrule
@@ -216,7 +218,8 @@ The earlier output looked more finance-heavy than the current one for two reason
 
 \begin{table}[H]
 \centering
-\begin{tabularx}{0.72\textwidth}{L{0.36\textwidth} R{0.10\textwidth} R{0.12\textwidth} R{0.12\textwidth}}
+\footnotesize
+\begin{tabularx}{0.68\textwidth}{@{}L{0.34\textwidth} R{0.08\textwidth} R{0.10\textwidth} R{0.10\textwidth}@{}}
 \toprule
 Group & Rows & Average $R_i$ & Average $P_i$ \\
 \midrule
