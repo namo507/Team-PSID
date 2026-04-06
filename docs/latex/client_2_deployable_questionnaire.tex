@@ -14,23 +14,24 @@
 This report is the PDF-ready version of the deployable questionnaire package. It translates the final scored question bank into a practical administration guide with live question tables, universe rules, timing estimates, and the ranking logic behind selection.
 
 \begin{psidbox}{Deployable scope}
-This deployable version excludes the two demographic traceability rows that remain in the master review file. The result is a 26-question instrument with an estimated administration time of 28.82 minutes.
+This deployable version begins from the same 28-row scored module used in the technical review package. It excludes \varname{SPC_AGE_YEARS} $(0.35$ minutes$)$ and \varname{SPC_DESCRIBE_SEX_GENDER} $(0.817$ minutes$)$, which remain in the master review file for traceability but are removed from routine field administration. The result is a 26-question instrument with an estimated paper length of $29.98 - 0.35 - 0.817 = 28.82$ minutes.
 \end{psidbox}
 
 \section{Deployable Snapshot}
 
 \begin{table}[H]
 \centering
-\begin{tabularx}{0.72\textwidth}{L{0.48\textwidth} R{0.14\textwidth}}
+\small
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.10\textwidth} Y Y}
 \toprule
-Metric & Value \\
+Metric & Value & Calculation / rule & Why it is used and the assumption behind it \\
 \midrule
-Deployable questions & 26 \\
-Estimated deployable minutes & 28.82 \\
-All-respondent generic questions & 3 \\
-Pandemic or public-health questions & 5 \\
-Shutdown or financial-disruption questions & 4 \\
-Disaster, displacement, or direct-exposure questions & 14 \\
+Deployable questions & 26 & $28 - 2 = 26$ after removing the selected demographic-only rows & Defines the paper instrument that can be handed to field staff. \\
+Estimated deployable minutes & 28.82 & $29.98 - 0.35 - 0.817 = 28.813 \approx 28.82$ & Upper-bound paper length if the full deployable document is read end to end. \\
+All-respondent Generic questions & 3 & Count of rows asked before any routing logic is applied & Portable screening core; assumes every respondent should receive the same baseline crisis probe. \\
+Pandemic or public-health questions & 5 & Count of rows in the pandemic block & Activated only when respondent answers or interview context indicate a pandemic/public-health event. \\
+Shutdown or financial-disruption questions & 4 & Count of rows in the shutdown/financial-disruption block & Activated only when the crisis is economic or shutdown driven. \\
+Disaster, displacement, or direct-exposure questions & 14 & Count of rows in the disaster/displacement block & Largest block because direct-exposure content carries the richest disaster signal in the source bank. \\
 \bottomrule
 \end{tabularx}
 \caption{Deployable instrument summary after removing demographic-only rows.}
@@ -66,6 +67,41 @@ Disaster, displacement, or direct-exposure questions & 14 \\
 \caption{Operational path from the scored module to the deployable questionnaire package.}
 \end{figure}
 
+\section{Why 28 Scored Rows Become 26 Asked Questions}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.08\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Stage & Rows & Minutes & Calculation / rule & Operational meaning \\
+\midrule
+Scored module & 28 & 29.98 & Count and summed minutes for rows with \texttt{selected\_for\_module = True} & Full analytic shortlist retained for auditability and review. \\
+Selected demographic traceability rows & 2 & 1.17 & \varname{SPC_AGE_YEARS} $(0.35)$ + \varname{SPC_DESCRIBE_SEX_GENDER} $(0.817)$ & Context variables retained in the master file but not asked by default in the crisis instrument. \\
+Deployable paper instrument & 26 & 28.82 & $28 - 2 = 26$ and $29.98 - 1.167 = 28.813 \approx 28.82$ & Clean field-ready questionnaire containing only direct crisis items plus the universal Generic screen. \\
+\bottomrule
+\end{tabularx}
+\caption{The 28-to-26 change is a deployment-stage subtraction, not a change in the scoring model.}
+\end{table}
+
+\section{Optimization Change From Scored Review to Live Administration}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.20\textwidth} Y Y Y}
+\toprule
+Dimension & Legacy architecture view & Current deployable view & Operational effect \\
+\midrule
+Category structure & Legacy architecture used 7 Generic Core rows, 1 Financial Crisis row, and 20 Pandemic / Disaster rows in the 28-row architecture & Current deployment asks 3 universal Generic rows first, then one routed crisis-specific block from a 23-row Specific bank & The universal screen is shorter and the field instrument is easier to explain. \\
+Financial items & Financial questions were visible as their own toggle label & Financial questions now compete inside Specific under the same redundancy and portability logic as other crisis items & Duplicate earnings or aid variants no longer dominate the field package. \\
+Deployment target & The scored shortlist and the field-facing package were closer together & The 28-row scored module remains the audit record, while the 26-row deployable file is the asked instrument & Separates internal traceability from respondent burden. \\
+Optimization levers & Ranking plus legacy toggle structure & Ranking plus portability bonus, redundancy control, construct coverage, documented wording replacements, and respondent-answer routing & Produces a more defensible always-on instrument. \\
+\bottomrule
+\end{tabularx}
+\caption{How the deployable questionnaire was optimized relative to the older architecture view.}
+\end{table}
+
 \section{Administration Rules}
 
 \subsection{Administration sequence}
@@ -73,9 +109,27 @@ Disaster, displacement, or direct-exposure questions & 14 \\
 \begin{enumerate}
 \item Ask the three all-respondent Generic items.
 \item Identify the active crisis context.
-\item Activate one crisis-specific section based on that context.
+\item Activate one crisis-specific section based on that context and on the respondent's Generic-core answers.
 \item Skip all sections that do not match the active crisis.
 \end{enumerate}
+
+\subsection{Respondent-answer refinement and live path lengths}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.08\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Live path & Rows asked & Minutes & Calculation / rule & Why it is used and the assumption behind it \\
+\midrule
+Pandemic path & 8 & 4.32 & $3$ Generic $+ 5$ pandemic rows and $1.40 + 2.92 = 4.32$ minutes & Used when answers or interview context indicate a pandemic/public-health event; assumes only the relevant block is activated. \\
+Shutdown path & 7 & 5.60 & $3$ Generic $+ 4$ shutdown rows and $1.40 + 4.20 = 5.60$ minutes & Used for acute financial disruption or shutdown crises; assumes one dominant economic-disruption context. \\
+Disaster path & 17 & 21.70 & $3$ Generic $+ 14$ disaster rows and $1.40 + 20.30 = 21.70$ minutes & Used for displacement, trauma, or direct exposure events; longest path because the disaster bank carries the deepest direct-impact content. \\
+Full paper instrument & 26 & 28.82 & Sum of all deployable rows listed in this document & Upper bound shown for documentation; not the default live path for a single respondent. \\
+\bottomrule
+\end{tabularx}
+\caption{Respondent answers refine the effective interview length by activating one relevant crisis block.}
+\end{table}
 
 \subsection{Universe summary}
 
@@ -129,23 +183,40 @@ P_i &= \frac{\text{augmented\_utility}}{B_i \times (1 + 0.65 \times \text{redund
 \end{itemize}
 \end{psidbox}
 
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{0.18\textwidth} Y Y Y}
+\toprule
+Quantity & Calculation & Why it is used & Assumption \\
+\midrule
+minutes & $(\text{word\_count} \times 7)/60$ & Converts wording length into an operational time field for routing and budget control & Oral administration averages about 7 seconds per word. \\
+$R_i$ & $U_i / B_i$ & Explains why a row is strong relative to its burden & Efficient questions should deliver more crisis signal than the time they consume. \\
+$P_i$ & $\text{augmented\_utility} / [B_i \times (1 + 0.65\,\text{redundancy\_scaled})]$ & Breaks ties among similarly efficient rows by rewarding distinctiveness and portability & A short field instrument should prefer distinct rows over repeated variants. \\
+Deployable rows & Selected scored rows minus demographic-only traceability rows & Converts the audit package into the field instrument & Demographic context is not part of the default asked path. \\
+Live path length & Generic-core minutes plus one active crisis block & Translates the paper instrument into respondent-specific burden & Exactly one specific block is active for the standard administration path. \\
+\bottomrule
+\end{tabularx}
+\caption{How the main deployable quantities are derived and interpreted.}
+\end{table}
+
 \section{Worked Example for a Deployable Generic Item}
 
 Example question: \varname{GEN_LOSE_EARNINGS_PANDEMIC}
 
 \begin{table}[H]
 \centering
-\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.16\textwidth} Y}
+\begin{tabularx}{\textwidth}{L{0.18\textwidth} R{0.12\textwidth} Y Y}
 \toprule
-Field & Value & Calculation or interpretation \\
+Field & Value & Calculation & Why it is used / assumption \\
 \midrule
-Question text & Did you lose earnings because of the pandemic? & Universal framing item retained in the Generic core. \\
-$U_i$ & 3.400 & $0.80 + 0.80 + 0.90 + 0.90$ \\
-$B_i$ & 0.600 & $\max(0.10 \times 6 + 0.20 \times 0.0, 0.1)$ \\
-$R_i$ & 5.667 & $3.40 / 0.60$ \\
-$P_i$ & 7.860 & Enhanced priority after distinctiveness adjustments. \\
-minutes & 0.70 & $(6 \times 7) / 60$ \\
-Administration block & All respondents & Asked before any crisis-specific skip logic. \\
+Question text & Did you lose earnings because of the pandemic? & Clean deployable wording retained in the universal screen & This item is portable enough to ask before any crisis-specific routing begins. \\
+$U_i$ & 3.400 & $0.80 + 0.80 + 0.90 + 0.90$ & Utility aggregates matched crisis-signal weights; assumes the tagged keywords capture the substance of the item. \\
+$B_i$ & 0.600 & $\max(0.10 \times 6 + 0.20 \times 0.0, 0.1)$ & Burden penalizes wording cost; assumes the fixed burden constants remain the operational design choice. \\
+$R_i$ & 5.667 & $3.40 / 0.60$ & Shows why the row is analytically strong relative to burden. \\
+$P_i$ & 7.860 & Value computed after rarity, construct, portability, and redundancy scaling & Keeps the item ahead of lower-value or more repetitive alternatives. \\
+minutes & 0.70 & $(6 \times 7) / 60$ & Feeds the routing and time-budget calculations; assumes 7 seconds per word in oral administration. \\
+Administration block & All respondents & Asked before any crisis-specific skip logic & Assumes every respondent should receive a common crisis-baseline screen. \\
 \bottomrule
 \end{tabularx}
 \caption{Worked example showing how one Generic item remains short, portable, and analytically strong.}
@@ -262,6 +333,7 @@ Variable & Source & Question & $R_i$ & $P_i$ & Minutes \\
 \begin{itemize}
 \item The deployable questionnaire intentionally keeps the three \texttt{Generic} questions first because they travel best across crisis contexts.
 \item The deployable file excludes demographic-only rows even though those rows still appear in the master review sheet.
+\item Respondent answers refine the live path length: most interviews ask the 3-item Generic core plus one specific block rather than all 26 deployable rows.
 \item Some closely related support items appear in both the Generic and pandemic blocks because one version is meant for universal framing and the other is preserved as an event-specific probe.
 \item The disaster block is the longest because the Katrina source bank contributes the richest direct-exposure content.
 \end{itemize}
