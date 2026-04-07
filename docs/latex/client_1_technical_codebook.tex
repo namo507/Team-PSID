@@ -361,24 +361,6 @@ Field & Meaning \\
 \caption{Key fields preserved in the authoritative scored dataset.}
 \end{table}
 
-\section{Deliverables Produced From the Same Dataset}
-
-\begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{L{0.28\textwidth} L{0.18\textwidth} Y}
-\toprule
-Deliverable & Audience & Purpose \\
-\midrule
-\filepath{deliverables/Master_Questionnaire.xlsx} & Internal review & Full 52-row review sheet with categories, wording, and scores. \\
-\filepath{deliverables/Deployable_Questionnaire.pdf} & Survey deployment & Final question text without demographic rows. \\
-\filepath{deliverables/Codebook.pdf} & Technical review & Rendered technical codebook. \\
-\filepath{deliverables/Final_Report.pdf} & Stakeholder review & Narrative summary of results and interpretation. \\
-\filepath{deliverables/Client_1_Technical_Codebook.pdf} & Client circulation & LaTeX report version of this technical codebook. \\
-\bottomrule
-\end{tabularx}
-\caption{Client-facing and internal deliverables generated from the same scored dataset.}
-\end{table}
-
 \section{Refresh Procedure}
 
 Use this order whenever the client package is refreshed:
@@ -392,5 +374,174 @@ Use this order whenever the client package is refreshed:
 \end{enumerate}
 
 That sequence keeps the scored CSV, the notebook, the figures, the packaged PDFs, and the presentation-ready report files synchronized.
+
+\appendix
+
+\section{Appendix: Production Functions Used in the Workflow}
+
+\subsection{Shared scoring and selection functions}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
+\toprule
+Function & Script & Purpose \\
+\midrule
+\varname{normalize_ranked_questions()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Renames source columns, parses keyword payloads, derives crisis-origin metadata, and normalizes legacy toggle labels before scoring. \\
+\varname{min_max_scale()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Rescales a numeric series to the $[0, 1]$ interval for thresholding and other normalized comparisons. \\
+\varname{assign_binary_categories()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Creates \varname{ri_threshold_score} and applies the $0.70$ cutoff that produces the final Generic versus Specific split. \\
+\varname{extract_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Uses RAKE and noun-phrase extraction to generate candidate phrases from question text. \\
+\varname{tag_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Maps extracted phrases onto the construct taxonomy and assigns the construct weights used in utility scoring. \\
+\varname{compute_word_count()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Counts words for both burden and time-budget calculations. \\
+\varname{compute_complexity()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Measures linguistic complexity from named entities and clause markers. \\
+\varname{compute_utility()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Sums matched taxonomy weights into $U_i$. \\
+\varname{compute_burden()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Converts word count and complexity into $B_i$. \\
+\varname{extract_constructs()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Derives the unique construct set attached to each question. \\
+\varname{classify_toggle()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Applies the rule-based legacy architecture labels: Generic Core, Financial Crisis, or Pandemic / Disaster. \\
+\varname{select_for_time_budget()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Greedy selector that keeps the highest-ranked rows inside the 30-minute cap, prioritizing the Generic core first when present. \\
+\bottomrule
+\end{tabularx}
+\caption{Core preprocessing, scoring, and selection functions.}
+\end{table}
+
+\subsection{Artifact-generation and wording functions}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
+\toprule
+Function & Script & Purpose \\
+\midrule
+\varname{suggest_deployable_wording()} & \filepath{generate_psid_artifacts.py} & Rewrites source-specific wording into cleaner deployable phrasing and applies documentation-backed replacements where exact wording is preferred. \\
+\varname{build_ranked_dataset()} & \filepath{generate_psid_artifacts.py} & Runs the end-to-end scoring pipeline, produces the derived fields, and returns the ranked dataset that feeds the downstream artifacts. \\
+\varname{compute_augmented_scores()} & \filepath{generate_psid_artifacts.py} & Computes TF-IDF rarity, redundancy, construct bonus, portability bonus, augmented utility, and the final $P_i$ score. \\
+\varname{build_design_recommendations()} & \filepath{generate_psid_artifacts.py} & Converts scored questions into grouped design recommendations for the Generic and Specific banks. \\
+\varname{build_summary()} & \filepath{generate_psid_artifacts.py} & Aggregates headline counts, score summaries, source counts, and construct counts for dashboards and reports. \\
+\varname{write_dashboard_data()} & \filepath{generate_psid_artifacts.py} & Writes processed data and summary payloads for the dashboard and figure consumers. \\
+\varname{plot_top_ranked()} & \filepath{generate_psid_artifacts.py} & Generates the top-ranked-questions figure. \\
+\varname{plot_toggle_comparison()} & \filepath{generate_psid_artifacts.py} & Generates the category-comparison figure used to inspect the final distribution. \\
+\varname{plot_utility_vs_burden()} & \filepath{generate_psid_artifacts.py} & Builds the utility-versus-burden scatter plot sized by $R_i$. \\
+\varname{plot_construct_heatmap()} & \filepath{generate_psid_artifacts.py} & Produces the construct-coverage heatmap. \\
+\varname{plot_time_budget()} & \filepath{generate_psid_artifacts.py} & Produces the time-budget figure used in the deployable and stakeholder reports. \\
+\bottomrule
+\end{tabularx}
+\caption{Functions that generate the ranked dataset, wording, and figures.}
+\end{table}
+
+\subsection{Client-package assembly functions}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
+\toprule
+Function & Script & Purpose \\
+\midrule
+\varname{build_questionnaire_frames()} & \filepath{generate_client_documents.py} & Creates the master and deployable questionnaire tables from the scored dataset, including Universes and rounded score fields. \\
+\varname{write_master_questionnaire()} & \filepath{generate_client_documents.py} & Writes and formats the internal traceability workbook. \\
+\varname{build_interaction_summary()} & \filepath{generate_client_documents.py} & Summarizes demographic and non-demographic interaction patterns for reporting. \\
+\varname{build_codebook_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline codebook PDF. \\
+\varname{build_report_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline stakeholder report PDF. \\
+\varname{build_deployable_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline deployable questionnaire PDF. \\
+\bottomrule
+\end{tabularx}
+\caption{Functions that package the scored dataset into internal review artifacts.}
+\end{table}
+
+\section{Appendix: Detailed Formula Derivations and Value Explanations}
+
+\subsection{Base scoring pipeline}
+
+For question $i$, the code builds the numeric fields in the following order:
+
+\begin{align*}
+\text{keyword\_list}_i &= \text{extract\_keywords}(\text{question\_text}_i) \\
+\text{tagged\_keywords}_i &= \text{tag\_keywords}(\text{keyword\_list}_i) \\
+U_i &= \sum_{k \in \text{tagged\_keywords}_i} w_k \\
+\text{word\_count}_i &= \operatorname{len}(\text{split}(\text{question\_text}_i)) \\
+\text{complexity}_i &= \#\text{entities}_i + 0.5\bigl(\#\text{commas}_i + \#\text{semicolons}_i + \#\text{ ``or''}_i + \#\text{ ``and''}_i\bigr) \\
+B_i &= \max\bigl(0.10 \times \text{word\_count}_i + 0.20 \times \text{complexity}_i, 0.1\bigr) \\
+R_i &= \frac{U_i}{B_i}
+\end{align*}
+
+\begin{psidbox}{How to interpret these values}
+\begin{itemize}
+\item $U_i$ increases when more high-weight crisis constructs are matched.
+\item \varname{word_count} is taken directly from the item text and feeds both burden and time estimates.
+\item \varname{complexity} increases when a question contains more named entities or clause separators, which is a proxy for respondent processing burden.
+\item $B_i$ has a floor of $0.1$ so that very short questions never create an undefined or explosively large ratio.
+\item $R_i$ is the baseline efficiency score: more crisis signal per unit of burden yields a larger value.
+\end{itemize}
+\end{psidbox}
+
+\subsection{Binary thresholding, time-budget selection, and deployable minutes}
+
+The final client-facing category model uses a normalized version of $R_i$:
+
+\begin{align*}
+\text{ri\_threshold\_score}_i &= \frac{R_i - \min(R)}{\max(R) - \min(R)} \\
+\text{Generic} &\iff \text{ri\_threshold\_score}_i \geq 0.70 \\
+\text{Specific} &\iff \text{ri\_threshold\_score}_i < 0.70
+\end{align*}
+
+The scored shortlist is then chosen by a greedy time-budget filter:
+
+\begin{align*}
+\text{question\_seconds}_i &= \text{word\_count}_i \times 7 \\
+\text{selected\_for\_module}_i &= 1 \text{ if adding row } i \text{ keeps cumulative time } \leq 1800 \text{ seconds}
+\end{align*}
+
+The deployable instrument length is then derived from the scored shortlist, not from a second ranking pass:
+
+\begin{align*}
+\text{deployable minutes} &= 29.98 - 0.35 - 0.817 \\
+&= 28.813 \approx 28.82
+\end{align*}
+
+The subtraction removes \varname{SPC_AGE_YEARS} and \varname{SPC_DESCRIBE_SEX_GENDER} from routine field administration while leaving them available in the traceability record.
+
+\subsection{Augmented priority score and why values change after enrichment}
+
+The production workflow does not stop at $R_i$. It also computes a distinctiveness-adjusted priority score that favors portable and non-redundant items.
+
+\begin{align*}
+\text{idf\_strength}_i &= \operatorname{mean}(\text{TF-IDF weights of analyzed tokens}) \\
+\text{redundancy\_penalty}_i &= \max_j \operatorname{cosine\_similarity}(i, j) \\
+\text{rarity}_i &= \operatorname{mean}\!\left(\frac{1}{\text{construct frequency}}\right) \times N \\
+\text{priority}_i &= \operatorname{mean}(\text{construct weights}) \\
+\text{construct\_bonus}_i &= \text{rarity}_i + \text{priority}_i + 0.08 \times \text{construct\_count}_i
+\end{align*}
+
+The portability bonus is a fixed rule based on whether a question is Generic or Specific and whether it contains source-specific terms such as \emph{katrina}, \emph{rita}, \emph{fema}, \emph{covid}, \emph{pandemic}, or \emph{shutdown}:
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{0.78\textwidth}{L{0.34\textwidth} L{0.22\textwidth} R{0.10\textwidth}}
+\toprule
+Row type & Source-specific term present? & Portability bonus \\
+\midrule
+Generic row & No & 0.16 \\
+Generic row & Yes & 0.03 \\
+Specific row & No & 0.08 \\
+Specific row & Yes & 0.02 \\
+\bottomrule
+\end{tabularx}
+\caption{Portability bonus rules used inside the augmented-priority calculation.}
+\end{table}
+
+All scaled components use min-max scaling within the current refreshed dataset, and the final augmented score is:
+
+\begin{align*}
+\text{augmented\_utility}_i &= U_i \times \bigl(1 + 0.32\,\text{idf\_scaled}_i + 0.24\,\text{construct\_scaled}_i \\
+&\qquad\qquad + 0.12\,\text{richness\_scaled}_i + \text{portability\_bonus}_i\bigr) \\
+P_i &= \frac{\text{augmented\_utility}_i}{B_i \times \bigl(1 + 0.65\,\text{redundancy\_scaled}_i\bigr)}
+\end{align*}
+
+\begin{psidbox}{Why $P_i$ can differ from $R_i$}
+Two questions can have similar baseline efficiency but very different $P_i$ values. A question moves up when it adds rare or high-priority constructs, uses portable wording, and is not a near-duplicate of other shortlisted items. A question moves down when it is redundant, overly source-specific, or substantively repetitive even if its raw $R_i$ is acceptable.
+\end{psidbox}
 
 \end{document}

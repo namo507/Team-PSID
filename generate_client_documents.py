@@ -16,8 +16,10 @@ ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 FIGURES_DIR = ROOT / "figures"
 DELIVERABLES_DIR = ROOT / "deliverables"
+INTERNAL_DELIVERABLES_DIR = ROOT / "archive" / "internal-deliverables"
 
 DELIVERABLES_DIR.mkdir(parents=True, exist_ok=True)
+INTERNAL_DELIVERABLES_DIR.mkdir(parents=True, exist_ok=True)
 
 FINAL_CSV_PATH = DATA_DIR / "PSID_Ranked_Questions_Final.csv"
 SUMMARY_PATH = DATA_DIR / "psid_artifact_summary.json"
@@ -27,10 +29,10 @@ FIG_TOGGLE = FIGURES_DIR / "fig_toggle_comparison.png"
 FIG_TIME = FIGURES_DIR / "fig_time_budget.png"
 FIG_UTILITY = FIGURES_DIR / "fig_utility_vs_burden.png"
 
-MASTER_XLSX = DELIVERABLES_DIR / "Master_Questionnaire.xlsx"
-DEPLOYABLE_PDF = DELIVERABLES_DIR / "Deployable_Questionnaire.pdf"
-CODEBOOK_PDF = DELIVERABLES_DIR / "Codebook.pdf"
-REPORT_PDF = DELIVERABLES_DIR / "Final_Report.pdf"
+MASTER_XLSX = INTERNAL_DELIVERABLES_DIR / "Master_Questionnaire.xlsx"
+DEPLOYABLE_PDF = INTERNAL_DELIVERABLES_DIR / "Deployable_Questionnaire.pdf"
+CODEBOOK_PDF = INTERNAL_DELIVERABLES_DIR / "Codebook.pdf"
+REPORT_PDF = INTERNAL_DELIVERABLES_DIR / "Final_Report.pdf"
 
 PAGE_W = 1654
 PAGE_H = 2339
@@ -828,10 +830,10 @@ def main():
     build_report_pdf(df, summary)
     print(json.dumps(
         {
-            "master_questionnaire": str(MASTER_XLSX.name),
-            "deployable_questionnaire": str(DEPLOYABLE_PDF.name),
-            "codebook_pdf": str(CODEBOOK_PDF.name),
-            "report_pdf": str(REPORT_PDF.name),
+            "master_questionnaire": str(MASTER_XLSX.relative_to(ROOT)),
+            "deployable_questionnaire": str(DEPLOYABLE_PDF.relative_to(ROOT)),
+            "codebook_pdf": str(CODEBOOK_PDF.relative_to(ROOT)),
+            "report_pdf": str(REPORT_PDF.relative_to(ROOT)),
             "deployable_rows": int(len(deployable_df)),
         },
         indent=2,
