@@ -75,9 +75,30 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 
 \section{Figures and Visual Diagnostics}
 
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} Y Y}
+\toprule
+Visual & Primary question answered & Why it belongs in the technical codebook \\
+\midrule
+Top-ranked questions & Which items have the largest raw $R_i$ values? & Shows the baseline efficiency leaders before portability, redundancy, and deployment filters are discussed. \\
+Binary category comparison & How do Generic and Specific rows distribute across the contributing sources? & Verifies that the simplified binary architecture is applied across the integrated source bank rather than inside one source only. \\
+Utility versus burden scatter & Which rows deliver the most signal at the lowest response cost? & Makes it easy to see why short, high-signal items dominate the low-burden region and survive the selection filter. \\
+Construct heatmap & Which construct families are concentrated inside each source bank? & Explains why trauma, housing, employment, and aid items remain prominent after the refresh. \\
+Time-budget chart & How much of the 30-minute cap is consumed by the selected Generic and Specific rows? & Connects the scoring logic to the operational deployment limit that actually determines the scored shortlist. \\
+Function-lane diagram & Which scripts and functions own each stage of the pipeline? & Converts the implementation into an auditable production map for technical review and maintenance. \\
+Scoring anatomy diagram & How does one question row become $U_i$, $B_i$, $R_i$, the binary label, and $P_i$? & Shows the formula chain directly so readers do not have to infer dependencies from code alone. \\
+\bottomrule
+\end{tabularx}
+\caption{Complete visual bundle used to explain the refreshed algorithm, its diagnostics, and its delivery pipeline.}
+\end{table}
+
 \psidfigure{fig_top_ranked_questions.png}{Top-ranked questions from the refreshed corpus.}
-\psidfigure{fig_utility_vs_burden.png}{Utility-versus-burden view used to inspect signal efficiency.}
+\psidfigure[0.88]{fig_toggle_comparison.png}{Binary category mix by source after the Generic versus Specific refresh.}
+\psidfigure{fig_utility_vs_burden.png}{Utility-versus-burden view used to inspect signal efficiency and selection pressure.}
 \psidfigure{fig_construct_heatmap.png}{Construct coverage heatmap for the refreshed item bank.}
+\psidfigure[0.88]{fig_time_budget.png}{Selected time budget by binary category under the 30-minute cap.}
 
 \section{End-to-End Workflow Pipeline}
 
@@ -112,6 +133,73 @@ The model still selects 28 rows as the best analytic bundle under the budget. Th
 }
 \caption{Production workflow from the raw integrated source to the maintained client package.}
 \end{figure}
+
+\section{Function-Level Pipeline Map}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.8cm and 0.95cm]
+\node[flowresult, text width=3.15cm] (raw) {Input layer\\raw integrated CSV\\source labels\\historical wording\\stored keyword payloads};
+\node[flowwide, right=of raw, text width=4.75cm] (structure) {Structure helpers\\normalize source fields\\parse or extract keywords\\tag keywords and constructs\\compute word count and complexity\\compute utility and burden\\assign binary categories\\apply time-budget selection};
+\node[flowwide, right=of structure, text width=4.85cm] (artifact) {Artifact builder\\build ranked dataset\\compute augmented scores\\clean deployable wording\\write summary and dashboard data\\render five analytical figures\\run full refresh entry point};
+\node[flowwide, right=of artifact, text width=4.55cm] (client) {Client packaging\\build questionnaire frames\\write master workbook\\summarize interactions\\render deployable PDF\\render codebook PDF\\render final report PDF};
+\node[flowresult, below=1.1cm of artifact, text width=4.2cm] (artifactout) {Persisted analytical outputs\\ranked CSV\\summary JSON\\dashboard payload\\five PNG figures};
+\node[flowresult, below=1.1cm of client, text width=4.1cm] (clientout) {Deliverable outputs\\master workbook\\internal PDFs\\LaTeX client reports\\deployable questionnaire};
+\draw[flowarrow] (raw) -- (structure);
+\draw[flowarrow] (structure) -- (artifact);
+\draw[flowarrow] (artifact) -- (client);
+\draw[flowarrow] (artifact) -- (artifactout);
+\draw[flowarrow] (artifactout.east) -- ++(0.4,0) |- (client.south);
+\draw[flowarrow] (client) -- (clientout);
+\end{tikzpicture}
+}
+\caption{Function ownership across normalization, scoring, enrichment, packaging, and final delivery.}
+\end{figure}
+
+\begin{psidbox}{Interpretation}
+The implementation is intentionally split into handoff layers. Shared helpers build row-level scoring fields, the artifact script persists the ranked dataset and figures, and the packaging layer converts those same outputs into spreadsheets and PDFs. That separation is what allows one refresh path to keep the CSV, notebook, figures, and client deliverables synchronized.
+\end{psidbox}
+
+\section{Scoring Algorithm Anatomy}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.75cm and 1.0cm]
+\node[flowresult, text width=3.2cm] (text) {Question row\\question text\\source\\stored keyword payload};
+\node[flowstep, right=of text, text width=3.95cm] (keywords) {Keyword and construct path\\parse or extract keywords\\tag matched terms\\derive construct families};
+\node[flowstep, below=of keywords, text width=3.95cm] (burden) {Burden path\\count source words\\measure clause complexity\\compute wording cost};
+\node[flowresult, right=of keywords, text width=2.55cm] (utility) {$U_i$ from\\matched weights};
+\node[flowresult, right=of burden, text width=2.55cm] (burdenv) {$B_i$ from\\wording cost};
+\node[flowresult, right=1.25cm of utility, yshift=-1.15cm, text width=2.75cm] (ri) {$R_i = U_i / B_i$};
+\node[flowstep, right=of ri, text width=3.55cm] (threshold) {Binary categorization\\min-max normalize $R_i$\\apply the $0.70$ cutoff};
+\node[flowresult, right=of threshold, text width=2.9cm] (category) {normalized $R_i$ score\\Generic / Specific};
+\node[flowstep, below=of threshold, text width=3.75cm] (augment) {Priority enrichment\\idf strength\\redundancy penalty\\construct bonus\\portability bonus};
+\node[flowresult, right=of augment, text width=2.9cm] (pi) {$P_i$ and\\augmented utility};
+\node[flowstep, below=of pi, text width=3.95cm] (select) {Selection and packaging\\minutes $= (\text{word\_count} \times 7)/60$\\apply time-budget selection};
+\node[flowresult, right=of select, text width=3.15cm] (outputs) {Selected row flag\\final CSV\\figures\\questionnaires\\PDFs};
+\draw[flowarrow] (text) -- (keywords);
+\draw[flowarrow] (text) |- (burden);
+\draw[flowarrow] (keywords) -- (utility);
+\draw[flowarrow] (burden) -- (burdenv);
+\draw[flowarrow] (utility) -- (ri);
+\draw[flowarrow] (burdenv) -- (ri);
+\draw[flowarrow] (ri) -- (threshold);
+\draw[flowarrow] (threshold) -- (category);
+\draw[flowarrow] (keywords.east) -- ++(0.55,0) |- (augment.west);
+\draw[flowarrow] (burdenv.east) -- ++(0.55,0) |- (augment.west);
+\draw[flowarrow] (augment) -- (pi);
+\draw[flowarrow] (pi) -- (select);
+\draw[flowarrow] (select) -- (outputs);
+\end{tikzpicture}
+}
+\caption{How one question row is transformed into baseline efficiency, a binary category label, augmented priority, and final selection.}
+\end{figure}
+
+\begin{psidbox}{Interpretation}
+The algorithm is not a single formula. It is a dependency chain. Text and stored keywords create constructs, constructs create utility, wording creates burden, $R_i$ creates the binary label, and the enriched components create $P_i$. Selection happens only after both the static scores and the time budget are known.
+\end{psidbox}
 
 \section{Optimization Strategy Change}
 
@@ -375,89 +463,200 @@ Use this order whenever the client package is refreshed:
 
 That sequence keeps the scored CSV, the notebook, the figures, the packaged PDFs, and the presentation-ready report files synchronized.
 
+\clearpage
 \appendix
 
-\section{Appendix: Production Functions Used in the Workflow}
+\section{Function Catalog by Pipeline Stage}
 
-\subsection{Shared scoring and selection functions}
-
-\begin{table}[H]
-\centering
-\footnotesize
-\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
-\toprule
-Function & Script & Purpose \\
-\midrule
-\varname{normalize_ranked_questions()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Renames source columns, parses keyword payloads, derives crisis-origin metadata, and normalizes legacy toggle labels before scoring. \\
-\varname{min_max_scale()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Rescales a numeric series to the $[0, 1]$ interval for thresholding and other normalized comparisons. \\
-\varname{assign_binary_categories()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Creates \varname{ri_threshold_score} and applies the $0.70$ cutoff that produces the final Generic versus Specific split. \\
-\varname{extract_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Uses RAKE and noun-phrase extraction to generate candidate phrases from question text. \\
-\varname{tag_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Maps extracted phrases onto the construct taxonomy and assigns the construct weights used in utility scoring. \\
-\varname{compute_word_count()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Counts words for both burden and time-budget calculations. \\
-\varname{compute_complexity()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Measures linguistic complexity from named entities and clause markers. \\
-\varname{compute_utility()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Sums matched taxonomy weights into $U_i$. \\
-\varname{compute_burden()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Converts word count and complexity into $B_i$. \\
-\varname{extract_constructs()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Derives the unique construct set attached to each question. \\
-\varname{classify_toggle()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Applies the rule-based legacy architecture labels: Generic Core, Financial Crisis, or Pandemic / Disaster. \\
-\varname{select_for_time_budget()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Greedy selector that keeps the highest-ranked rows inside the 30-minute cap, prioritizing the Generic core first when present. \\
-\bottomrule
-\end{tabularx}
-\caption{Core preprocessing, scoring, and selection functions.}
-\end{table}
-
-\subsection{Artifact-generation and wording functions}
+\subsection{Input normalization and taxonomy preparation}
 
 \begin{table}[H]
 \centering
 \footnotesize
-\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} L{0.19\textwidth} L{0.21\textwidth} Y}
 \toprule
-Function & Script & Purpose \\
+Function / entry point & Script & Produces / updates & Why it matters \\
 \midrule
-\varname{suggest_deployable_wording()} & \filepath{generate_psid_artifacts.py} & Rewrites source-specific wording into cleaner deployable phrasing and applies documentation-backed replacements where exact wording is preferred. \\
-\varname{build_ranked_dataset()} & \filepath{generate_psid_artifacts.py} & Runs the end-to-end scoring pipeline, produces the derived fields, and returns the ranked dataset that feeds the downstream artifacts. \\
-\varname{compute_augmented_scores()} & \filepath{generate_psid_artifacts.py} & Computes TF-IDF rarity, redundancy, construct bonus, portability bonus, augmented utility, and the final $P_i$ score. \\
-\varname{build_design_recommendations()} & \filepath{generate_psid_artifacts.py} & Converts scored questions into grouped design recommendations for the Generic and Specific banks. \\
-\varname{build_summary()} & \filepath{generate_psid_artifacts.py} & Aggregates headline counts, score summaries, source counts, and construct counts for dashboards and reports. \\
-\varname{write_dashboard_data()} & \filepath{generate_psid_artifacts.py} & Writes processed data and summary payloads for the dashboard and figure consumers. \\
-\varname{plot_top_ranked()} & \filepath{generate_psid_artifacts.py} & Generates the top-ranked-questions figure. \\
-\varname{plot_toggle_comparison()} & \filepath{generate_psid_artifacts.py} & Generates the category-comparison figure used to inspect the final distribution. \\
-\varname{plot_utility_vs_burden()} & \filepath{generate_psid_artifacts.py} & Builds the utility-versus-burden scatter plot sized by $R_i$. \\
-\varname{plot_construct_heatmap()} & \filepath{generate_psid_artifacts.py} & Produces the construct-coverage heatmap. \\
-\varname{plot_time_budget()} & \filepath{generate_psid_artifacts.py} & Produces the time-budget figure used in the deployable and stakeholder reports. \\
+\varname{normalize_ranked_questions()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Harmonized column names, parsed keyword payloads, crisis-origin labels, and normalized legacy category labels & Creates the consistent schema that the downstream scoring code expects. \\
+\varname{parse_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Clean Python list from CSV-stored keyword text & Lets the production CSV carry reusable keyword evidence rather than forcing extraction on every refresh. \\
+\varname{extract_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & RAKE phrases and noun chunks from raw question text & Backfills keyword evidence when the source row does not already include a usable keyword payload. \\
+\varname{tag_keywords()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Keyword-to-construct matches with fixed weights & Converts text fragments into scored crisis constructs that can be used analytically. \\
+\varname{extract_constructs()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Unique construct list attached to each row & Feeds construct coverage tables, rarity calculations, and recommendation logic. \\
+\varname{classify_toggle()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Legacy multi-label interpretation of historical rows & Preserves the older architecture for traceability even though the final production split is binary. \\
 \bottomrule
 \end{tabularx}
-\caption{Functions that generate the ranked dataset, wording, and figures.}
+\caption{Functions that standardize the source bank and translate question text into construct evidence.}
 \end{table}
 
-\subsection{Client-package assembly functions}
+\subsection{Baseline scoring, thresholding, and selection}
 
 \begin{table}[H]
 \centering
 \footnotesize
-\begin{tabularx}{\textwidth}{L{0.30\textwidth} L{0.22\textwidth} Y}
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} L{0.19\textwidth} L{0.21\textwidth} Y}
 \toprule
-Function & Script & Purpose \\
+Function / entry point & Script & Produces / updates & Why it matters \\
 \midrule
-\varname{build_questionnaire_frames()} & \filepath{generate_client_documents.py} & Creates the master and deployable questionnaire tables from the scored dataset, including Universes and rounded score fields. \\
-\varname{write_master_questionnaire()} & \filepath{generate_client_documents.py} & Writes and formats the internal traceability workbook. \\
-\varname{build_interaction_summary()} & \filepath{generate_client_documents.py} & Summarizes demographic and non-demographic interaction patterns for reporting. \\
-\varname{build_codebook_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline codebook PDF. \\
-\varname{build_report_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline stakeholder report PDF. \\
-\varname{build_deployable_pdf()} & \filepath{generate_client_documents.py} & Renders the internal artifact-pipeline deployable questionnaire PDF. \\
+\varname{compute_word_count()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Source-word length for each question row & Supplies the base input for burden and time-budget calculations. \\
+\varname{compute_complexity()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Named-entity and clause-marker burden proxy & Captures the extra respondent processing cost of longer or more complex wording. \\
+\varname{compute_utility()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & $U_i$ from tagged keyword weights & Summarizes how much crisis signal the row carries before burden is applied. \\
+\varname{compute_burden()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & $B_i$ from word count and complexity & Converts wording cost into the denominator used by the baseline rank. \\
+\varname{min_max_scale()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & $[0,1]$ scaling for score vectors & Makes the client's $0.70$ threshold meaningful on an otherwise unbounded raw $R_i$ scale. \\
+\varname{assign_binary_categories()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & \varname{ri_threshold_score} and final Generic / Specific labels & Produces the client-facing binary architecture used throughout the refreshed package. \\
+\varname{select_for_time_budget()} & \filepath{PSID_NLP_Crisis_Module_Structure.py} & Greedy shortlist under the 30-minute cap & Converts ranking into an operational module that can actually be administered. \\
 \bottomrule
 \end{tabularx}
-\caption{Functions that package the scored dataset into internal review artifacts.}
+\caption{Functions that build the baseline rank, apply the binary cutoff, and enforce the time budget.}
 \end{table}
 
-\section{Appendix: Detailed Formula Derivations and Value Explanations}
+\subsection{Augmented scoring and orchestration}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} L{0.19\textwidth} L{0.21\textwidth} Y}
+\toprule
+Function / entry point & Script & Produces / updates & Why it matters \\
+\midrule
+\varname{build_ranked_dataset()} & \filepath{generate_psid_artifacts.py} & Fully enriched ranked dataset with derived fields & This is the core orchestration step that turns the raw integrated source into the scored analytic table. \\
+\varname{suggest_deployable_wording()} & \filepath{generate_psid_artifacts.py} & Cleaner crisis-portable wording proposals & Bridges historical source phrasing and field-ready client wording. \\
+\varname{compute_augmented_scores()} & \filepath{generate_psid_artifacts.py} & TF-IDF strength, redundancy, construct bonus, portability bonus, augmented utility, and $P_i$ & Adds the distinctiveness layer that resolves ties among similar $R_i$ values. \\
+\varname{build_design_recommendations()} & \filepath{generate_psid_artifacts.py} & Generic and Specific recommendation bundles & Converts the scored dataset into narrative design guidance rather than leaving it as a bare ranking table. \\
+\varname{build_summary()} & \filepath{generate_psid_artifacts.py} & Headline counts, score summaries, source mix, and construct counts & Supplies the benchmark values used throughout the notebook, dashboard, and client reports. \\
+\varname{write_dashboard_data()} & \filepath{generate_psid_artifacts.py} & Browser-ready dashboard payload & Keeps the interactive dashboard synchronized with the same scored dataset used everywhere else. \\
+\varname{build_all()} & \filepath{generate_psid_artifacts.py} & One supported refresh path for CSV, summary, dashboard data, and figures & Minimizes drift by rebuilding the full artifact bundle from one entry point. \\
+\bottomrule
+\end{tabularx}
+\caption{Functions that enrich the ranked dataset and orchestrate the maintained artifact refresh.}
+\end{table}
+
+\subsection{Figure generation and monitoring}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} L{0.19\textwidth} L{0.21\textwidth} Y}
+\toprule
+Function / entry point & Script & Produces / updates & Why it matters \\
+\midrule
+\varname{plot_top_ranked()} & \filepath{generate_psid_artifacts.py} & Horizontal bar chart of the strongest raw $R_i$ rows & Makes the baseline ranking visible to non-code readers. \\
+\varname{plot_toggle_comparison()} & \filepath{generate_psid_artifacts.py} & Source-by-category comparison chart & Shows how the binary Generic / Specific split is distributed across the contributing sources. \\
+\varname{plot_utility_vs_burden()} & \filepath{generate_psid_artifacts.py} & Scatter plot of $U_i$ versus $B_i$, sized by $R_i$ & Reveals the efficiency frontier that drives shortlist competition. \\
+\varname{plot_construct_heatmap()} & \filepath{generate_psid_artifacts.py} & Source-by-construct heatmap & Explains which crisis dimensions dominate the selected bank and why. \\
+\varname{plot_time_budget()} & \filepath{generate_psid_artifacts.py} & Selected-minute chart by final binary category & Connects the abstract scores to the operational 30-minute deployment constraint. \\
+\bottomrule
+\end{tabularx}
+\caption{Functions that create the complete live figure bundle used by the codebook and companion reports.}
+\end{table}
+
+\subsection{Client package assembly and final delivery}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} L{0.19\textwidth} L{0.21\textwidth} Y}
+\toprule
+Function / entry point & Script & Produces / updates & Why it matters \\
+\midrule
+\varname{build_questionnaire_frames()} & \filepath{generate_client_documents.py} & Master and deployable questionnaire tables with universes and rounded score fields & Converts the scored CSV into the tabular structure used by review and field artifacts. \\
+\varname{write_master_questionnaire()} & \filepath{generate_client_documents.py} & Internal traceability workbook & Keeps the full scored selection auditable outside the notebook. \\
+\varname{build_interaction_summary()} & \filepath{generate_client_documents.py} & Demographic and non-demographic comparison summaries & Supplies the interaction evidence used in the final reporting layer. \\
+\varname{build_deployable_pdf()} & \filepath{generate_client_documents.py} & Internal deployable questionnaire PDF & Produces the field-facing question set stripped of routine demographic traceability rows. \\
+\varname{build_codebook_pdf()} & \filepath{generate_client_documents.py} & Internal artifact-pipeline codebook PDF & Documents the non-LaTeX packaging path used for internal review artifacts. \\
+\varname{build_report_pdf()} & \filepath{generate_client_documents.py} & Internal stakeholder report PDF & Gives the package a lightweight report output tied to the same scored dataset. \\
+\filepath{docs/latex/build_client_reports.sh} & \filepath{docs/latex/build_client_reports.sh} & Final client-facing LaTeX PDFs in \filepath{deliverables/} & Compiles the maintained technical codebook, deployable questionnaire, and final report into the distribution-ready client bundle. \\
+\bottomrule
+\end{tabularx}
+\caption{Functions and entry points that turn scored artifacts into the delivered review package.}
+\end{table}
+
+\section{Constants, Scaling Ranges, and Fixed Weights}
+
+\subsection{Workflow constants in the live implementation}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.22\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Constant & Value & Implementation rule & Why it matters \\
+\midrule
+\varname{ALPHA} & 0.10 & Adds $0.10$ burden per source-word & Controls how quickly long wording reduces baseline efficiency. \\
+\varname{BETA} & 0.20 & Adds $0.20$ burden per complexity unit & Penalizes questions that are harder to process because of entities or clause structure. \\
+\varname{SECS_PER_WORD} & 7 & Converts words to seconds via $(\text{word\_count} \times 7)$ & Turns row length into an operational deployment cost. \\
+\varname{MAX_SECONDS} & 1800 & Hard cap used by the greedy selector & Enforces the 30-minute scored shortlist limit. \\
+\varname{IDEAL_SECONDS} & 900 & Reference lower-burden target inside the helper module & Documents the preferred shorter target even though the hard production cap remains 30 minutes. \\
+\varname{RI_BINARY_THRESHOLD} & 0.70 & Applied to min-max normalized $R_i$ & Produces the final Generic / Specific split requested by the client. \\
+\bottomrule
+\end{tabularx}
+\caption{Fixed constants that determine burden, timing, and the final binary threshold.}
+\end{table}
+
+\subsection{Live scaled-component ranges from the current refresh}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.25\textwidth} R{0.12\textwidth} R{0.12\textwidth} Y}
+\toprule
+Input term & Minimum & Maximum & How it enters the algorithm \\
+\midrule
+\varname{idf_strength} & 2.781 & 4.277 & Min-max scaled to reward relatively distinctive wording inside augmented utility. \\
+\varname{redundancy_penalty} & 0.000 & 1.000 & Min-max scaled to increase the denominator of $P_i$ for near-duplicate rows. \\
+\varname{construct_bonus} & 2.146 & 17.863 & Min-max scaled to reward rare and high-priority construct coverage. \\
+\varname{construct_count} & 1 & 2 & Min-max scaled to give extra lift to rows that cover more than one construct family. \\
+\bottomrule
+\end{tabularx}
+\caption{Current anchors used by the augmented-priority scaling logic.}
+\end{table}
+
+\subsection{Construct-priority weights used by the augmented score}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.30\textwidth} R{0.10\textwidth} Y}
+\toprule
+Construct & Weight & Why the weight is meaningful \\
+\midrule
+Trauma / Health & 0.58 & Highest fixed priority because direct crisis exposure, distress, and health impact are central to crisis measurement. \\
+Housing / Shelter & 0.55 & Strongly weighted because displacement, damage, and housing instability are core disaster and hardship signals. \\
+Government Aid & 0.48 & High enough to preserve emergency-support exposure as a major crisis-response dimension. \\
+Financial Coping & 0.45 & Rewards adaptive behavior and hardship management without letting coping variants dominate the final bank. \\
+Employment & 0.42 & Keeps labor-market disruption prominent but below the most direct exposure constructs. \\
+Economic / Income & 0.40 & Preserves earnings and income loss as a core analytic dimension while balancing it against non-financial impacts. \\
+Demographics & 0.14 & Retained for traceability and context, but intentionally weighted far below direct crisis-impact constructs. \\
+\bottomrule
+\end{tabularx}
+\caption{Fixed construct weights used inside the construct-bonus calculation.}
+\end{table}
+
+\subsection{Portability bonus rules}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{0.84\textwidth}{L{0.30\textwidth} L{0.24\textwidth} R{0.10\textwidth} Y}
+\toprule
+Row type & Source-specific term present? & Portability bonus & Why the rule exists \\
+\midrule
+Generic row & No & 0.16 & Strongest bonus because the wording can likely survive across multiple crisis contexts without rewriting. \\
+Generic row & Yes & 0.03 & Still rewards high-value generic items, but dampens the bonus when the row carries event-specific wording. \\
+Specific row & No & 0.08 & Rewards reusable specific items that still need context-sensitive routing. \\
+Specific row & Yes & 0.02 & Smallest bonus because these rows are useful but clearly tied to one historical crisis or program. \\
+\bottomrule
+\end{tabularx}
+\caption{Portability bonus rules used inside the augmented-priority calculation.}
+\end{table}
+
+\section{Detailed Formula Derivations and Current Value Explanations}
 
 \subsection{Base scoring pipeline}
 
 For question $i$, the code builds the numeric fields in the following order:
 
 \begin{align*}
-\text{keyword\_list}_i &= \text{extract\_keywords}(\text{question\_text}_i) \\
+\text{keyword\_list}_i &= \text{parse\_keywords}(\text{keywords}_i) \text{ or } \text{extract\_keywords}(\text{question\_text}_i) \\
 \text{tagged\_keywords}_i &= \text{tag\_keywords}(\text{keyword\_list}_i) \\
 U_i &= \sum_{k \in \text{tagged\_keywords}_i} w_k \\
 \text{word\_count}_i &= \operatorname{len}(\text{split}(\text{question\_text}_i)) \\
@@ -469,12 +668,30 @@ R_i &= \frac{U_i}{B_i}
 \begin{psidbox}{How to interpret these values}
 \begin{itemize}
 \item $U_i$ increases when more high-weight crisis constructs are matched.
-\item \varname{word_count} is taken directly from the item text and feeds both burden and time estimates.
-\item \varname{complexity} increases when a question contains more named entities or clause separators, which is a proxy for respondent processing burden.
+\item \varname{word_count} is taken directly from the stored source wording and feeds both burden and time estimates.
+\item \varname{complexity} increases when a question contains more named entities or clause separators, which acts as a proxy for respondent processing burden.
 \item $B_i$ has a floor of $0.1$ so that very short questions never create an undefined or explosively large ratio.
 \item $R_i$ is the baseline efficiency score: more crisis signal per unit of burden yields a larger value.
 \end{itemize}
 \end{psidbox}
+
+\subsection{Scaled component formulae for augmented scoring}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.20\textwidth} Y L{0.22\textwidth} Y}
+\toprule
+Scaled field & Formula & Current anchor values & Why it matters \\
+\midrule
+\varname{idf_scaled} & $(\text{idf\_strength} - 2.781)/(4.277 - 2.781)$ & Minimum $2.781$, maximum $4.277$ & Rewards comparatively distinctive wording patterns in the current refresh. \\
+\varname{redundancy_scaled} & $(\text{redundancy\_penalty} - 0.000)/(1.000 - 0.000)$ & Minimum $0.000$, maximum $1.000$ & Increases the denominator of $P_i$ when a row is very similar to another row in the bank. \\
+\varname{construct_scaled} & $(\text{construct\_bonus} - 2.146)/(17.863 - 2.146)$ & Minimum $2.146$, maximum $17.863$ & Rewards rows that cover rarer or more important constructs. \\
+\varname{richness_scaled} & $(\text{construct\_count} - 1)/(2 - 1)$ & Minimum $1$, maximum $2$ & Gives extra lift to rows that span more than one construct family. \\
+\bottomrule
+\end{tabularx}
+\caption{Current scaling rules applied before the augmented-priority score is calculated.}
+\end{table}
 
 \subsection{Binary thresholding, time-budget selection, and deployable minutes}
 
@@ -514,24 +731,6 @@ The production workflow does not stop at $R_i$. It also computes a distinctivene
 \text{construct\_bonus}_i &= \text{rarity}_i + \text{priority}_i + 0.08 \times \text{construct\_count}_i
 \end{align*}
 
-The portability bonus is a fixed rule based on whether a question is Generic or Specific and whether it contains source-specific terms such as \emph{katrina}, \emph{rita}, \emph{fema}, \emph{covid}, \emph{pandemic}, or \emph{shutdown}:
-
-\begin{table}[H]
-\centering
-\footnotesize
-\begin{tabularx}{0.78\textwidth}{L{0.34\textwidth} L{0.22\textwidth} R{0.10\textwidth}}
-\toprule
-Row type & Source-specific term present? & Portability bonus \\
-\midrule
-Generic row & No & 0.16 \\
-Generic row & Yes & 0.03 \\
-Specific row & No & 0.08 \\
-Specific row & Yes & 0.02 \\
-\bottomrule
-\end{tabularx}
-\caption{Portability bonus rules used inside the augmented-priority calculation.}
-\end{table}
-
 All scaled components use min-max scaling within the current refreshed dataset, and the final augmented score is:
 
 \begin{align*}
@@ -542,6 +741,99 @@ P_i &= \frac{\text{augmented\_utility}_i}{B_i \times \bigl(1 + 0.65\,\text{redun
 
 \begin{psidbox}{Why $P_i$ can differ from $R_i$}
 Two questions can have similar baseline efficiency but very different $P_i$ values. A question moves up when it adds rare or high-priority constructs, uses portable wording, and is not a near-duplicate of other shortlisted items. A question moves down when it is redundant, overly source-specific, or substantively repetitive even if its raw $R_i$ is acceptable.
+\end{psidbox}
+
+\section{Worked Examples From the Current Scored Dataset}
+
+\subsection{Example A: Generic high-signal earnings item}
+
+Variable: \varname{GEN_LOSE_EARNINGS_PANDEMIC}\\
+Recommended wording: \emph{Did you lose earnings because of the pandemic?}\\
+Constructs: Economic / Income and Trauma / Health.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.19\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Field & Value & Calculation / rule & Why the value matters \\
+\midrule
+$U_i$ & 3.400 & $0.80 + 0.80 + 0.90 + 0.90$ from the matched keywords \emph{earnings}, \emph{lost earnings}, \emph{pandemic}, and \emph{the pandemic} & The row carries strong signal from both income shock and crisis-context wording. \\
+$B_i$ & 0.600 & $\max(0.10 \times 6 + 0.20 \times 0.0, 0.1)$ & Very low wording cost keeps the denominator small. \\
+$R_i$ & 5.667 & $3.40 / 0.60$ & Reaches the raw ceiling of the current refreshed corpus. \\
+\varname{idf_scaled} & 0.946 & $(4.196 - 2.781)/(4.277 - 2.781)$ & The wording is distinctive relative to the rest of the bank. \\
+\varname{construct_bonus} & 7.893 & $7.243 + 0.490 + 0.160$ & The row benefits from rarity, high-priority constructs, and multi-construct coverage. \\
+\varname{construct_scaled} & 0.366 & $(7.893 - 2.146)/(17.863 - 2.146)$ & Keeps the construct reward meaningful without letting it dominate the score. \\
+\varname{redundancy_scaled} & 0.170 & $(0.170 - 0.000)/(1.000 - 0.000)$ & Only a mild penalty is applied for similarity to other rows. \\
+\varname{portability_bonus} & 0.03 & Generic row with a source-specific term present & The row remains valuable enough to stay Generic even though the wording still names a crisis context. \\
+\varname{augmented_utility} & 5.237 & $3.40 \times (1 + 0.32 \times 0.946 + 0.24 \times 0.366 + 0.12 \times 1.000 + 0.03)$ & Distinctiveness and construct coverage lift the baseline utility substantially. \\
+$P_i$ & 7.860 & $5.237 / [0.60 \times (1 + 0.65 \times 0.170)]$ & This is the strongest augmented-priority score in the current refresh. \\
+minutes & 0.70 & $(6 \times 7)/60$ & The row is analytically strong and operationally cheap. \\
+\bottomrule
+\end{tabularx}
+\caption{Worked derivation for the highest-priority Generic row in the current scored dataset.}
+\end{table}
+
+\subsection{Example B: Specific employment-exposure item}
+
+Variable: \varname{SPC_WORKING_JOB_CONSIDERED_ESSENTIAL}\\
+Recommended wording: \emph{Were you working in a job that was considered essential during the crisis?}\\
+Construct: Employment.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.19\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Field & Value & Calculation / rule & Why the value matters \\
+\midrule
+$U_i$ & 3.600 & $0.70 + 0.75 + 0.75 + 0.70 + 0.70$ from \emph{a job}, \emph{considered essential work}, \emph{essential work}, \emph{job}, and \emph{working} & Dense employment signal keeps the item competitive even without multiple constructs. \\
+$B_i$ & 0.900 & $\max(0.10 \times 9 + 0.20 \times 0.0, 0.1)$ & The wording is longer than the Generic screeners but still moderate in burden. \\
+$R_i$ & 4.000 & $3.60 / 0.90$ & Strong baseline efficiency keeps the row near the top of the Specific bank. \\
+\varname{idf_scaled} & 0.867 & $(4.078 - 2.781)/(4.277 - 2.781)$ & The wording remains relatively distinctive within the corpus. \\
+\varname{construct_bonus} & 7.929 & $7.429 + 0.420 + 0.080$ & Rarity does most of the work because the row covers only one construct family. \\
+\varname{construct_scaled} & 0.368 & $(7.929 - 2.146)/(17.863 - 2.146)$ & Provides a moderate construct lift without a richness bonus. \\
+\varname{redundancy_scaled} & 0.165 & $(0.165 - 0.000)/(1.000 - 0.000)$ & Similarity pressure is low, so the denominator penalty stays modest. \\
+\varname{portability_bonus} & 0.08 & Specific row with no source-specific term present & The wording is reusable across crises even though it remains a routed specific item. \\
+\varname{augmented_utility} & 5.205 & $3.60 \times (1 + 0.32 \times 0.867 + 0.24 \times 0.368 + 0.12 \times 0.000 + 0.08)$ & Portability and distinctiveness lift the row above a simple single-construct baseline. \\
+$P_i$ & 5.223 & $5.205 / [0.90 \times (1 + 0.65 \times 0.165)]$ & Highest-priority Specific item in the current refresh because it balances clarity, portability, and low redundancy. \\
+minutes & 1.05 & $(9 \times 7)/60$ & The row remains deployable despite being more detailed than the Generic core. \\
+\bottomrule
+\end{tabularx}
+\caption{Worked derivation for the strongest current Specific employment item.}
+\end{table}
+
+\subsection{Example C: Long-form coping item with a redundancy penalty}
+
+Variable: \varname{SPC_HOUSEHOLD_MANAGE_FINANCIAL_DIFFICULT}\\
+Recommended wording: \emph{How did your household manage financial difficulties caused by the shutdown or crisis?}\\
+Constructs: Financial Coping and Government Aid.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{L{0.19\textwidth} R{0.10\textwidth} Y Y}
+\toprule
+Field & Value & Calculation / rule & Why the value matters \\
+\midrule
+$U_i$ & 5.950 & $0.85 + 0.75 + 0.70 + 0.85 + 0.75 + 0.65 + 0.65 + 0.75$ from the matched coping and shutdown keywords & Substantively rich rows can accumulate very high utility before burden is applied. \\
+$B_i$ & 1.600 & $\max(0.10 \times 16 + 0.20 \times 0.0, 0.1)$ & The longer source wording sharply increases the denominator. \\
+$R_i$ & 3.719 & $5.95 / 1.60$ & Strong but no longer dominant once the high burden is counted. \\
+\varname{idf_scaled} & 0.826 & $(4.017 - 2.781)/(4.277 - 2.781)$ & Distinctive wording still helps the row recover some rank after the burden penalty. \\
+\varname{construct_bonus} & 13.006 & $12.381 + 0.465 + 0.160$ & The row covers rare and policy-relevant constructs, so the construct bonus is large. \\
+\varname{construct_scaled} & 0.691 & $(13.006 - 2.146)/(17.863 - 2.146)$ & Strong construct coverage provides meaningful uplift in the augmented score. \\
+\varname{redundancy_scaled} & 0.418 & $(0.418 - 0.000)/(1.000 - 0.000)$ & Similar coping variants in the bank create a much larger denominator penalty. \\
+\varname{portability_bonus} & 0.02 & Specific row with a source-specific term present & The row is useful but clearly tied to one historical context, so the portability reward is small. \\
+\varname{augmented_utility} & 9.343 & $5.95 \times (1 + 0.32 \times 0.826 + 0.24 \times 0.691 + 0.12 \times 1.000 + 0.02)$ & Augmented utility remains very high because the row is analytically rich. \\
+$P_i$ & 4.592 & $9.343 / [1.60 \times (1 + 0.65 \times 0.418)]$ & The final priority drops below shorter items because burden and redundancy dominate the denominator. \\
+minutes & 1.87 & $(16 \times 7)/60$ & This row shows exactly why the final algorithm cannot rely on raw utility alone. \\
+\bottomrule
+\end{tabularx}
+\caption{Worked derivation for a high-utility row that is pushed down by length and redundancy.}
+\end{table}
+
+\begin{psidbox}{Cross-example takeaway}
+The three live examples show the actual tradeoffs enforced by the production algorithm. High signal and low burden lift $R_i$, distinctiveness and construct breadth lift $P_i$, and long or repetitive wording suppresses otherwise strong candidates. That is the logic the figures, tables, and final 28-row selection are meant to make visible.
 \end{psidbox}
 
 \end{document}
