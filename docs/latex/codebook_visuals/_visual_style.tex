@@ -1,0 +1,33 @@
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+\definecolor{psidblue}{HTML}{1E3A5F}
+\definecolor{psidline}{HTML}{D1D5DB}
+\definecolor{psidpanel}{HTML}{F7FAFC}
+\definecolor{psidaccent}{HTML}{E8F1FB}
+\definecolor{psidgold}{HTML}{A16207}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+\tikzset{
+  flowstep/.style={
+    rectangle,
+    rounded corners=6pt,
+    draw=psidblue,
+    fill=psidpanel,
+    very thick,
+    align=center,
+    text width=3.6cm,
+    minimum height=1cm,
+    font=\sffamily\small
+  },
+  flowwide/.style={flowstep, text width=4.4cm},
+  flowresult/.style={flowstep, draw=psidgold!85!black, fill=psidaccent},
+  flowarrow/.style={-{Stealth[length=3mm]}, very thick, draw=psidblue}
+}
